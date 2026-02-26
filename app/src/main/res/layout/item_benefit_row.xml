@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <!-- Card name (small) -->
+    <TextView
+        android:id="@+id/tv_benefit_card_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceLabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
+
+    <!-- Benefit name -->
+    <TextView
+        android:id="@+id/tv_benefit_row_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintTop_toBottomOf="@id/tv_benefit_card_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
+
+    <!-- Amount -->
+    <TextView
+        android:id="@+id/tv_benefit_row_amount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textAppearance="?attr/textAppearanceLabelMedium"
+        android:textColor="?attr/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/tv_benefit_row_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Used toggle -->
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switch_benefit_used"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Used"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/colorOutlineVariant"
+        app:layout_constraintTop_toBottomOf="@id/tv_benefit_row_amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

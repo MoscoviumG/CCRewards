@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="4dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="12dp">
+
+    <!-- Card graphic / header -->
+    <View
+        android:id="@+id/card_color_strip"
+        android:layout_width="match_parent"
+        android:layout_height="6dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Card name -->
+        <TextView
+            android:id="@+id/tv_card_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_annual_fee" />
+
+        <!-- Annual fee -->
+        <TextView
+            android:id="@+id/tv_annual_fee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Issuer / network -->
+        <TextView
+            android:id="@+id/tv_issuer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toBottomOf="@id/tv_card_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/chip_business_badge" />
+
+        <!-- Business badge (shown only for business cards) -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_business_badge"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Business"
+            android:visibility="gone"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintTop_toTopOf="@id/tv_issuer"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Nickname (shown if set) -->
+        <TextView
+            android:id="@+id/tv_nickname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tv_issuer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Open date -->
+        <TextView
+            android:id="@+id/tv_open_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toBottomOf="@id/tv_nickname"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Reward currency chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_currency"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintTop_toBottomOf="@id/tv_open_date"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

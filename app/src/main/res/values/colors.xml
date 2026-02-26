@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navy/Gold financial palette -->
+    <color name="navy_primary">#FF0D2137</color>
+    <color name="navy_dark">#FF071624</color>
+    <color name="navy_light">#FF1A3A5C</color>
+    <color name="gold_accent">#FFCFA44A</color>
+    <color name="gold_dark">#FFA07C20</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="surface">#FFF5F7FA</color>
+    <color name="surface_dark">#FF1E2A38</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_surface">#FF1A1A2E</color>
+    <color name="on_surface_variant">#FF546478</color>
+    <color name="success_green">#FF2E7D32</color>
+    <color name="warning_amber">#FFF57C00</color>
+    <color name="error_red">#FFB00020</color>
+    <!-- Card chip colors for rate badges -->
+    <color name="badge_points">#FF1565C0</color>
+    <color name="badge_miles">#FF6A1B9A</color>
+    <color name="badge_cashback">#FF2E7D32</color>
+    <color name="badge_bilt_cash">#FF4A148C</color>
+</resources>

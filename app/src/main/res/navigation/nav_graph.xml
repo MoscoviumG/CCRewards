@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/myCardsFragment">
+
+    <!-- ── My Cards ──────────────────────────────────────────────────────── -->
+    <fragment
+        android:id="@+id/myCardsFragment"
+        android:name="com.example.ccrewards.ui.mycards.MyCardsFragment"
+        android:label="My Cards"
+        tools:layout="@layout/fragment_my_cards">
+        <action
+            android:id="@+id/action_myCards_to_addCard"
+            app:destination="@id/addCardFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_myCards_to_cardDetail"
+            app:destination="@id/cardDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addCardFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddCardFragment"
+        android:label="Add Card"
+        tools:layout="@layout/fragment_add_card" />
+
+    <fragment
+        android:id="@+id/cardDetailFragment"
+        android:name="com.example.ccrewards.ui.mycards.CardDetailFragment"
+        android:label="Card Detail"
+        tools:layout="@layout/fragment_card_detail">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_cardDetail_to_editRates"
+            app:destination="@id/editRewardRatesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_cardDetail_to_productChange"
+            app:destination="@id/productChangeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_cardDetail_to_addEditBenefit"
+            app:destination="@id/addEditBenefitFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editRewardRatesFragment"
+        android:name="com.example.ccrewards.ui.mycards.EditRewardRatesFragment"
+        android:label="Edit Reward Rates"
+        tools:layout="@layout/fragment_edit_reward_rates">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <argument
+            android:name="cardDefinitionId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/productChangeFragment"
+        android:name="com.example.ccrewards.ui.mycards.ProductChangeFragment"
+        android:label="Product Change"
+        tools:layout="@layout/fragment_product_change">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <argument
+            android:name="currentCardDefinitionId"
+            app:argType="string" />
+        <argument
+            android:name="issuer"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEditBenefitFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddEditBenefitFragment"
+        android:label="Add / Edit Benefit"
+        tools:layout="@layout/fragment_add_edit_benefit">
+        <argument
+            android:name="cardDefinitionId"
+            app:argType="string" />
+        <argument
+            android:name="benefitId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <!-- ── Best Card ─────────────────────────────────────────────────────── -->
+    <fragment
+        android:id="@+id/bestCardFragment"
+        android:name="com.example.ccrewards.ui.bestcard.BestCardFragment"
+        android:label="Best Card"
+        tools:layout="@layout/fragment_best_card">
+        <action
+            android:id="@+id/action_bestCard_to_categoryDetail"
+            app:destination="@id/categoryDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryDetailFragment"
+        android:name="com.example.ccrewards.ui.bestcard.CategoryDetailFragment"
+        android:label="Category Detail"
+        tools:layout="@layout/fragment_category_detail">
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+    </fragment>
+
+    <!-- ── Credits ───────────────────────────────────────────────────────── -->
+    <fragment
+        android:id="@+id/creditsFragment"
+        android:name="com.example.ccrewards.ui.credits.CreditsFragment"
+        android:label="Credits"
+        tools:layout="@layout/fragment_credits">
+        <action
+            android:id="@+id/action_credits_to_benefitDetail"
+            app:destination="@id/benefitDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/benefitDetailFragment"
+        android:name="com.example.ccrewards.ui.credits.BenefitDetailFragment"
+        android:label="Benefit Detail"
+        tools:layout="@layout/fragment_benefit_detail">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <argument
+            android:name="benefitId"
+            app:argType="long" />
+    </fragment>
+
+    <!-- ── Settings ──────────────────────────────────────────────────────── -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.ccrewards.ui.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settings_to_pointValuations"
+            app:destination="@id/pointValuationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pointValuationFragment"
+        android:name="com.example.ccrewards.ui.settings.PointValuationFragment"
+        android:label="Point Valuations"
+        tools:layout="@layout/fragment_point_valuation">
+        <action
+            android:id="@+id/action_pointValuation_to_currencyDetail"
+            app:destination="@id/pointCurrencyDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pointCurrencyDetailFragment"
+        android:name="com.example.ccrewards.ui.settings.PointCurrencyDetailFragment"
+        android:label="Currency Detail"
+        tools:layout="@layout/fragment_point_currency_detail">
+        <argument
+            android:name="currencyName"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="2dp"
+    app:cardElevation="1dp"
+    app:cardCornerRadius="10dp">
+
+    <!-- Color strip -->
+    <View
+        android:id="@+id/catalog_color_strip"
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <!-- Card name -->
+        <TextView
+            android:id="@+id/tv_catalog_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_catalog_fee" />
+
+        <!-- Annual fee -->
+        <TextView
+            android:id="@+id/tv_catalog_fee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Issuer · Network -->
+        <TextView
+            android:id="@+id/tv_catalog_issuer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toBottomOf="@id/tv_catalog_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/chip_catalog_business" />
+
+        <!-- Business badge -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_catalog_business"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Business"
+            android:visibility="gone"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintTop_toTopOf="@id/tv_catalog_issuer"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Currency chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_catalog_currency"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            app:layout_constraintTop_toBottomOf="@id/tv_catalog_issuer"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

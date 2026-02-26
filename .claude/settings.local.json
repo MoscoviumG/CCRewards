@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.uscreditcardguide.com)",
+      "WebFetch(domain:loyaltylobby.com)",
+      "WebFetch(domain:thepointsguy.com)",
+      "WebFetch(domain:thriftytraveler.com)",
+      "WebFetch(domain:militarymoneymanual.com)",
+      "WebFetch(domain:upgradedpoints.com)",
+      "WebFetch(domain:awardtravelfinder.com)",
+      "Bash(dir C:\\\\Users\\\\MC\\\\AndroidStudioProjects\\\\CCRewards:*)",
+      "Bash(Get-ChildItem:*)",
+      "Bash(powershell:*)",
+      "Bash(cmd:*)",
+      "Bash(tail:*)",
+      "WebFetch(domain:mvnrepository.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb devices:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/emulator/emulator:*)",
+      "Bash($ADB install:*)",
+      "Bash($ADB shell:*)",
+      "Bash(sleep 4:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb logcat:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb shell:*)",
+      "Bash(grep:*)",
+      "Bash(sleep 1:*)",
+      "Bash($ADB logcat:*)",
+      "Bash(sleep 6:*)",
+      "Bash(sleep 8:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb install:*)"
+    ]
+  }
+}

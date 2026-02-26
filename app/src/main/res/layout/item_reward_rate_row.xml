@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- Category label -->
+    <TextView
+        android:id="@+id/tv_rate_category"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tv_rate_value"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Rate value (e.g. "3x Points") -->
+    <TextView
+        android:id="@+id/tv_rate_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorPrimary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_customized"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Customized indicator (pen icon) -->
+    <ImageView
+        android:id="@+id/iv_customized"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="4dp"
+        android:src="@android:drawable/ic_menu_edit"
+        android:visibility="gone"
+        android:contentDescription="Customized"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="?attr/colorOutlineVariant"
+        app:layout_constraintTop_toBottomOf="@id/tv_rate_category"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
