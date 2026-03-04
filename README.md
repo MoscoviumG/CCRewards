@@ -2,7 +2,7 @@
 
 A US credit card portfolio optimizer for Android. CCRewards helps you track every card you own, find the highest-earning card for each spending category, monitor recurring credits before they expire, and configure point valuations to reflect your personal redemption style.
 
-[![Download APK](https://img.shields.io/badge/Download-APK-brightgreen?logo=android)](https://github.com/YOUR_USERNAME/CCRewards/releases/latest)
+[![Download APK](https://img.shields.io/badge/Download-APK-brightgreen?logo=android)](https://github.com/MoscoviumG/CCRewards/releases/latest)
 
 > **Requires Android 15 (API 35) or higher.**
 > Download the APK, open it on your device, and allow installation from unknown sources when prompted.
