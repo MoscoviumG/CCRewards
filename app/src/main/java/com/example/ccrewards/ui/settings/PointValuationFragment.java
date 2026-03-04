@@ -1,9 +1,11 @@
 package com.example.ccrewards.ui.settings;
 
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +20,9 @@ import com.example.ccrewards.data.model.PointValuation;
 import com.example.ccrewards.databinding.FragmentPointValuationBinding;
 import com.example.ccrewards.databinding.ItemPointValuationBinding;
 import com.example.ccrewards.util.CurrencyUtil;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +64,47 @@ public class PointValuationFragment extends Fragment {
         });
 
         viewModel.getAllValuations().observe(getViewLifecycleOwner(), adapter::setData);
+
+        binding.fabAddCurrency.setOnClickListener(v -> showAddCurrencyDialog());
+    }
+
+    private void showAddCurrencyDialog() {
+        // Build dialog with two inputs: currency name + cents-per-point
+        TextInputLayout tilName = new TextInputLayout(requireContext());
+        tilName.setHint("Currency name (e.g. Hilton Honors Points)");
+        TextInputEditText etName = new TextInputEditText(requireContext());
+        etName.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        etName.setSingleLine(true);
+        tilName.addView(etName);
+
+        TextInputLayout tilCpp = new TextInputLayout(requireContext());
+        tilCpp.setHint("Value in ¢/pt (e.g. 0.5)");
+        TextInputEditText etCpp = new TextInputEditText(requireContext());
+        etCpp.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        etCpp.setSingleLine(true);
+        tilCpp.addView(etCpp);
+
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        container.setPadding(pad, 0, pad, 0);
+        container.addView(tilName);
+        container.addView(tilCpp);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Add Currency")
+                .setView(container)
+                .setPositiveButton("Add", (dialog, which) -> {
+                    String name = etName.getText() != null
+                            ? etName.getText().toString().trim() : "";
+                    if (name.isEmpty()) return;
+                    String cppStr = etCpp.getText() != null
+                            ? etCpp.getText().toString().trim() : "";
+                    double cpp = cppStr.isEmpty() ? 1.0 : Double.parseDouble(cppStr);
+                    viewModel.addValuation(name, cpp, null);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

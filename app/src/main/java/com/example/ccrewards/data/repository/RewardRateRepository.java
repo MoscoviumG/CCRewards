@@ -51,8 +51,20 @@ public class RewardRateRepository {
         executor.execute(() -> rewardRateDao.insert(rate));
     }
 
+    public void deleteRate(RewardRate rate) {
+        executor.execute(() -> rewardRateDao.delete(rate));
+    }
+
     public void resetCustomizations(String cardId) {
         executor.execute(() -> rewardRateDao.resetCustomizationsForCard(cardId));
+    }
+
+    /** Sync — call from background thread only. Deletes all rates for card then re-inserts seed list. */
+    public void fullResetCardSync(String cardId, List<RewardRate> seedRates) {
+        rewardRateDao.deleteAllForCard(cardId);
+        if (!seedRates.isEmpty()) {
+            rewardRateDao.insertAll(seedRates);
+        }
     }
 
     // ── Point Valuations ─────────────────────────────────────────────────────
@@ -76,5 +88,9 @@ public class RewardRateRepository {
 
     public List<PointValuation> getAllValuationsSync() {
         return pointValuationDao.getAllValuationsSync();
+    }
+
+    public long insertValuationSync(PointValuation pv) {
+        return pointValuationDao.insert(pv);
     }
 }

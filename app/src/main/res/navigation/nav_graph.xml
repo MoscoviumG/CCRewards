@@ -31,7 +31,38 @@
         android:id="@+id/addCardFragment"
         android:name="com.example.ccrewards.ui.mycards.AddCardFragment"
         android:label="Add Card"
-        tools:layout="@layout/fragment_add_card" />
+        tools:layout="@layout/fragment_add_card">
+        <action
+            android:id="@+id/action_addCard_to_addCardDetail"
+            app:destination="@id/addCardDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_addCard_to_addCustomCard"
+            app:destination="@id/addCustomCardFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addCustomCardFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddCustomCardFragment"
+        android:label="Create Custom Card"
+        tools:layout="@layout/fragment_add_custom_card" />
+
+    <fragment
+        android:id="@+id/addCardDetailFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddCardDetailFragment"
+        android:label="Card Details"
+        tools:layout="@layout/fragment_add_card_detail">
+        <argument
+            android:name="cardDefinitionId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/cardDetailFragment"
@@ -120,6 +151,45 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_bestCard_to_customCategoryDetail"
+            app:destination="@id/customCategoryDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_bestCard_to_travelGroup"
+            app:destination="@id/travelGroupFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/travelGroupFragment"
+        android:name="com.example.ccrewards.ui.bestcard.TravelGroupFragment"
+        android:label="Travel"
+        tools:layout="@layout/fragment_travel_group">
+        <action
+            android:id="@+id/action_travelGroup_to_categoryDetail"
+            app:destination="@id/categoryDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customCategoryDetailFragment"
+        android:name="com.example.ccrewards.ui.bestcard.CustomCategoryDetailFragment"
+        android:label="Custom Category"
+        tools:layout="@layout/fragment_custom_category_detail">
+        <argument
+            android:name="customCategoryId"
+            app:argType="long"
+            android:defaultValue="-1L" />
     </fragment>
 
     <fragment

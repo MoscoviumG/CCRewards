@@ -4,6 +4,7 @@ import androidx.room.TypeConverter;
 
 import com.example.ccrewards.data.model.RateType;
 import com.example.ccrewards.data.model.ResetPeriod;
+import com.example.ccrewards.data.model.ResetType;
 import com.example.ccrewards.data.model.RewardCategory;
 import com.example.ccrewards.data.model.TransferPartnerType;
 
@@ -59,5 +60,15 @@ public class Converters {
     @TypeConverter
     public static TransferPartnerType toTransferPartnerType(String name) {
         return name == null ? null : TransferPartnerType.valueOf(name);
+    }
+
+    @TypeConverter
+    public static String fromResetType(ResetType resetType) {
+        return resetType == null ? null : resetType.name();
+    }
+
+    @TypeConverter
+    public static ResetType toResetType(String name) {
+        return name == null ? null : ResetType.valueOf(name);
     }
 }

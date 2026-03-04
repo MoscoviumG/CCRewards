@@ -52,6 +52,12 @@ public interface RewardRateDao {
     @Query("DELETE FROM reward_rates WHERE cardDefinitionId = :cardId AND isCustomized = 1")
     void clearCustomizedRates(String cardId);
 
+    @Query("DELETE FROM reward_rates WHERE cardDefinitionId = :cardId AND isCustomized = 0")
+    void deleteSeededRatesForCard(String cardId);
+
+    @Query("DELETE FROM reward_rates WHERE cardDefinitionId = :cardId")
+    void deleteAllForCard(String cardId);
+
     @Query("UPDATE reward_rates SET isCustomized = 0 WHERE cardDefinitionId = :cardId")
     void resetCustomizationsForCard(String cardId);
 

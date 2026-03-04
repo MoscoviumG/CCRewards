@@ -9,9 +9,9 @@ public class CurrencyUtil {
         return String.format(Locale.US, "$%,.2f", cents / 100.0);
     }
 
-    /** Formats an effective return percentage: "3.52%" */
+    /** Formats an effective return percentage: "3.520%" */
     public static String formatEffectiveReturn(double effectiveReturn) {
-        return String.format(Locale.US, "%.2f%%", effectiveReturn);
+        return String.format(Locale.US, "%.3f%%", effectiveReturn);
     }
 
     /** Formats a rate: "3x" or "3%" depending on rateType label. */

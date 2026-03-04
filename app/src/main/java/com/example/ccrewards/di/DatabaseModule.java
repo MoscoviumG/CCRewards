@@ -6,6 +6,7 @@ import androidx.room.Room;
 
 import com.example.ccrewards.data.db.AppDatabase;
 import com.example.ccrewards.data.db.dao.*;
+import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 
 import javax.inject.Singleton;
 
@@ -25,8 +26,8 @@ public class DatabaseModule {
         // Use a holder array so we can reference the DB instance in the callback.
         AppDatabase[] holder = new AppDatabase[1];
         holder[0] = Room.databaseBuilder(context, AppDatabase.class, "ccrewards.db")
-                .fallbackToDestructiveMigration()
-                .addCallback(AppDatabase.buildSeedCallback(holder))
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
+                .addCallback(AppDatabase.buildOpenCallback(context, holder))
                 .build();
         return holder[0];
     }
@@ -74,5 +75,26 @@ public class DatabaseModule {
     @Provides
     public static TransferPartnerDao provideTransferPartnerDao(AppDatabase db) {
         return db.transferPartnerDao();
+    }
+
+    @Provides
+    public static CustomCategoryDao provideCustomCategoryDao(AppDatabase db) {
+        return db.customCategoryDao();
+    }
+
+    @Provides
+    public static CustomCategoryRateDao provideCustomCategoryRateDao(AppDatabase db) {
+        return db.customCategoryRateDao();
+    }
+
+    @Provides
+    public static WelcomeBonusDao provideWelcomeBonusDao(AppDatabase db) {
+        return db.welcomeBonusDao();
+    }
+
+    @Provides
+    @Singleton
+    public static WelcomeBonusRepository provideWelcomeBonusRepository(WelcomeBonusDao dao) {
+        return new WelcomeBonusRepository(dao);
     }
 }

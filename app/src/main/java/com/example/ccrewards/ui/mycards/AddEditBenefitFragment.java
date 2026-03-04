@@ -11,8 +11,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.CardBenefit;
 import com.example.ccrewards.data.model.ResetPeriod;
+import com.example.ccrewards.data.model.ResetType;
 import com.example.ccrewards.databinding.FragmentAddEditBenefitBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -48,6 +50,17 @@ public class AddEditBenefitFragment extends Fragment {
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp());
 
+        if (isEditing) {
+            binding.toolbar.inflateMenu(R.menu.menu_add_edit_benefit);
+            binding.toolbar.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.action_delete_benefit) {
+                    confirmDeleteBenefit(view);
+                    return true;
+                }
+                return false;
+            });
+        }
+
         viewModel.loadBenefit(benefitId);
 
         // Populate fields if editing
@@ -63,6 +76,12 @@ public class AddEditBenefitFragment extends Fragment {
                     case QUARTERLY: binding.rgResetPeriod.check(binding.rbQuarterly.getId()); break;
                     case SEMI_ANNUALLY: binding.rgResetPeriod.check(binding.rbSemiAnnually.getId()); break;
                     default: binding.rgResetPeriod.check(binding.rbAnnually.getId()); break;
+                }
+                // Set reset type radio
+                if (benefit.resetType == ResetType.ANNIVERSARY) {
+                    binding.rgResetType.check(binding.rbAnniversary.getId());
+                } else {
+                    binding.rgResetType.check(binding.rbCalendar.getId());
                 }
             }
         });
@@ -89,11 +108,24 @@ public class AddEditBenefitFragment extends Fragment {
             }
 
             ResetPeriod period = getSelectedPeriod();
+            ResetType resetType = getSelectedResetType();
 
             viewModel.saveBenefit(cardDefinitionId, name, description, amountCents, period,
-                    benefitId, () -> requireActivity().runOnUiThread(() ->
+                    resetType, benefitId, () -> requireActivity().runOnUiThread(() ->
                             Navigation.findNavController(requireView()).navigateUp()));
         });
+    }
+
+    private void confirmDeleteBenefit(View navView) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Delete Benefit")
+                .setMessage("Remove this benefit?")
+                .setPositiveButton("Delete", (dialog, which) ->
+                        viewModel.deleteBenefit(() ->
+                                requireActivity().runOnUiThread(() ->
+                                        Navigation.findNavController(navView).navigateUp())))
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private ResetPeriod getSelectedPeriod() {
@@ -102,6 +134,11 @@ public class AddEditBenefitFragment extends Fragment {
         if (checkedId == binding.rbQuarterly.getId()) return ResetPeriod.QUARTERLY;
         if (checkedId == binding.rbSemiAnnually.getId()) return ResetPeriod.SEMI_ANNUALLY;
         return ResetPeriod.ANNUALLY;
+    }
+
+    private ResetType getSelectedResetType() {
+        return binding.rgResetType.getCheckedRadioButtonId() == binding.rbAnniversary.getId()
+                ? ResetType.ANNIVERSARY : ResetType.CALENDAR;
     }
 
     @Override

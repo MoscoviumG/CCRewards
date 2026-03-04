@@ -8,6 +8,7 @@ import com.example.ccrewards.data.db.dao.CardBenefitDao;
 import com.example.ccrewards.data.db.dao.TransferPartnerDao;
 import com.example.ccrewards.data.db.dao.UserCardDao;
 import com.example.ccrewards.data.model.BenefitUsage;
+import com.example.ccrewards.data.model.BenefitUsageWithAmount;
 import com.example.ccrewards.data.model.CardBenefit;
 import com.example.ccrewards.data.model.TransferPartner;
 import com.example.ccrewards.data.model.TransferPartnerType;
@@ -79,6 +80,14 @@ public class BenefitRepository {
     public com.example.ccrewards.data.model.BenefitUsage getUsageSync(
             long userCardId, long benefitId, String periodKey) {
         return benefitUsageDao.getUsageSync(userCardId, benefitId, periodKey);
+    }
+
+    public LiveData<List<BenefitUsageWithAmount>> getAllUsedWithAmounts() {
+        return benefitUsageDao.getAllUsedWithAmounts();
+    }
+
+    public LiveData<List<BenefitUsageWithAmount>> getUsedWithAmountsForCard(long userCardId) {
+        return benefitUsageDao.getUsedWithAmountsForCard(userCardId);
     }
 
     public void setUsed(long userCardId, long benefitId, String periodKey, boolean isUsed) {

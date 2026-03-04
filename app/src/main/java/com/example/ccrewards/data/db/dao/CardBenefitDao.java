@@ -39,6 +39,12 @@ public interface CardBenefitDao {
     @Delete
     void delete(CardBenefit benefit);
 
+    @Query("SELECT * FROM card_benefits WHERE cardDefinitionId = :cardId AND isCustom = 0")
+    List<CardBenefit> getSeededBenefitsForCardSync(String cardId);
+
+    @Query("DELETE FROM card_benefits WHERE cardDefinitionId = :cardId AND isCustom = 0")
+    void deleteSeededBenefitsForCard(String cardId);
+
     @Query("SELECT COUNT(*) FROM card_benefits")
     int count();
 }

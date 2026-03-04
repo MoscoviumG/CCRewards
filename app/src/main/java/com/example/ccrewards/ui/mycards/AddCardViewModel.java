@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.ccrewards.data.model.CardDefinition;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.ui.common.CardFilterState;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,12 +21,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class AddCardViewModel extends ViewModel {
 
-    public enum Filter { ALL, PERSONAL, BUSINESS }
-
     private final CardRepository cardRepository;
 
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
-    private final MutableLiveData<Filter> filterMode = new MutableLiveData<>(Filter.ALL);
+    private final MutableLiveData<CardFilterState> filterState = new MutableLiveData<>(new CardFilterState());
     private final MediatorLiveData<List<CardDefinition>> displayedCards = new MediatorLiveData<>();
 
     private LiveData<List<CardDefinition>> allCards;
@@ -35,9 +34,9 @@ public class AddCardViewModel extends ViewModel {
         this.cardRepository = cardRepository;
         allCards = cardRepository.getAllCardDefinitions();
 
-        displayedCards.addSource(allCards, cards -> refilter(cards, searchQuery.getValue(), filterMode.getValue()));
-        displayedCards.addSource(searchQuery, q -> refilter(allCards.getValue(), q, filterMode.getValue()));
-        displayedCards.addSource(filterMode, f -> refilter(allCards.getValue(), searchQuery.getValue(), f));
+        displayedCards.addSource(allCards, cards -> refilter());
+        displayedCards.addSource(searchQuery, q -> refilter());
+        displayedCards.addSource(filterState, f -> refilter());
     }
 
     public LiveData<List<CardDefinition>> getDisplayedCards() {
@@ -48,22 +47,35 @@ public class AddCardViewModel extends ViewModel {
         searchQuery.setValue(query == null ? "" : query.toLowerCase().trim());
     }
 
-    public void setFilter(Filter filter) {
-        filterMode.setValue(filter);
+    public void setFilter(CardFilterState filter) {
+        filterState.setValue(filter != null ? filter : new CardFilterState());
     }
 
-    private void refilter(List<CardDefinition> cards, String query, Filter filter) {
+    public CardFilterState getCurrentFilter() {
+        CardFilterState f = filterState.getValue();
+        return f != null ? f : new CardFilterState();
+    }
+
+    private void refilter() {
+        List<CardDefinition> cards = allCards.getValue();
         if (cards == null) {
             displayedCards.setValue(new ArrayList<>());
             return;
         }
+        String q = searchQuery.getValue() != null ? searchQuery.getValue() : "";
+        CardFilterState filter = filterState.getValue();
+        if (filter == null) filter = new CardFilterState();
+
         List<CardDefinition> result = new ArrayList<>();
-        String q = query == null ? "" : query;
         for (CardDefinition card : cards) {
-            // Filter by personal/business
-            if (filter == Filter.PERSONAL && card.isBusinessCard) continue;
-            if (filter == Filter.BUSINESS && !card.isBusinessCard) continue;
-            // Filter by search query
+            // Card type
+            if (filter.cardType == CardFilterState.CardType.PERSONAL && card.isBusinessCard) continue;
+            if (filter.cardType == CardFilterState.CardType.BUSINESS && !card.isBusinessCard) continue;
+            // Issuer
+            if (!filter.issuers.isEmpty() && !filter.issuers.contains(card.issuer)) continue;
+            // Network
+            if (!filter.networks.isEmpty() && !filter.networks.contains(card.network)) continue;
+            // Search query
             if (!q.isEmpty()) {
                 boolean matches = card.displayName.toLowerCase().contains(q)
                         || card.issuer.toLowerCase().contains(q)

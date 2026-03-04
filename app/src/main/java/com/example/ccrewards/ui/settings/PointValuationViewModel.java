@@ -9,6 +9,8 @@ import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.RewardRateRepository;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -19,6 +21,7 @@ public class PointValuationViewModel extends ViewModel {
 
     private final RewardRateRepository rateRepository;
     private final BenefitRepository benefitRepository;
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     @Inject
     public PointValuationViewModel(RewardRateRepository rateRepository,
@@ -37,6 +40,13 @@ public class PointValuationViewModel extends ViewModel {
 
     public void resetValuationToDefault(String currencyName) {
         rateRepository.resetValuationToDefault(currencyName);
+    }
+
+    public void addValuation(String name, double centsPerPoint, Runnable onDone) {
+        executor.execute(() -> {
+            rateRepository.insertValuationSync(new PointValuation(name, centsPerPoint, centsPerPoint));
+            if (onDone != null) onDone.run();
+        });
     }
 
     public LiveData<List<TransferPartner>> getAirlinePartners(String currencyName) {

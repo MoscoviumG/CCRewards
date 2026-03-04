@@ -13,6 +13,7 @@ public class RewardRate {
     public String cardDefinitionId;
     public RewardCategory category;
     public RateType rateType;
+    public String currencyName;     // user-selected currency override; null = use card default
     public double rate;
     public boolean isChoiceCategory;
     public String choiceGroupId;    // null if not a choice category

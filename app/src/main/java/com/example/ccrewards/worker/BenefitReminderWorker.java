@@ -13,12 +13,15 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import android.preference.PreferenceManager;
+
 import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.BenefitUsage;
 import com.example.ccrewards.data.model.CardBenefit;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.ui.settings.SettingsFragment;
 import com.example.ccrewards.util.CurrencyUtil;
 import com.example.ccrewards.util.PeriodKeyUtil;
 
@@ -67,13 +70,16 @@ public class BenefitReminderWorker extends Worker {
 
         if (activeCards == null || allBenefits == null) return Result.success();
 
+        int threshold = PreferenceManager.getDefaultSharedPreferences(appContext)
+                .getInt(SettingsFragment.PREF_NOTIF_DAYS_THRESHOLD, 7);
+
         int notifId = NOTIFICATION_ID_BASE;
         for (UserCard card : activeCards) {
             for (CardBenefit benefit : allBenefits) {
                 if (!benefit.cardDefinitionId.equals(card.cardDefinitionId)) continue;
 
                 int daysLeft = PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
-                if (daysLeft > 7) continue;
+                if (daysLeft > threshold) continue;
 
                 String periodKey = PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
                 BenefitUsage usage = benefitRepo.getUsageSync(card.id, benefit.id, periodKey);

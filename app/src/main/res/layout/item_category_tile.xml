@@ -33,7 +33,7 @@
             android:maxLines="2"
             android:ellipsize="end" />
 
-        <!-- Effective return -->
+        <!-- Primary value (effective return or raw rate depending on display mode) -->
         <TextView
             android:id="@+id/tv_effective_return"
             android:layout_width="match_parent"
@@ -42,17 +42,14 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="?attr/colorPrimary" />
 
-        <!-- "You own this" badge -->
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_you_own"
-            style="@style/Widget.Material3.Chip.Assist"
-            android:layout_width="wrap_content"
+        <!-- Secondary value (raw rate or effective return, opposite of primary) -->
+        <TextView
+            android:id="@+id/tv_secondary_value"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="You own this"
             android:visibility="gone"
             android:textAppearance="?attr/textAppearanceLabelSmall"
-            app:chipBackgroundColor="?attr/colorTertiaryContainer" />
+            android:textColor="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>
 

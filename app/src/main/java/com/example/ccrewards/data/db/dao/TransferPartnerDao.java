@@ -22,8 +22,11 @@ public interface TransferPartnerDao {
            "AND partnerType = :type ORDER BY partnerName")
     LiveData<List<TransferPartner>> getPartnersForCurrencyAndType(String currencyName, TransferPartnerType type);
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<TransferPartner> partners);
+
+    @Query("DELETE FROM transfer_partners")
+    void deleteAll();
 
     @Query("SELECT COUNT(*) FROM transfer_partners")
     int count();

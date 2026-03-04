@@ -23,7 +23,6 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
     }
 
     private OnCardClickListener listener;
-
     public UserCardAdapter() {
         super(DIFF_CALLBACK);
     }

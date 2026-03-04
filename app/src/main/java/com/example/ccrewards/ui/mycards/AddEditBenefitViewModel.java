@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.ccrewards.data.model.CardBenefit;
 import com.example.ccrewards.data.model.ResetPeriod;
+import com.example.ccrewards.data.model.ResetType;
 import com.example.ccrewards.data.repository.BenefitRepository;
 
 import java.util.concurrent.Executor;
@@ -43,11 +44,11 @@ public class AddEditBenefitViewModel extends ViewModel {
     }
 
     public void saveBenefit(String cardDefinitionId, String name, String description,
-                            int amountCents, ResetPeriod resetPeriod, long editingBenefitId,
-                            Runnable onComplete) {
+                            int amountCents, ResetPeriod resetPeriod, ResetType resetType,
+                            long editingBenefitId, Runnable onComplete) {
         if (editingBenefitId == -1L) {
             CardBenefit benefit = new CardBenefit(
-                    cardDefinitionId, name, description, amountCents, resetPeriod, true);
+                    cardDefinitionId, name, description, amountCents, resetPeriod, true, resetType);
             benefitRepository.insertBenefit(benefit, onComplete);
         } else {
             CardBenefit current = existingBenefit.getValue();
@@ -56,6 +57,7 @@ public class AddEditBenefitViewModel extends ViewModel {
                 current.description = description;
                 current.amountCents = amountCents;
                 current.resetPeriod = resetPeriod;
+                current.resetType = resetType;
                 benefitRepository.updateBenefit(current);
                 if (onComplete != null) onComplete.run();
             }

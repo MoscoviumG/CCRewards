@@ -32,4 +32,7 @@ public interface UserCardChoiceCategoryDao {
 
     @Query("DELETE FROM user_card_choice_categories WHERE userCardId = :userCardId")
     void deleteAllForCard(long userCardId);
+
+    @Query("DELETE FROM user_card_choice_categories")
+    void deleteAll();
 }

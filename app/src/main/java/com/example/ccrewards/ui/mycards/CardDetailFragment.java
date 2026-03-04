@@ -18,6 +18,7 @@ import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.CardBenefit;
 import com.example.ccrewards.data.model.ProductChangeRecord;
 import com.example.ccrewards.data.model.UserCard;
+import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
 import com.example.ccrewards.databinding.FragmentCardDetailBinding;
 import com.example.ccrewards.databinding.ItemBenefitDetailBinding;
@@ -28,8 +29,11 @@ import com.example.ccrewards.util.DateUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -40,6 +44,7 @@ public class CardDetailFragment extends Fragment {
     private FragmentCardDetailBinding binding;
     private CardDetailViewModel viewModel;
     private long userCardId;
+    private String currentCurrencyName = "";
 
     // Simple adapters using ViewBinding
     private SimpleRateAdapter rateAdapter;
@@ -99,6 +104,16 @@ public class CardDetailFragment extends Fragment {
         viewModel.getHistory().observe(getViewLifecycleOwner(), records ->
                 historyAdapter.setData(records));
 
+        // Observe credit usage
+        viewModel.getCreditUsageThisYear().observe(getViewLifecycleOwner(), cents -> {
+            if (cents != null && cents > 0) {
+                binding.tvDetailCreditUsed.setVisibility(View.VISIBLE);
+                binding.tvDetailCreditUsed.setText("$" + (cents / 100) + " in credits used this year");
+            } else {
+                binding.tvDetailCreditUsed.setVisibility(View.GONE);
+            }
+        });
+
         // Action buttons
         binding.btnEditRates.setOnClickListener(v -> {
             UserCardWithDetails current = viewModel.getCardDetails().getValue();
@@ -129,11 +144,56 @@ public class CardDetailFragment extends Fragment {
         });
 
         binding.btnDeleteCard.setOnClickListener(v -> confirmDelete());
+
+        // ── Welcome Bonus ────────────────────────────────────────────────────
+
+        viewModel.getWelcomeBonus().observe(getViewLifecycleOwner(), this::bindWelcomeBonus);
+
+        // Listen for result from the bottom sheet
+        getChildFragmentManager().setFragmentResultListener(
+                WelcomeBonusBottomSheet.RESULT_KEY, getViewLifecycleOwner(), (key, result) -> {
+                    WelcomeBonus wb = new WelcomeBonus();
+                    wb.userCardId = userCardId;
+                    wb.bonusPoints = result.getInt("bonus_points");
+                    wb.bonusCurrencyName = currentCurrencyName;
+                    wb.spendRequirementCents = result.getInt("spend_req_cents");
+                    long epoch = result.getLong("deadline_epoch", -1L);
+                    wb.deadline = epoch == -1L ? null : LocalDate.ofEpochDay(epoch);
+                    wb.showInBestCard = result.getBoolean("show_in_best_card", true);
+                    wb.achieved = false;
+                    viewModel.upsertWelcomeBonus(wb);
+                });
+
+        binding.btnAddWelcomeBonus.setOnClickListener(v ->
+                WelcomeBonusBottomSheet.newInstance(currentCurrencyName)
+                        .show(getChildFragmentManager(), WelcomeBonusBottomSheet.TAG));
+
+        binding.btnWbEdit.setOnClickListener(v -> {
+            WelcomeBonus current = viewModel.getWelcomeBonus().getValue();
+            if (current != null)
+                WelcomeBonusBottomSheet.newInstance(current)
+                        .show(getChildFragmentManager(), WelcomeBonusBottomSheet.TAG);
+        });
+
+        binding.btnWbMarkAchieved.setOnClickListener(v ->
+                viewModel.markWelcomeBonusAchieved(userCardId));
+
+        binding.btnWbRemove.setOnClickListener(v -> {
+            WelcomeBonus wb = viewModel.getWelcomeBonus().getValue();
+            if (wb == null) return;
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Remove Welcome Bonus")
+                    .setMessage("Remove the welcome bonus from this card?")
+                    .setPositiveButton("Remove", (d, w) -> viewModel.deleteWelcomeBonus(wb))
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
     }
 
     private void bindCardDetails(UserCardWithDetails item) {
         if (item == null || item.definition == null) return;
 
+        currentCurrencyName = item.definition.rewardCurrencyName;
         binding.toolbar.setTitle(item.definition.displayName);
         binding.detailColorStrip.setBackgroundColor((int) item.definition.cardColorPrimary);
         binding.tvDetailCardName.setText(item.definition.displayName);
@@ -161,6 +221,57 @@ public class CardDetailFragment extends Fragment {
 
         // Benefits
         benefitAdapter.setData(item.benefits);
+    }
+
+    private void bindWelcomeBonus(WelcomeBonus wb) {
+        if (wb == null) {
+            binding.cardWelcomeBonus.setVisibility(View.GONE);
+            binding.btnAddWelcomeBonus.setVisibility(View.VISIBLE);
+            return;
+        }
+        binding.cardWelcomeBonus.setVisibility(View.VISIBLE);
+        binding.btnAddWelcomeBonus.setVisibility(View.GONE);
+
+        boolean cashBack = WelcomeBonusBottomSheet.isCashBack(wb.bonusCurrencyName);
+        if (cashBack) {
+            binding.tvWbBonus.setText(CurrencyUtil.centsToString(wb.bonusPoints) + " Cash Back");
+        } else {
+            binding.tvWbBonus.setText(NumberFormat.getInstance(Locale.US).format(wb.bonusPoints)
+                    + " " + shortCurrency(wb.bonusCurrencyName));
+        }
+
+        binding.tvWbSpend.setText("Spend " + CurrencyUtil.centsToString(wb.spendRequirementCents));
+        binding.tvWbDeadline.setText(wb.deadline != null
+                ? "by " + DateUtil.toDisplayString(wb.deadline) : "No deadline");
+
+        binding.btnWbMarkAchieved.setVisibility(wb.achieved ? View.GONE : View.VISIBLE);
+        binding.tvWbAchievedLabel.setVisibility(wb.achieved ? View.VISIBLE : View.GONE);
+    }
+
+    private static String shortCurrency(String name) {
+        if (name == null) return "pts";
+        switch (name) {
+            case "Chase Ultimate Rewards Points":  return "UR";
+            case "Amex Membership Rewards Points": return "MR";
+            case "Citi ThankYou Points":           return "TY";
+            case "Capital One Miles":              return "CO";
+            case "Bilt Points":                    return "Bilt";
+            case "Atmos/Alaska Rewards Miles":     return "AS";
+            case "Delta SkyMiles":                 return "DL";
+            case "Southwest Rapid Rewards":        return "SW";
+            case "United MileagePlus":             return "UA";
+            case "AAdvantage Miles":               return "AA";
+            case "Avios":                          return "Avios";
+            case "Aeroplan Miles":                 return "AC";
+            case "Hilton Honors Points":           return "Hilton";
+            case "Marriott Bonvoy Points":         return "Bonvoy";
+            case "World of Hyatt Points":          return "Hyatt";
+            case "IHG One Rewards Points":         return "IHG";
+            case "BofA Points":                    return "BofA";
+            case "Flying Blue Miles":              return "FB";
+            case "Free Spirit Points":             return "FS";
+            default:                               return "pts";
+        }
     }
 
     private void showEditDialog() {
@@ -278,8 +389,26 @@ public class CardDetailFragment extends Fragment {
         public void onBindViewHolder(@NonNull VH holder, int position) {
             CardBenefit benefit = items.get(position);
             holder.binding.tvBenefitName.setText(benefit.name);
-            holder.binding.tvBenefitAmount.setText(CurrencyUtil.centsToString(benefit.amountCents) + "/yr");
+            holder.binding.tvBenefitAmount.setText(
+                    CurrencyUtil.centsToString(benefit.amountCents) + "/" + periodSuffix(benefit.resetPeriod));
             holder.binding.chipBenefitPeriod.setText(formatPeriod(benefit.resetPeriod));
+            holder.itemView.setOnClickListener(v -> {
+                if (binding == null) return;
+                Bundle args = new Bundle();
+                args.putString("cardDefinitionId", benefit.cardDefinitionId);
+                args.putLong("benefitId", benefit.id);
+                Navigation.findNavController(binding.getRoot())
+                        .navigate(R.id.action_cardDetail_to_addEditBenefit, args);
+            });
+        }
+
+        private String periodSuffix(com.example.ccrewards.data.model.ResetPeriod period) {
+            switch (period) {
+                case MONTHLY: return "mo";
+                case QUARTERLY: return "qtr";
+                case SEMI_ANNUALLY: return "6mo";
+                default: return "yr";
+            }
         }
 
         private String formatPeriod(com.example.ccrewards.data.model.ResetPeriod period) {

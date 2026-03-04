@@ -18,6 +18,7 @@ public class CardRepository {
 
     private final CardDefinitionDao cardDefinitionDao;
     private final RewardRateDao rewardRateDao;
+    private final CardBenefitDao cardBenefitDao;
     private final UserCardDao userCardDao;
     private final UserCardChoiceCategoryDao choiceCategoryDao;
     private final ProductChangeRecordDao productChangeRecordDao;
@@ -26,11 +27,13 @@ public class CardRepository {
     @Inject
     public CardRepository(CardDefinitionDao cardDefinitionDao,
                           RewardRateDao rewardRateDao,
+                          CardBenefitDao cardBenefitDao,
                           UserCardDao userCardDao,
                           UserCardChoiceCategoryDao choiceCategoryDao,
                           ProductChangeRecordDao productChangeRecordDao) {
         this.cardDefinitionDao = cardDefinitionDao;
         this.rewardRateDao = rewardRateDao;
+        this.cardBenefitDao = cardBenefitDao;
         this.userCardDao = userCardDao;
         this.choiceCategoryDao = choiceCategoryDao;
         this.productChangeRecordDao = productChangeRecordDao;
@@ -86,6 +89,16 @@ public class CardRepository {
         executor.execute(() -> cardDefinitionDao.delete(card));
     }
 
+    // ── Rates & Benefits ──────────────────────────────────────────────────────
+
+    public LiveData<List<RewardRate>> getRatesForCard(String cardDefinitionId) {
+        return rewardRateDao.getRatesForCard(cardDefinitionId);
+    }
+
+    public LiveData<List<CardBenefit>> getBenefitsForCard(String cardDefinitionId) {
+        return cardBenefitDao.getBenefitsForCard(cardDefinitionId);
+    }
+
     // ── User Cards ────────────────────────────────────────────────────────────
 
     public LiveData<List<UserCardWithDetails>> getActiveUserCards() {
@@ -101,11 +114,15 @@ public class CardRepository {
     }
 
     public void addUserCard(UserCard card, Runnable onComplete) {
+        addUserCard(card, ignored -> { if (onComplete != null) onComplete.run(); });
+    }
+
+    public void addUserCard(UserCard card, java.util.function.LongConsumer onComplete) {
         executor.execute(() -> {
             Integer maxOrder = userCardDao.getMaxSortOrder();
             card.sortOrder = (maxOrder == null ? 0 : maxOrder + 1);
-            userCardDao.insert(card);
-            if (onComplete != null) onComplete.run();
+            long newId = userCardDao.insert(card);
+            if (onComplete != null) onComplete.accept(newId);
         });
     }
 

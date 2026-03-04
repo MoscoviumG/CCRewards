@@ -13,6 +13,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ccrewards.data.model.RateType;
 import com.example.ccrewards.data.model.RewardCategory;
 import com.example.ccrewards.data.model.relations.BestCardForCategory;
 import com.example.ccrewards.databinding.FragmentCategoryDetailBinding;
@@ -52,7 +53,8 @@ public class CategoryDetailFragment extends Fragment {
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp());
 
-        RankingsAdapter adapter = new RankingsAdapter();
+        boolean myCardsMode = viewModel.getCurrentFilter() == BestCardViewModel.Filter.MY_CARDS;
+        RankingsAdapter adapter = new RankingsAdapter(myCardsMode);
         binding.recyclerCategoryRankings.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerCategoryRankings.setAdapter(adapter);
 
@@ -66,15 +68,38 @@ public class CategoryDetailFragment extends Fragment {
         });
     }
 
-    private String formatCategoryName(String enumName) {
+    static String formatCategoryName(String enumName) {
         if (enumName == null) return "Category";
-        String[] parts = enumName.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (sb.length() > 0) sb.append(" / ");
-            sb.append(part.charAt(0)).append(part.substring(1).toLowerCase());
+        switch (enumName) {
+            case "TRAVEL":                return "General Travel";
+            case "TRAVEL_PORTAL":         return "Travel Portal";
+            case "TRAVEL_HILTON":         return "Hilton";
+            case "TRAVEL_MARRIOTT":       return "Marriott";
+            case "TRAVEL_IHG":            return "IHG";
+            case "TRAVEL_HYATT":          return "Hyatt";
+            case "TRAVEL_DELTA":          return "Delta";
+            case "TRAVEL_UNITED":         return "United";
+            case "TRAVEL_SOUTHWEST":      return "Southwest";
+            case "TRAVEL_AA":             return "American Airlines";
+            case "TRAVEL_AEROPLAN":       return "Aeroplan";
+            case "TRAVEL_BRITISH_AIRWAYS":return "British Airways";
+            case "TRAVEL_AER_LINGUS":     return "Aer Lingus";
+            case "TRAVEL_IBERIA":         return "Iberia";
+            case "TRAVEL_AIR_FRANCE_KLM": return "Air France / KLM";
+            case "TRAVEL_SPIRIT":         return "Spirit";
+            case "TRAVEL_ALLEGIANT":      return "Allegiant";
+            case "TRAVEL_ALASKA":         return "Alaska Airlines";
+            case "TRAVEL_CRUISES":        return "Cruises";
+            default:
+                String[] parts = enumName.split("_");
+                StringBuilder sb = new StringBuilder();
+                for (String part : parts) {
+                    if (sb.length() > 0) sb.append(" / ");
+                    sb.append(Character.toUpperCase(part.charAt(0)))
+                      .append(part.substring(1).toLowerCase());
+                }
+                return sb.toString();
         }
-        return sb.toString();
     }
 
     @Override
@@ -87,6 +112,11 @@ public class CategoryDetailFragment extends Fragment {
 
     private static class RankingsAdapter extends RecyclerView.Adapter<RankingsAdapter.VH> {
         private List<BestCardForCategory> items = new ArrayList<>();
+        private final boolean myCardsMode;
+
+        RankingsAdapter(boolean myCardsMode) {
+            this.myCardsMode = myCardsMode;
+        }
 
         void setData(List<BestCardForCategory> data) {
             items = data != null ? new ArrayList<>(data) : new ArrayList<>();
@@ -106,10 +136,17 @@ public class CategoryDetailFragment extends Fragment {
             BestCardForCategory item = items.get(position);
             holder.binding.tvRank.setText(String.valueOf(position + 1));
             holder.binding.tvRankedCardName.setText(item.cardDisplayName);
-            holder.binding.tvRankedReturn.setText(
-                    CurrencyUtil.formatEffectiveReturn(item.effectiveReturn));
+
+            String effectiveStr = CurrencyUtil.formatEffectiveReturn(item.effectiveReturn);
+            if (item.rateType == RateType.CASHBACK || item.rateType == RateType.BILT_CASH) {
+                holder.binding.tvRankedReturn.setText(effectiveStr);
+            } else {
+                String rawStr = BestCardFragment.formatRawRate(item);
+                holder.binding.tvRankedReturn.setText(rawStr + " · " + effectiveStr);
+            }
+
             holder.binding.chipRankedOwned.setVisibility(
-                    item.isUserOwned ? View.VISIBLE : View.GONE);
+                    !myCardsMode && item.isUserOwned ? View.VISIBLE : View.GONE);
         }
 
         @Override

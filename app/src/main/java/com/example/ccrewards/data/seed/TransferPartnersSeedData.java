@@ -125,6 +125,14 @@ public class TransferPartnersSeedData {
         list.add(hotel(bilt, "Marriott Bonvoy", 2, 1.0));
         list.add(hotel(bilt, "World of Hyatt", 1, 1.0));
 
+        // ── HSBC Rewards Points ───────────────────────────────────────────────
+        String hsbc = "HSBC Rewards Points";
+        list.add(airline(hsbc, "British Airways Avios", 1, 1.0));
+        list.add(airline(hsbc, "Aer Lingus AerClub",   1, 1.0));
+        list.add(airline(hsbc, "Iberia Avios",          1, 1.0));
+        list.add(airline(hsbc, "Emirates Skywards",     1, 1.0));
+        list.add(airline(hsbc, "Singapore KrisFlyer",   1, 1.0));
+
         return list;
     }
 }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.ccrewards.R;
 import com.example.ccrewards.databinding.FragmentMyCardsBinding;
+import com.example.ccrewards.ui.common.CardFilterState;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -58,22 +59,61 @@ public class MyCardsFragment extends Fragment {
             binding.recyclerMyCards.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         });
 
-        // Filter chip group
-        binding.filterChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.isEmpty()) return;
-            int id = checkedIds.get(0);
-            if (id == R.id.chip_all) {
-                viewModel.setFilter(MyCardsViewModel.Filter.ALL);
-            } else if (id == R.id.chip_personal) {
-                viewModel.setFilter(MyCardsViewModel.Filter.PERSONAL);
-            } else if (id == R.id.chip_business) {
-                viewModel.setFilter(MyCardsViewModel.Filter.BUSINESS);
+        // Observe total annual fee
+        viewModel.getTotalAnnualFee().observe(getViewLifecycleOwner(), fee -> {
+            if (fee != null && fee > 0) {
+                binding.tvTotalFee.setVisibility(View.VISIBLE);
+                binding.tvTotalFee.setText("$" + fee + "/year total annual fees");
+            } else {
+                binding.tvTotalFee.setVisibility(View.GONE);
             }
         });
+
+        // Filter button
+        binding.btnFilter.setOnClickListener(v -> {
+            MyCardsFilterBottomSheet sheet = MyCardsFilterBottomSheet.newInstance(
+                    viewModel.getCurrentFilter());
+            sheet.show(getChildFragmentManager(), MyCardsFilterBottomSheet.TAG);
+        });
+
+        // Receive filter result
+        getChildFragmentManager().setFragmentResultListener(
+                MyCardsFilterBottomSheet.RESULT_KEY, getViewLifecycleOwner(),
+                (key, result) -> {
+                    CardFilterState state = parseFilterResult(result, true);
+                    viewModel.setFilter(state);
+                    updateFilterBadge(state.countActiveFilters());
+                });
 
         // FAB → Add Card
         binding.fabAddCard.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_myCards_to_addCard));
+    }
+
+    private CardFilterState parseFilterResult(Bundle result, boolean includeMyCardsFields) {
+        CardFilterState state = new CardFilterState();
+        state.cardType = CardFilterState.CardType.valueOf(
+                result.getString("cardType", "ALL"));
+        java.util.ArrayList<String> issuers = result.getStringArrayList("issuers");
+        if (issuers != null) state.issuers = new java.util.HashSet<>(issuers);
+        java.util.ArrayList<String> networks = result.getStringArrayList("networks");
+        if (networks != null) state.networks = new java.util.HashSet<>(networks);
+        if (includeMyCardsFields) {
+            state.anniversaryMonth = CardFilterState.AnniversaryFilter.valueOf(
+                    result.getString("anniversaryMonth", "ANY"));
+            state.cardAge = CardFilterState.CardAgeFilter.valueOf(
+                    result.getString("cardAge", "ANY"));
+        }
+        return state;
+    }
+
+    private void updateFilterBadge(int activeCount) {
+        if (activeCount > 0) {
+            binding.tvFilterBadge.setText(String.valueOf(activeCount));
+            binding.tvFilterBadge.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvFilterBadge.setVisibility(View.GONE);
+        }
     }
 
     @Override

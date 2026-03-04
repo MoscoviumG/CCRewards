@@ -5,12 +5,18 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.ccrewards.data.model.BenefitUsageWithAmount;
 import com.example.ccrewards.data.model.ProductChangeRecord;
 import com.example.ccrewards.data.model.RewardRate;
 import com.example.ccrewards.data.model.UserCard;
+import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
+import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.WelcomeBonusRepository;
+import com.example.ccrewards.util.PeriodKeyUtil;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,23 +29,36 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class CardDetailViewModel extends ViewModel {
 
     private final CardRepository cardRepository;
+    private final WelcomeBonusRepository wbRepository;
+    private final BenefitRepository benefitRepository;
 
     private final MutableLiveData<Long> userCardId = new MutableLiveData<>();
 
     // Switches source LiveData when userCardId changes
     private final MediatorLiveData<UserCardWithDetails> cardDetails = new MediatorLiveData<>();
     private final MediatorLiveData<List<ProductChangeRecord>> history = new MediatorLiveData<>();
+    private final MediatorLiveData<WelcomeBonus> welcomeBonus = new MediatorLiveData<>();
+    private final MediatorLiveData<Integer> creditUsageThisYear = new MediatorLiveData<>();
 
     private LiveData<UserCardWithDetails> detailsSource;
     private LiveData<List<ProductChangeRecord>> historySource;
+    private LiveData<WelcomeBonus> wbSource;
+    private LiveData<List<BenefitUsageWithAmount>> usageSource;
 
     @Inject
-    public CardDetailViewModel(CardRepository cardRepository) {
+    public CardDetailViewModel(CardRepository cardRepository, WelcomeBonusRepository wbRepository,
+                               BenefitRepository benefitRepository) {
         this.cardRepository = cardRepository;
+        this.wbRepository = wbRepository;
+        this.benefitRepository = benefitRepository;
     }
 
     public void loadCard(long id) {
         userCardId.setValue(id);
+
+        // Remove old sources from creditUsageThisYear before swapping detailsSource
+        if (detailsSource != null) creditUsageThisYear.removeSource(detailsSource);
+        if (usageSource != null) creditUsageThisYear.removeSource(usageSource);
 
         // Swap LiveData sources
         if (detailsSource != null) cardDetails.removeSource(detailsSource);
@@ -49,6 +68,17 @@ public class CardDetailViewModel extends ViewModel {
         if (historySource != null) history.removeSource(historySource);
         historySource = cardRepository.getProductChangeHistory(id);
         history.addSource(historySource, history::setValue);
+
+        if (wbSource != null) welcomeBonus.removeSource(wbSource);
+        wbSource = wbRepository.getLiveForCard(id);
+        welcomeBonus.addSource(wbSource, welcomeBonus::setValue);
+
+        // Credit usage for this card
+        usageSource = benefitRepository.getUsedWithAmountsForCard(id);
+        creditUsageThisYear.addSource(detailsSource,
+                details -> recomputeCreditUsage(details, usageSource.getValue()));
+        creditUsageThisYear.addSource(usageSource,
+                usages -> recomputeCreditUsage(cardDetails.getValue(), usages));
     }
 
     public LiveData<UserCardWithDetails> getCardDetails() {
@@ -57,6 +87,43 @@ public class CardDetailViewModel extends ViewModel {
 
     public LiveData<List<ProductChangeRecord>> getHistory() {
         return history;
+    }
+
+    public LiveData<WelcomeBonus> getWelcomeBonus() {
+        return welcomeBonus;
+    }
+
+    public LiveData<Integer> getCreditUsageThisYear() {
+        return creditUsageThisYear;
+    }
+
+    private void recomputeCreditUsage(UserCardWithDetails details,
+                                       List<BenefitUsageWithAmount> usages) {
+        if (details == null || usages == null) { creditUsageThisYear.setValue(null); return; }
+        LocalDate openDate = details.userCard.openDate;
+        if (openDate == null) { creditUsageThisYear.setValue(null); return; }
+        LocalDate today = LocalDate.now();
+        LocalDate lastAnn = openDate.withYear(today.getYear());
+        if (lastAnn.isAfter(today)) lastAnn = lastAnn.minusYears(1);
+        LocalDate nextAnn = lastAnn.plusYears(1);
+        int total = 0;
+        for (BenefitUsageWithAmount u : usages) {
+            LocalDate ps = PeriodKeyUtil.periodKeyStartDate(u.periodKey);
+            if (ps != null && !ps.isBefore(lastAnn) && ps.isBefore(nextAnn)) total += u.amountCents;
+        }
+        creditUsageThisYear.setValue(total > 0 ? total : null);
+    }
+
+    public void upsertWelcomeBonus(WelcomeBonus wb) {
+        wbRepository.upsert(wb);
+    }
+
+    public void deleteWelcomeBonus(WelcomeBonus wb) {
+        wbRepository.delete(wb);
+    }
+
+    public void markWelcomeBonusAchieved(long userCardId) {
+        wbRepository.markAchieved(userCardId);
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.example.ccrewards.ui.credits;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +54,21 @@ public class CreditsFragment extends Fragment {
             binding.recyclerCredits.setVisibility(empty ? View.GONE : View.VISIBLE);
             adapter.setItems(items);
         });
+
+        // Hide-used switch
+        binding.switchHideUsed.setOnCheckedChangeListener((btn, checked) ->
+                viewModel.setHideUsed(checked));
+
+        // Search bar
+        if (binding.etCreditsSearch != null) {
+            binding.etCreditsSearch.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+                @Override public void onTextChanged(CharSequence s, int st, int b, int c) {
+                    viewModel.setSearchQuery(s != null ? s.toString() : "");
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
     }
 
     @Override
@@ -103,7 +120,7 @@ public class CreditsFragment extends Fragment {
                 h.binding.tvCreditsDaysReset.setText(item.daysUntilReset + " days to reset");
             } else if (holder instanceof BenefitVH && item.benefitWithUsage != null) {
                 BenefitVH b = (BenefitVH) holder;
-                b.bind(item.benefitWithUsage, viewModel);
+                b.bind(item, viewModel);
             }
         }
 
@@ -125,8 +142,9 @@ public class CreditsFragment extends Fragment {
                 binding = b;
             }
 
-            void bind(com.example.ccrewards.data.model.relations.BenefitWithUsage bwu,
-                      CreditsViewModel vm) {
+            void bind(CreditsViewModel.ListItem item, CreditsViewModel vm) {
+                com.example.ccrewards.data.model.relations.BenefitWithUsage bwu =
+                        item.benefitWithUsage;
                 binding.tvBenefitCardName.setText(bwu.definition.displayName +
                         (bwu.userCard.nickname != null && !bwu.userCard.nickname.isEmpty()
                                 ? " (\u201C" + bwu.userCard.nickname + "\u201D)" : ""));
@@ -134,12 +152,21 @@ public class CreditsFragment extends Fragment {
                 binding.tvBenefitRowAmount.setText(CurrencyUtil.centsToString(bwu.benefit.amountCents)
                         + " / " + formatPeriod(bwu.benefit.resetPeriod));
 
+                // Anniversary badge
+                if (item.isAnniversary) {
+                    binding.tvAnniversaryBadge.setVisibility(View.VISIBLE);
+                    binding.tvAnniversaryBadge.setText(
+                            "Anniversary \u00B7 Resets in " + item.benefitDaysUntilReset + " days");
+                } else {
+                    binding.tvAnniversaryBadge.setVisibility(View.GONE);
+                }
+
                 // Suppress listener while setting state
                 binding.switchBenefitUsed.setOnCheckedChangeListener(null);
                 binding.switchBenefitUsed.setChecked(bwu.isUsed());
-                binding.switchBenefitUsed.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    vm.markUsed(bwu.userCard.id, bwu.benefit.id, bwu.benefit.resetPeriod, isChecked);
-                });
+                binding.switchBenefitUsed.setOnCheckedChangeListener((buttonView, isChecked) ->
+                        vm.markUsed(bwu.userCard.id, bwu.benefit.id, bwu.benefit.resetPeriod,
+                                bwu.benefit.resetType, bwu.userCard.openDate, isChecked));
             }
 
             private String formatPeriod(com.example.ccrewards.data.model.ResetPeriod p) {

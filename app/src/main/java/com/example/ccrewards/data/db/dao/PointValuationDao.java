@@ -26,12 +26,19 @@ public interface PointValuationDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(List<PointValuation> valuations);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insert(PointValuation valuation);
+
     @Update
     void update(PointValuation valuation);
 
     @Query("UPDATE point_valuations SET centsPerPoint = defaultCentsPerPoint " +
            "WHERE rewardCurrencyName = :currencyName")
     void resetToDefault(String currencyName);
+
+    @Query("UPDATE point_valuations SET defaultCentsPerPoint = :defaultCentsPerPoint " +
+           "WHERE rewardCurrencyName = :currencyName")
+    void updateDefaultCentsPerPoint(String currencyName, double defaultCentsPerPoint);
 
     @Query("SELECT COUNT(*) FROM point_valuations")
     int count();
