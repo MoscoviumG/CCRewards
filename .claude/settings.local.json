@@ -29,7 +29,20 @@
       "Bash($ADB logcat:*)",
       "Bash(sleep 6:*)",
       "Bash(sleep 8:*)",
-      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb install:*)"
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb install:*)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(adb logcat:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb.exe logcat:*)",
+      "Bash(timeout 120 /c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb.exe logcat:*)",
+      "Bash(/c/Users/MC/AppData/Local/Android/Sdk/platform-tools/adb.exe:*)",
+      "Bash(xargs ls:*)",
+      "Bash(JAVA_HOME=\"$ANDROID_STUDIO_HOME/jbr\" ./gradlew assembleDebug:*)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug:*)",
+      "Bash(export:*)",
+      "WebFetch(domain:www.doctorofcredit.com)",
+      "WebFetch(domain:www.dailydrop.com)"
     ]
   }
 }
