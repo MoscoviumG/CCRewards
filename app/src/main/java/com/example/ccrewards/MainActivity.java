@@ -13,7 +13,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import com.example.ccrewards.databinding.ActivityMainBinding;
+import com.example.ccrewards.ui.settings.SettingsFragment;
 import com.example.ccrewards.worker.WorkManagerScheduler;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -26,8 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                // Schedule reminder regardless — WorkManager handles gracefully without permission
-                WorkManagerScheduler.scheduleBenefitReminders(this);
+                if (granted) {
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                    WorkManagerScheduler.scheduleBenefitReminders(this, prefs);
+                }
             });
 
     @Override
@@ -89,6 +95,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestNotificationPermission() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean enabled = prefs.getBoolean(SettingsFragment.PREF_NOTIFICATIONS_ENABLED, true);
+        if (!enabled) return; // User disabled reminders — don't reschedule
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -96,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        WorkManagerScheduler.scheduleBenefitReminders(this);
+        WorkManagerScheduler.scheduleBenefitReminders(this, prefs);
     }
 
     @Override

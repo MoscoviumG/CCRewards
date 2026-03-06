@@ -93,6 +93,27 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_cardDetail_to_addRotationalBonus"
+            app:destination="@id/addRotationalBonusFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addRotationalBonusFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddRotationalBonusFragment"
+        android:label="Add Quarterly Benefit"
+        tools:layout="@layout/fragment_add_rotational_bonus">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <argument
+            android:name="currencyName"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment
@@ -228,6 +249,13 @@
         <argument
             android:name="benefitId"
             app:argType="long" />
+        <action
+            android:id="@+id/action_benefitDetail_to_addEditBenefit"
+            app:destination="@id/addEditBenefitFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <!-- ── Settings ──────────────────────────────────────────────────────── -->

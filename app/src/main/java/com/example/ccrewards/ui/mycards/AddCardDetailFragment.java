@@ -106,12 +106,14 @@ public class AddCardDetailFragment extends Fragment {
         binding.btnAddCard.setOnClickListener(v -> {
             String nickname = binding.etNickname.getText() != null
                     ? binding.etNickname.getText().toString().trim() : "";
+            String lastFour = binding.etLastFour.getText() != null
+                    ? binding.etLastFour.getText().toString().trim() : "";
             String limitStr = binding.etLimit.getText() != null
                     ? binding.etLimit.getText().toString().trim() : "";
             int creditLimit = limitStr.isEmpty() ? 0 : Integer.parseInt(limitStr);
             LocalDate openDate = selectedDate.get() != null ? selectedDate.get() : LocalDate.now();
 
-            viewModel.addUserCard(nickname, creditLimit, openDate, () ->
+            viewModel.addUserCard(nickname, lastFour, creditLimit, openDate, () ->
                     requireActivity().runOnUiThread(() -> {
                         NavController nav = Navigation.findNavController(requireView());
                         nav.popBackStack(R.id.myCardsFragment, false);

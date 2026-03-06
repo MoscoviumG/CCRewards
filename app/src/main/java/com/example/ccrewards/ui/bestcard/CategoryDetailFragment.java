@@ -53,8 +53,7 @@ public class CategoryDetailFragment extends Fragment {
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp());
 
-        boolean myCardsMode = viewModel.getCurrentFilter() == BestCardViewModel.Filter.MY_CARDS;
-        RankingsAdapter adapter = new RankingsAdapter(myCardsMode);
+        RankingsAdapter adapter = new RankingsAdapter(true);
         binding.recyclerCategoryRankings.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerCategoryRankings.setAdapter(adapter);
 

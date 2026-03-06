@@ -26,7 +26,7 @@ public class DatabaseModule {
         // Use a holder array so we can reference the DB instance in the callback.
         AppDatabase[] holder = new AppDatabase[1];
         holder[0] = Room.databaseBuilder(context, AppDatabase.class, "ccrewards.db")
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
                 .addCallback(AppDatabase.buildOpenCallback(context, holder))
                 .build();
         return holder[0];
@@ -96,5 +96,15 @@ public class DatabaseModule {
     @Singleton
     public static WelcomeBonusRepository provideWelcomeBonusRepository(WelcomeBonusDao dao) {
         return new WelcomeBonusRepository(dao);
+    }
+
+    @Provides
+    public static com.example.ccrewards.data.db.dao.RotationalBonusDao provideRotationalBonusDao(AppDatabase db) {
+        return db.rotationalBonusDao();
+    }
+
+    @Provides
+    public static com.example.ccrewards.data.db.dao.RotationalBonusCategoryDao provideRotationalBonusCategoryDao(AppDatabase db) {
+        return db.rotationalBonusCategoryDao();
     }
 }

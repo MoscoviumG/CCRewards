@@ -113,6 +113,11 @@ public class CardRepository {
         return userCardDao.getCardWithDetails(id);
     }
 
+    /** Synchronous lookup — call from background thread only. */
+    public com.example.ccrewards.data.model.UserCard getUserCardByIdSync(long id) {
+        return userCardDao.getCardByIdSync(id);
+    }
+
     public void addUserCard(UserCard card, Runnable onComplete) {
         addUserCard(card, ignored -> { if (onComplete != null) onComplete.run(); });
     }

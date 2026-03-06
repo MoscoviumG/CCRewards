@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic colors that are referenced directly in layouts (not via theme attrs)
+         and need lighter/more vivid values on dark backgrounds. -->
+
+    <!-- Buttons & success states -->
+    <color name="success_green">#FF81C784</color>
+
+    <!-- Error / destructive -->
+    <color name="error_red">#FFEF5350</color>
+
+    <!-- Rate badge chip backgrounds — lighter so they pop on dark navy surfaces -->
+    <color name="badge_points">#FF64B5F6</color>
+    <color name="badge_miles">#FFCE93D8</color>
+    <color name="badge_cashback">#FF81C784</color>
+    <color name="badge_bilt_cash">#FFB39DDB</color>
+</resources>

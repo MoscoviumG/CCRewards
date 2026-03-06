@@ -24,6 +24,10 @@ public class WelcomeBonus {
     /** Spend required to earn the bonus, in cents. */
     public int spendRequirementCents;
 
+    /** How much the user has already spent toward the requirement, in cents. */
+    @ColumnInfo(defaultValue = "0")
+    public int spendUsedCents;
+
     /** Optional deadline. Null = no deadline. Stored via Converters as epoch day. */
     public LocalDate deadline;
 

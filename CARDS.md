@@ -36,6 +36,13 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | `british_airways_visa` | British Airways Visa Signature | Chase | $95 | Personal | Avios |
 | `aer_lingus_visa` | Aer Lingus Visa Signature | Chase | $95 | Personal | Avios |
 | `iberia_visa` | Iberia Visa Signature | Chase | $95 | Personal | Avios |
+| `csr_business` | Chase Sapphire Reserve Business | Chase | $795 | Business | Chase Ultimate Rewards Points |
+| `southwest_performance_business` | Southwest Rapid Rewards Performance Business | Chase | $299 | Business | Southwest Rapid Rewards |
+| `southwest_premier_business` | Southwest Rapid Rewards Premier Business | Chase | $149 | Business | Southwest Rapid Rewards |
+| `ihg_premier_business` | IHG One Rewards Premier Business | Chase | $99 | Business | IHG One Rewards Points |
+| `united_business` | United Business Card | Chase | $150 | Business | United MileagePlus |
+| `united_club_business` | United Club Business Card | Chase | $695 | Business | United MileagePlus |
+| `world_of_hyatt_business` | World of Hyatt Business Credit Card | Chase | $199 | Business | World of Hyatt Points |
 | `ink_preferred` | Ink Business Preferred | Chase | $95 | Business | Chase Ultimate Rewards Points |
 | `ink_cash` | Ink Business Cash | Chase | $0 | Business | Chase Ultimate Rewards Points |
 | `ink_unlimited` | Ink Business Unlimited | Chase | $0 | Business | Chase Ultimate Rewards Points |
@@ -61,6 +68,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | `amex_blue_business_cash` | Amex Blue Business Cash | American Express | $0 | Business | Cash Back |
 | `delta_gold_business_amex` | Delta SkyMiles Gold Business Amex | American Express | $150 | Business | Delta SkyMiles |
 | `delta_platinum_business_amex` | Delta SkyMiles Platinum Business Amex | American Express | $350 | Business | Delta SkyMiles |
+| `delta_reserve_business_amex` | Delta SkyMiles Reserve Business Amex | American Express | $650 | Business | Delta SkyMiles |
 | `hilton_business_amex` | Hilton Honors Business Amex | American Express | $195 | Business | Hilton Honors Points |
 | `capital_one_venture_x` | Capital One Venture X | Capital One | $395 | Personal | Capital One Miles |
 | `capital_one_venture` | Capital One Venture | Capital One | $95 | Personal | Capital One Miles |
@@ -498,6 +506,127 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 
 ---
 
+### Chase Sapphire Reserve Business
+`csr_business` · Visa · $795/yr · Business · Chase Ultimate Rewards Points
+
+| Category | Rate | Type |
+|---|---|---|
+| Travel Portal | 8x | Points |
+| Travel (flights / hotels direct) | 4x | Points |
+| General | 1x | Points |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| Travel Credit | $300 | Anniversary |
+| The Edit Hotel Credit | $250 | Semi-Annual |
+| DoorDash Credit | $25 | Monthly |
+| Lyft Credit | $10 | Monthly |
+| ZipRecruiter Credit | $200 | Semi-Annual |
+| Google Workspace Credit | $200 | Annual |
+| Giftcards.com Credit | $50 | Semi-Annual |
+
+---
+
+### Southwest Rapid Rewards Performance Business
+`southwest_performance_business` · Visa · $299/yr · Business · Southwest Rapid Rewards
+
+| Category | Rate | Type |
+|---|---|---|
+| Travel (Southwest) | 4x | Miles |
+| Travel (hotels direct) | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Southwest Rapid Rewards Premier Business
+`southwest_premier_business` · Visa · $149/yr · Business · Southwest Rapid Rewards
+
+| Category | Rate | Type |
+|---|---|---|
+| Travel (Southwest) | 3x | Miles |
+| Gas | 2x | Miles |
+| Dining | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### IHG One Rewards Premier Business
+`ihg_premier_business` · Visa · $99/yr · Business · IHG One Rewards Points
+
+| Category | Rate | Type |
+|---|---|---|
+| IHG Hotels | 10x | Points |
+| Travel | 5x | Points |
+| Gas | 5x | Points |
+| Dining | 5x | Points |
+| General | 3x | Points |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| United TravelBank Credit | $25 | Semi-Annual |
+
+---
+
+### United Business Card
+`united_business` · Visa · $150/yr · Business · United MileagePlus
+
+| Category | Rate | Type |
+|---|---|---|
+| United (flights) | 2x | Miles |
+| Dining | 2x | Miles |
+| Gas | 2x | Miles |
+| General | 1x | Miles |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| United Hotels Credit | $50 | Semi-Annual (Anniversary) |
+| Avis/Budget Credit | $25 | Semi-Annual (Anniversary) |
+| Rideshare Credit | $8 | Monthly |
+| Instacart Credit | $10 | Monthly |
+| JSX Credit | $100 | Anniversary |
+
+> Rideshare credit is $8/month Jan–Nov, $12 in December = $100/yr total. Yearly opt-in required. Instacart benefit ends 12/31/2027.
+
+---
+
+### United Club Business Card
+`united_club_business` · Visa · $695/yr · Business · United MileagePlus
+
+| Category | Rate | Type |
+|---|---|---|
+| United (flights) | 2x | Miles |
+| General | 1.5x | Miles |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| Renowned Hotels Credit | $200 | Anniversary |
+| Avis/Budget Credit | $50 | Semi-Annual (Anniversary) |
+| Rideshare Credit | $12 | Monthly |
+| Instacart Credit | $20 | Monthly |
+| JSX Credit | $200 | Anniversary |
+
+> Rideshare credit is $12/month Jan–Nov, $18 in December = $150/yr total. Yearly opt-in required. Instacart benefit ends 12/31/2027.
+
+---
+
+### World of Hyatt Business Credit Card
+`world_of_hyatt_business` · Visa · $199/yr · Business · World of Hyatt Points
+
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Hyatt Hotels | 4x | Points | |
+| Dining | 2x | Points | [choice] quarterly choice group |
+| Gas | 2x | Points | [choice] quarterly choice group |
+| General | 1x | Points | |
+
+> 2x choice categories: user picks 2 per quarter from dining, gas, telecom, car rentals, shipping, airline tickets, social/search advertising. Only dining and gas are modeled in app.
+
+| Benefit | Amount | Period |
+|---|---|---|
+| Hyatt Credit | $50 | Semi-Annual (Anniversary) |
+
+---
+
 ## American Express
 
 ### Amex Platinum Card
@@ -505,7 +634,8 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 
 | Category | Rate | Type |
 |---|---|---|
-| Travel | 5x | Points |
+| Travel Portal (Amex Travel) | 5x | Points |
+| Travel (flights direct) | 5x | Points |
 | General | 1x | Points |
 
 | Benefit | Amount | Period |
@@ -746,13 +876,21 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 
 | Category | Rate | Type |
 |---|---|---|
-| Travel | 5x | Points |
+| Travel Portal (Amex Travel) | 5x | Points |
+| Travel (flights direct) | 5x | Points |
 | General | 1x | Points |
 
 | Benefit | Amount | Period |
 |---|---|---|
 | Airline Fee Credit | $200 | Annual |
-| CLEAR Plus Credit | $199 | Annual |
+| FHR / The Hotel Collection Credit | $300 | Semi-Annual |
+| Hilton Credit | $50 | Quarterly |
+| Dell Technologies Credit | $150 | Annual |
+| Wireless Credit | $10 | Monthly |
+| Indeed Credit | $90 | Quarterly |
+| Adobe Credit | $150 | Annual |
+| Global Entry / TSA PreCheck | $100 | Annual |
+| CLEAR Plus Credit | $179 | Annual |
 
 ---
 
@@ -794,6 +932,24 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Delta (flights) | 3x | Miles |
 | Dining | 1.5x | Miles |
 | General | 1x | Miles |
+
+---
+
+### Delta SkyMiles Reserve Business Amex
+`delta_reserve_business_amex` · Amex · $650/yr · Business · Delta SkyMiles
+
+> 1.5x on transit, U.S. shipping, and office supply stores is not modeled (no matching category in app).
+
+| Category | Rate | Type |
+|---|---|---|
+| Delta (flights) | 3x | Miles |
+| General | 1x | Miles |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| Resy Credit | $20 | Monthly |
+| Rideshare Credit | $10 | Monthly |
+| Delta Stays Credit | $250 | Annual |
 
 ---
 
@@ -1471,3 +1627,4 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Benefit | Amount | Period |
 |---|---|---|
 | Annual Bilt Cash | $200 | Annual |
+| Travel Hotel Credit | $200 | Semi-Annual |

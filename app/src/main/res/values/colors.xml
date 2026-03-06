@@ -21,4 +21,18 @@
     <color name="badge_miles">#FF6A1B9A</color>
     <color name="badge_cashback">#FF2E7D32</color>
     <color name="badge_bilt_cash">#FF4A148C</color>
+
+    <!-- Dark mode palette — referenced by values-night/themes.xml -->
+    <color name="dark_primary">#FF90C4F0</color>
+    <color name="dark_on_primary">#FF003355</color>
+    <color name="dark_primary_container">#FF004878</color>
+    <color name="dark_on_primary_container">#FFC5E4FF</color>
+    <color name="dark_secondary_container">#FF2E2400</color>
+    <color name="dark_on_secondary_container">#FFFFDF7A</color>
+    <color name="dark_surface">#FF111822</color>
+    <color name="dark_on_surface">#FFD8E8F5</color>
+    <color name="dark_surface_variant">#FF1E2D3E</color>
+    <color name="dark_on_surface_variant">#FF88A8C0</color>
+    <color name="dark_outline">#FF4A6075</color>
+    <color name="dark_outline_variant">#FF253545</color>
 </resources>

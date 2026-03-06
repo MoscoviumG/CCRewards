@@ -90,11 +90,34 @@ public class BenefitRepository {
         return benefitUsageDao.getUsedWithAmountsForCard(userCardId);
     }
 
+    /** Update partial usage amount. isUsed is set to true when usedCents >= amountCents. */
+    public void setUsedAmount(long userCardId, long benefitId, String periodKey,
+                              int usedCents, int amountCents) {
+        executor.execute(() -> {
+            boolean isFullyUsed = amountCents > 0 && usedCents >= amountCents;
+            BenefitUsage existing = benefitUsageDao.getUsageSync(userCardId, benefitId, periodKey);
+            if (existing != null) {
+                existing.usedCents = usedCents;
+                existing.isUsed = isFullyUsed;
+                if (isFullyUsed && existing.usedDate == null) {
+                    existing.usedDate = java.time.LocalDate.now();
+                }
+                benefitUsageDao.update(existing);
+            } else {
+                BenefitUsage newUsage = new BenefitUsage(userCardId, benefitId, periodKey,
+                        isFullyUsed, isFullyUsed ? java.time.LocalDate.now() : null, null);
+                newUsage.usedCents = usedCents;
+                benefitUsageDao.insert(newUsage);
+            }
+        });
+    }
+
     public void setUsed(long userCardId, long benefitId, String periodKey, boolean isUsed) {
         executor.execute(() -> {
             BenefitUsage existing = benefitUsageDao.getUsageSync(userCardId, benefitId, periodKey);
             if (existing != null) {
                 existing.isUsed = isUsed;
+                if (isUsed) existing.usedCents = 0; // will be overridden by slider when used
                 benefitUsageDao.update(existing);
             } else {
                 BenefitUsage newUsage = new BenefitUsage(userCardId, benefitId, periodKey,

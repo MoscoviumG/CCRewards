@@ -1,5 +1,6 @@
 package com.example.ccrewards.data.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
@@ -21,6 +22,10 @@ public class BenefitUsage {
     public boolean isUsed;
     public LocalDate usedDate;  // null if not yet used
     public String notes;
+
+    /** How many cents of this benefit have been used in the current period (0 = none). */
+    @ColumnInfo(defaultValue = "0")
+    public int usedCents = 0;
 
     public BenefitUsage(long userCardId, long benefitId, String periodKey,
                         boolean isUsed, LocalDate usedDate, String notes) {

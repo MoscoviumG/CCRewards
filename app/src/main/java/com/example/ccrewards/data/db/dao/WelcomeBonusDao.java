@@ -31,4 +31,7 @@ public interface WelcomeBonusDao {
 
     @Query("UPDATE welcome_bonuses SET achieved = 1 WHERE userCardId = :userCardId")
     void markAchieved(long userCardId);
+
+    @Query("UPDATE welcome_bonuses SET spendUsedCents = :cents WHERE userCardId = :userCardId")
+    void updateSpendUsed(long userCardId, int cents);
 }

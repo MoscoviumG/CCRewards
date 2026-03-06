@@ -24,10 +24,13 @@ import com.example.ccrewards.databinding.FragmentCardDetailBinding;
 import com.example.ccrewards.databinding.ItemBenefitDetailBinding;
 import com.example.ccrewards.databinding.ItemHistoryRecordBinding;
 import com.example.ccrewards.databinding.ItemRewardRateRowBinding;
+import com.example.ccrewards.databinding.ItemRotationalBonusBannerBinding;
 import com.example.ccrewards.util.CurrencyUtil;
 import com.example.ccrewards.util.DateUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
+
+import android.widget.SeekBar;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -50,6 +53,7 @@ public class CardDetailFragment extends Fragment {
     private SimpleRateAdapter rateAdapter;
     private SimpleBenefitAdapter benefitAdapter;
     private SimpleHistoryAdapter historyAdapter;
+    private SimpleRotationalBonusAdapter rbAdapter;
 
     @Nullable
     @Override
@@ -97,12 +101,21 @@ public class CardDetailFragment extends Fragment {
         binding.recyclerHistory.setAdapter(historyAdapter);
         binding.recyclerHistory.setNestedScrollingEnabled(false);
 
+        rbAdapter = new SimpleRotationalBonusAdapter();
+        binding.recyclerQuarterlyBonuses.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerQuarterlyBonuses.setAdapter(rbAdapter);
+        binding.recyclerQuarterlyBonuses.setNestedScrollingEnabled(false);
+
         // Observe card details
         viewModel.getCardDetails().observe(getViewLifecycleOwner(), this::bindCardDetails);
 
         // Observe history
         viewModel.getHistory().observe(getViewLifecycleOwner(), records ->
                 historyAdapter.setData(records));
+
+        // Observe quarterly bonuses
+        viewModel.getRotationalBonuses().observe(getViewLifecycleOwner(), items ->
+                rbAdapter.setData(items != null ? items : new ArrayList<>()));
 
         // Observe credit usage
         viewModel.getCreditUsageThisYear().observe(getViewLifecycleOwner(), cents -> {
@@ -144,6 +157,14 @@ public class CardDetailFragment extends Fragment {
         });
 
         binding.btnDeleteCard.setOnClickListener(v -> confirmDelete());
+
+        binding.btnAddQuarterlyBenefit.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putLong("userCardId", userCardId);
+            args.putString("currencyName", currentCurrencyName);
+            Navigation.findNavController(v)
+                    .navigate(R.id.action_cardDetail_to_addRotationalBonus, args);
+        });
 
         // ── Welcome Bonus ────────────────────────────────────────────────────
 
@@ -194,9 +215,10 @@ public class CardDetailFragment extends Fragment {
         if (item == null || item.definition == null) return;
 
         currentCurrencyName = item.definition.rewardCurrencyName;
-        binding.toolbar.setTitle(item.definition.displayName);
+        String cardLabel = UserCard.label(item.definition.displayName, item.userCard.lastFour, item.userCard.nickname);
+        binding.toolbar.setTitle(cardLabel);
         binding.detailColorStrip.setBackgroundColor((int) item.definition.cardColorPrimary);
-        binding.tvDetailCardName.setText(item.definition.displayName);
+        binding.tvDetailCardName.setText(cardLabel);
         binding.tvDetailIssuer.setText(item.definition.issuer + " · " + item.definition.network);
         binding.tvDetailAnnualFee.setText(CurrencyUtil.formatAnnualFee(item.definition.annualFee));
 
@@ -208,16 +230,25 @@ public class CardDetailFragment extends Fragment {
 
         binding.tvDetailOpenDate.setText(DateUtil.toDisplayString(item.userCard.openDate));
 
-        if (item.userCard.nickname != null && !item.userCard.nickname.isEmpty()) {
-            binding.tvDetailNickname.setVisibility(View.VISIBLE);
-            binding.tvDetailNickname.setText("\u201C" + item.userCard.nickname + "\u201D");
-        } else {
-            binding.tvDetailNickname.setVisibility(View.GONE);
-        }
+        // Nickname is now included inline in the card label above
+        binding.tvDetailNickname.setVisibility(View.GONE);
 
         // Rates
         Map<String, String> rateDisplay = CardDetailViewModel.buildRateDisplay(item.rewardRates);
         rateAdapter.setData(rateDisplay);
+
+        // Show rotating-category banner if this card has quarterly rotating rates
+        boolean hasRotating = false;
+        if (item.rewardRates != null) {
+            for (com.example.ccrewards.data.model.RewardRate r : item.rewardRates) {
+                if (r.isChoiceCategory && r.choiceGroupId != null
+                        && r.choiceGroupId.contains("rotating")) {
+                    hasRotating = true;
+                    break;
+                }
+            }
+        }
+        binding.cardRotatingInfo.setVisibility(hasRotating ? View.VISIBLE : View.GONE);
 
         // Benefits
         benefitAdapter.setData(item.benefits);
@@ -281,10 +312,12 @@ public class CardDetailFragment extends Fragment {
         View dialogView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.dialog_add_card_details, null);
         TextInputEditText etNickname = dialogView.findViewById(R.id.et_dialog_nickname);
+        TextInputEditText etLastFour = dialogView.findViewById(R.id.et_dialog_last_four);
         TextInputEditText etCreditLimit = dialogView.findViewById(R.id.et_dialog_credit_limit);
         TextInputEditText etOpenDate = dialogView.findViewById(R.id.et_dialog_open_date);
 
         if (current.userCard.nickname != null) etNickname.setText(current.userCard.nickname);
+        if (current.userCard.lastFour != null) etLastFour.setText(current.userCard.lastFour);
         if (current.userCard.creditLimit > 0)
             etCreditLimit.setText(String.valueOf(current.userCard.creditLimit));
 
@@ -297,12 +330,15 @@ public class CardDetailFragment extends Fragment {
                 .setPositiveButton("Save", (dialog, which) -> {
                     String nickname = etNickname.getText() != null
                             ? etNickname.getText().toString().trim() : "";
+                    String lastFour = etLastFour.getText() != null
+                            ? etLastFour.getText().toString().trim() : "";
                     String limitStr = etCreditLimit.getText() != null
                             ? etCreditLimit.getText().toString().trim() : "";
                     int creditLimit = limitStr.isEmpty() ? 0 : Integer.parseInt(limitStr);
 
                     UserCard updated = current.userCard;
                     updated.nickname = nickname.isEmpty() ? null : nickname;
+                    updated.lastFour = lastFour.isEmpty() ? null : lastFour;
                     updated.creditLimit = creditLimit;
                     viewModel.updateCard(updated);
                 })
@@ -331,6 +367,95 @@ public class CardDetailFragment extends Fragment {
     }
 
     // ── Simple inner adapters ────────────────────────────────────────────────
+
+    private class SimpleRotationalBonusAdapter
+            extends androidx.recyclerview.widget.RecyclerView.Adapter<SimpleRotationalBonusAdapter.VH> {
+
+        private List<CardDetailViewModel.RotationalBonusInfo> items = new ArrayList<>();
+
+        void setData(List<CardDetailViewModel.RotationalBonusInfo> data) {
+            items = data != null ? data : new ArrayList<>();
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemRotationalBonusBannerBinding b = ItemRotationalBonusBannerBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false);
+            return new VH(b);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            CardDetailViewModel.RotationalBonusInfo info = items.get(position);
+            com.example.ccrewards.data.model.RotationalBonus rb = info.bonus;
+
+            holder.binding.dividerRb.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+            holder.binding.tvRbCardName.setVisibility(View.GONE); // in card detail, no need for card name
+            holder.binding.tvRbLabel.setText(rb.label != null ? rb.label : "");
+            holder.binding.tvRbCategories.setText(info.categoryDisplay);
+
+            if (rb.endDate != null) {
+                holder.binding.tvRbEndDate.setText("Expires " + DateUtil.toDisplayString(rb.endDate));
+                holder.binding.tvRbEndDate.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.tvRbEndDate.setVisibility(View.GONE);
+            }
+
+            int limitDollars = rb.spendLimitCents > 0 ? rb.spendLimitCents / 100 : 1500;
+            holder.binding.seekbarRbUsage.setMax(limitDollars);
+            int usedDollars = Math.min(rb.usedCents / 100, limitDollars);
+            holder.binding.seekbarRbUsage.setProgress(usedDollars);
+            updateUsedLabel(holder, rb.usedCents, rb.spendLimitCents);
+
+            holder.binding.seekbarRbUsage.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    seekBar.getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateUsedLabel(holder, progress * 100, rb.spendLimitCents);
+                }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    int newUsedCents = seekBar.getProgress() * 100;
+                    viewModel.updateRotationalBonusUsed(rb.id, newUsedCents, rb.spendLimitCents);
+                }
+            });
+
+            holder.binding.btnRbMarkDone.setOnClickListener(v ->
+                    viewModel.markRotationalBonusFullyUsed(rb.id));
+
+            holder.binding.btnRbDelete.setOnClickListener(v ->
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Remove Quarterly Bonus")
+                            .setMessage("Remove \"" + rb.label + "\"?")
+                            .setPositiveButton("Remove", (d, w) ->
+                                    viewModel.deleteRotationalBonus(rb.id))
+                            .setNegativeButton("Cancel", null)
+                            .show());
+        }
+
+        private void updateUsedLabel(VH holder, int usedCents, int limitCents) {
+            String text = "$" + (usedCents / 100);
+            if (limitCents > 0) text += " / $" + (limitCents / 100);
+            holder.binding.tvRbUsedAmount.setText(text);
+        }
+
+        @Override
+        public int getItemCount() { return items.size(); }
+
+        class VH extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+            final ItemRotationalBonusBannerBinding binding;
+            VH(ItemRotationalBonusBannerBinding b) {
+                super(b.getRoot());
+                binding = b;
+            }
+        }
+    }
 
     private class SimpleRateAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<SimpleRateAdapter.VH> {
         private final List<Map.Entry<String, String>> entries = new ArrayList<>();

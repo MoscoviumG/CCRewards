@@ -35,6 +35,10 @@ public interface BenefitUsageDao {
            "WHERE userCardId = :userCardId AND benefitId = :benefitId AND periodKey = :periodKey")
     void setUsed(long userCardId, long benefitId, String periodKey, boolean isUsed);
 
+    @Query("UPDATE benefit_usage SET usedCents = :usedCents, isUsed = :isUsed " +
+           "WHERE userCardId = :userCardId AND benefitId = :benefitId AND periodKey = :periodKey")
+    void setUsedCents(long userCardId, long benefitId, String periodKey, int usedCents, boolean isUsed);
+
     @Query("SELECT bu.userCardId, bu.periodKey, cb.amountCents " +
            "FROM benefit_usage bu " +
            "JOIN card_benefits cb ON bu.benefitId = cb.id " +

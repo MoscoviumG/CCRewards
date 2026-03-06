@@ -7,19 +7,27 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.ccrewards.data.model.BenefitUsageWithAmount;
 import com.example.ccrewards.data.model.ProductChangeRecord;
+import com.example.ccrewards.data.model.RewardCategory;
 import com.example.ccrewards.data.model.RewardRate;
+import com.example.ccrewards.data.model.RotationalBonus;
+import com.example.ccrewards.data.model.RotationalBonusCategory;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
 import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.RotationalBonusRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 import com.example.ccrewards.util.PeriodKeyUtil;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -28,9 +36,22 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class CardDetailViewModel extends ViewModel {
 
+    /** Combined bonus + display-ready category string for the card detail list. */
+    public static class RotationalBonusInfo {
+        public final RotationalBonus bonus;
+        public final String categoryDisplay; // e.g. "Dining · Groceries"
+
+        RotationalBonusInfo(RotationalBonus bonus, String categoryDisplay) {
+            this.bonus = bonus;
+            this.categoryDisplay = categoryDisplay;
+        }
+    }
+
     private final CardRepository cardRepository;
     private final WelcomeBonusRepository wbRepository;
     private final BenefitRepository benefitRepository;
+    private final RotationalBonusRepository rotRepository;
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<Long> userCardId = new MutableLiveData<>();
 
@@ -39,18 +60,22 @@ public class CardDetailViewModel extends ViewModel {
     private final MediatorLiveData<List<ProductChangeRecord>> history = new MediatorLiveData<>();
     private final MediatorLiveData<WelcomeBonus> welcomeBonus = new MediatorLiveData<>();
     private final MediatorLiveData<Integer> creditUsageThisYear = new MediatorLiveData<>();
+    private final MediatorLiveData<List<RotationalBonusInfo>> rotBonuses = new MediatorLiveData<>();
 
     private LiveData<UserCardWithDetails> detailsSource;
     private LiveData<List<ProductChangeRecord>> historySource;
     private LiveData<WelcomeBonus> wbSource;
     private LiveData<List<BenefitUsageWithAmount>> usageSource;
+    private LiveData<List<RotationalBonus>> rbSource;
 
     @Inject
     public CardDetailViewModel(CardRepository cardRepository, WelcomeBonusRepository wbRepository,
-                               BenefitRepository benefitRepository) {
+                               BenefitRepository benefitRepository,
+                               RotationalBonusRepository rotRepository) {
         this.cardRepository = cardRepository;
         this.wbRepository = wbRepository;
         this.benefitRepository = benefitRepository;
+        this.rotRepository = rotRepository;
     }
 
     public void loadCard(long id) {
@@ -79,6 +104,29 @@ public class CardDetailViewModel extends ViewModel {
                 details -> recomputeCreditUsage(details, usageSource.getValue()));
         creditUsageThisYear.addSource(usageSource,
                 usages -> recomputeCreditUsage(cardDetails.getValue(), usages));
+
+        // Quarterly bonuses for this card
+        if (rbSource != null) rotBonuses.removeSource(rbSource);
+        rbSource = rotRepository.getForUserCard(id);
+        final long cardIdFinal = id;
+        rotBonuses.addSource(rbSource, bonusList ->
+                executor.execute(() -> {
+                    List<RotationalBonusCategory> cats =
+                            rotRepository.getCategoriesForUserCardSync(cardIdFinal);
+                    Map<Long, List<String>> labelMap = new HashMap<>();
+                    for (RotationalBonusCategory c : cats) {
+                        labelMap.computeIfAbsent(c.rotationalBonusId, k -> new ArrayList<>())
+                                .add(formatCategoryName(c.categoryName));
+                    }
+                    List<RotationalBonusInfo> result = new ArrayList<>();
+                    if (bonusList != null) {
+                        for (RotationalBonus rb : bonusList) {
+                            List<String> labels = labelMap.getOrDefault(rb.id, new ArrayList<>());
+                            result.add(new RotationalBonusInfo(rb, String.join(" · ", labels)));
+                        }
+                    }
+                    rotBonuses.postValue(result);
+                }));
     }
 
     public LiveData<UserCardWithDetails> getCardDetails() {
@@ -95,6 +143,22 @@ public class CardDetailViewModel extends ViewModel {
 
     public LiveData<Integer> getCreditUsageThisYear() {
         return creditUsageThisYear;
+    }
+
+    public LiveData<List<RotationalBonusInfo>> getRotationalBonuses() {
+        return rotBonuses;
+    }
+
+    public void deleteRotationalBonus(long bonusId) {
+        rotRepository.delete(bonusId);
+    }
+
+    public void updateRotationalBonusUsed(long bonusId, int usedCents, int limitCents) {
+        rotRepository.updateUsed(bonusId, usedCents, limitCents);
+    }
+
+    public void markRotationalBonusFullyUsed(long bonusId) {
+        rotRepository.markFullyUsed(bonusId);
     }
 
     private void recomputeCreditUsage(UserCardWithDetails details,
@@ -175,6 +239,25 @@ public class CardDetailViewModel extends ViewModel {
                 }
                 return String.format("%.1fx Points", rate.rate);
         }
+    }
+
+    private static String formatCategoryName(String name) {
+        if (name == null) return "";
+        try {
+            RewardCategory rc = RewardCategory.valueOf(name);
+            switch (rc) {
+                case DINING:          return "Dining";
+                case GROCERIES:       return "Groceries";
+                case TRAVEL:          return "General Travel";
+                case TRAVEL_PORTAL:   return "Travel Portal";
+                case GAS:             return "Gas";
+                case ENTERTAINMENT:   return "Entertainment";
+                case ONLINE_SHOPPING: return "Online Shopping";
+                case RENT_MORTGAGE:   return "Rent / Mortgage";
+                default:              break;
+            }
+        } catch (IllegalArgumentException ignored) {}
+        return name; // free-text custom category
     }
 
     public void deleteCard(UserCard card) {

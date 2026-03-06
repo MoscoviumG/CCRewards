@@ -40,8 +40,10 @@ import java.util.concurrent.Executors;
         CustomCategory.class,
         CustomCategoryRate.class,
         WelcomeBonus.class,
+        RotationalBonus.class,
+        RotationalBonusCategory.class,
     },
-    version = 5,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters.class)
@@ -59,6 +61,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CustomCategoryDao customCategoryDao();
     public abstract CustomCategoryRateDao customCategoryRateDao();
     public abstract WelcomeBonusDao welcomeBonusDao();
+    public abstract RotationalBonusDao rotationalBonusDao();
+    public abstract RotationalBonusCategoryDao rotationalBonusCategoryDao();
 
     // ── Schema migration ───────────────────────────────────────────────────────
 
@@ -106,6 +110,48 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `benefit_usage` ADD COLUMN `usedCents` INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
+    public static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `rotational_bonuses` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`userCardId` INTEGER NOT NULL, " +
+                    "`label` TEXT, " +
+                    "`spendLimitCents` INTEGER NOT NULL DEFAULT 150000, " +
+                    "`usedCents` INTEGER NOT NULL DEFAULT 0, " +
+                    "`endDate` INTEGER, " +
+                    "`isFullyUsed` INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `rotational_bonus_categories` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`rotationalBonusId` INTEGER NOT NULL, " +
+                    "`categoryName` TEXT, " +
+                    "`rate` REAL NOT NULL DEFAULT 0, " +
+                    "`rateType` TEXT, " +
+                    "`currencyName` TEXT)");
+        }
+    };
+
+    public static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `user_cards` ADD COLUMN `lastFour` TEXT");
+        }
+    };
+
+    public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `welcome_bonuses` ADD COLUMN `spendUsedCents` INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
     // ── Versioned seed management ──────────────────────────────────────────────
 
     /**
@@ -113,7 +159,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * Existing installs will automatically refresh their catalog on next launch while
      * preserving all user data (owned cards, usage history, custom rates, ¢/pt edits).
      */
-    public static final int SEED_VERSION = 14;
+    public static final int SEED_VERSION = 18;
 
     private static final String PREF_NAME = "ccrewards_seed_prefs";
     private static final String KEY_SEED_VERSION = "seed_version";

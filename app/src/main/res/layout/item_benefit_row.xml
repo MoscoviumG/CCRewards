@@ -1,79 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardElevation="1dp"
+    app:cardCornerRadius="10dp"
+    app:strokeWidth="0dp">
 
-    <!-- Card name (small) -->
-    <TextView
-        android:id="@+id/tv_benefit_card_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceLabelSmall"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
-
-    <!-- Benefit name -->
-    <TextView
-        android:id="@+id/tv_benefit_row_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurface"
-        app:layout_constraintTop_toBottomOf="@id/tv_benefit_card_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
-
-    <!-- Amount -->
-    <TextView
-        android:id="@+id/tv_benefit_row_amount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textAppearance="?attr/textAppearanceLabelMedium"
-        android:textColor="?attr/colorPrimary"
-        app:layout_constraintTop_toBottomOf="@id/tv_benefit_row_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
-
-    <!-- Anniversary badge (GONE by default) -->
-    <TextView
-        android:id="@+id/tv_anniversary_badge"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:textAppearance="?attr/textAppearanceLabelSmall"
-        android:textColor="?attr/colorTertiary"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tv_benefit_row_amount"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/switch_benefit_used" />
-
-    <!-- Used toggle -->
-    <com.google.android.material.materialswitch.MaterialSwitch
-        android:id="@+id/switch_benefit_used"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Used"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <!-- Divider -->
-    <View
-        android:id="@+id/view_divider"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/colorOutlineVariant"
-        app:layout_constraintTop_toBottomOf="@id/tv_anniversary_badge"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_height="wrap_content"
+        android:padding="14dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Card name (top-left) -->
+        <TextView
+            android:id="@+id/tv_benefit_card_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_days_reset" />
+
+        <!-- Days to reset (top-right) -->
+        <TextView
+            android:id="@+id/tv_days_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorTertiary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Benefit name -->
+        <TextView
+            android:id="@+id/tv_benefit_row_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintTop_toBottomOf="@id/tv_benefit_card_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_chevron" />
+
+        <!-- Chevron (right side, vertically centered) -->
+        <ImageView
+            android:id="@+id/iv_chevron"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_arrow_right"
+            android:alpha="0.35"
+            app:layout_constraintTop_toBottomOf="@id/tv_days_reset"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Used amount: "$50 of $200 used" -->
+        <TextView
+            android:id="@+id/tv_benefit_used_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/tv_benefit_row_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_chevron" />
+
+        <!-- Progress bar -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progress_benefit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            app:trackCornerRadius="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_benefit_used_amount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_chevron"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -8,32 +8,48 @@
     android:paddingTop="6dp"
     android:paddingBottom="6dp">
 
-    <!-- Divider above (hidden on first item) -->
+    <!-- Divider above (except first item — handled in adapter) -->
     <View
-        android:id="@+id/divider_wb"
+        android:id="@+id/divider_rb"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginBottom="8dp"
         android:background="?attr/colorOutlineVariant" />
 
-    <!-- Card name + Mark Achieved -->
+    <!-- Card name + Mark Done + Remove -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tv_wb_card_name"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorOnSecondaryContainer"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_rb_card_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_rb_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:alpha="0.8" />
+
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_wb_mark_achieved"
+            android:id="@+id/btn_rb_mark_done"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,20 +58,29 @@
             android:minWidth="0dp"
             app:strokeColor="@color/success_green" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rb_delete"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remove"
+            android:textColor="@color/design_default_color_error"
+            android:minWidth="0dp" />
+
     </LinearLayout>
 
-    <!-- Bonus amount + deadline -->
+    <!-- Categories -->
     <TextView
-        android:id="@+id/tv_wb_bonus_line"
+        android:id="@+id/tv_rb_categories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textAppearance="?attr/textAppearanceLabelMedium"
         android:textColor="?attr/colorOnSecondaryContainer" />
 
-    <!-- Spend progress seek bar -->
+    <!-- Seek bar -->
     <SeekBar
-        android:id="@+id/seekbar_wb_spend"
+        android:id="@+id/seekbar_rb_usage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -63,7 +88,7 @@
         android:progressTint="?attr/colorOnSecondaryContainer"
         android:thumbTint="?attr/colorOnSecondaryContainer" />
 
-    <!-- Bottom: Expires (left) | Spent/requirement (right) -->
+    <!-- Bottom: Expires (left) | Spent/limit (right) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,7 +96,7 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/tv_wb_expires"
+            android:id="@+id/tv_rb_end_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -80,7 +105,7 @@
             android:alpha="0.7" />
 
         <TextView
-            android:id="@+id/tv_wb_spent_amount"
+            android:id="@+id/tv_rb_used_amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBodySmall"

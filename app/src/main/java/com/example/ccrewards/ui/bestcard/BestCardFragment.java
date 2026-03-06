@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.SeekBar;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
@@ -24,9 +25,11 @@ import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.BestCardForCategory;
 import com.example.ccrewards.databinding.FragmentBestCardBinding;
 import com.example.ccrewards.databinding.ItemCategoryTileBinding;
+import com.example.ccrewards.databinding.ItemRotationalBonusBannerBinding;
 import com.example.ccrewards.databinding.ItemWelcomeBonusBannerBinding;
 import com.example.ccrewards.ui.settings.SettingsFragment;
 import com.example.ccrewards.util.CurrencyUtil;
+import com.example.ccrewards.util.DateUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -62,6 +65,7 @@ public class BestCardFragment extends Fragment {
     private BestCardViewModel viewModel;
     private CategoryTileAdapter adapter;
     private WelcomeBonusAdapter wbAdapter;
+    private RotationalBonusAdapter rbAdapter;
 
     // Last observed values for combining standard + custom tiles
     private Map<RewardCategory, List<BestCardForCategory>> latestRanked = null;
@@ -92,6 +96,19 @@ public class BestCardFragment extends Fragment {
             boolean hasAny = bonuses != null && !bonuses.isEmpty();
             binding.sectionWelcomeBonuses.setVisibility(hasAny ? View.VISIBLE : View.GONE);
             wbAdapter.setData(bonuses != null ? bonuses : new ArrayList<>());
+        });
+
+        // Rotational bonus banner
+        rbAdapter = new RotationalBonusAdapter();
+        binding.recyclerRotationalBonuses.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerRotationalBonuses.setAdapter(rbAdapter);
+        binding.recyclerRotationalBonuses.setNestedScrollingEnabled(false);
+
+        viewModel.getActiveRotationalBonuses().observe(getViewLifecycleOwner(), rbs -> {
+            boolean hasAny = rbs != null && !rbs.isEmpty();
+            binding.recyclerRotationalBonuses.setVisibility(hasAny ? View.VISIBLE : View.GONE);
+            binding.tvQuarterlyEmpty.setVisibility(hasAny ? View.GONE : View.VISIBLE);
+            rbAdapter.setData(rbs != null ? rbs : new ArrayList<>());
         });
 
         // Category tiles
@@ -130,13 +147,6 @@ public class BestCardFragment extends Fragment {
 
         // FAB — add custom category
         binding.fabAddCustomCategory.setOnClickListener(v -> showAddCustomCategoryDialog(view));
-
-        // My Cards filter switch — default on (MY_CARDS is the default filter)
-        binding.switchMyCards.setChecked(true);
-        binding.switchMyCards.setOnCheckedChangeListener((btn, checked) ->
-                viewModel.setFilter(checked
-                        ? BestCardViewModel.Filter.MY_CARDS
-                        : BestCardViewModel.Filter.ALL_CARDS));
 
         // Display mode preference
         showEffective = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -215,6 +225,100 @@ public class BestCardFragment extends Fragment {
         binding = null;
     }
 
+    // ── Rotational Bonus Banner Adapter ──────────────────────────────────────
+
+    private class RotationalBonusAdapter
+            extends RecyclerView.Adapter<RotationalBonusAdapter.VH> {
+
+        private List<BestCardViewModel.ActiveRotationalBonus> items = new ArrayList<>();
+
+        void setData(List<BestCardViewModel.ActiveRotationalBonus> data) {
+            items = data != null ? data : new ArrayList<>();
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemRotationalBonusBannerBinding b = ItemRotationalBonusBannerBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false);
+            return new VH(b);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            BestCardViewModel.ActiveRotationalBonus item = items.get(position);
+            com.example.ccrewards.data.model.RotationalBonus rb = item.bonus;
+
+            // Hide top divider on first item
+            holder.binding.dividerRb.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+
+            holder.binding.tvRbCardName.setText(item.cardName);
+            holder.binding.tvRbLabel.setText(rb.label != null ? rb.label : "");
+            holder.binding.tvRbCategories.setText(
+                    String.join(" · ", item.categoryLabels));
+
+            // End date
+            if (rb.endDate != null) {
+                holder.binding.tvRbEndDate.setText("Expires " + DateUtil.toDisplayString(rb.endDate));
+                holder.binding.tvRbEndDate.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.tvRbEndDate.setVisibility(View.GONE);
+            }
+
+            // SeekBar — reliably draggable inside RecyclerView/NestedScrollView
+            int limitDollars = rb.spendLimitCents > 0 ? rb.spendLimitCents / 100 : 1500;
+            holder.binding.seekbarRbUsage.setMax(limitDollars);
+            int usedDollars = Math.min(rb.usedCents / 100, limitDollars);
+            holder.binding.seekbarRbUsage.setProgress(usedDollars);
+            updateUsedLabel(holder, rb.usedCents, rb.spendLimitCents);
+
+            holder.binding.seekbarRbUsage.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    seekBar.getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateUsedLabel(holder, progress * 100, rb.spendLimitCents);
+                }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    int newUsedCents = seekBar.getProgress() * 100;
+                    viewModel.updateRotationalBonusUsed(rb.id, newUsedCents, rb.spendLimitCents);
+                }
+            });
+
+            // Remove button hidden on Best Card page (only shown in card detail)
+            holder.binding.btnRbDelete.setVisibility(View.GONE);
+
+            holder.binding.btnRbMarkDone.setOnClickListener(v -> {
+                viewModel.markRotationalBonusFullyUsed(rb.id);
+                com.google.android.material.snackbar.Snackbar.make(
+                        binding.getRoot(), "Quarterly bonus marked as done",
+                        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+            });
+        }
+
+        private void updateUsedLabel(VH holder, int usedCents, int limitCents) {
+            String text = "$" + (usedCents / 100);
+            if (limitCents > 0) text += " / $" + (limitCents / 100);
+            holder.binding.tvRbUsedAmount.setText(text);
+        }
+
+        @Override
+        public int getItemCount() { return items.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            final ItemRotationalBonusBannerBinding binding;
+            VH(ItemRotationalBonusBannerBinding b) {
+                super(b.getRoot());
+                binding = b;
+            }
+        }
+    }
+
     // ── Rate formatting helpers ───────────────────────────────────────────────
 
     static String formatRawRate(BestCardForCategory top) {
@@ -277,9 +381,7 @@ public class BestCardFragment extends Fragment {
             notifyDataSetChanged();
         }
 
-        void setShowEffective(boolean v) {
-            showEffective = v;
-        }
+        void setShowEffective(boolean v) { showEffective = v; }
 
         @NonNull
         @Override
@@ -294,39 +396,65 @@ public class BestCardFragment extends Fragment {
             BestCardViewModel.ActiveWelcomeBonus item = items.get(position);
             WelcomeBonus wb = item.bonus;
 
-            holder.binding.wbColorStrip.setBackgroundColor((int) item.cardColorPrimary);
-            holder.binding.tvWbbCardName.setText(item.cardName);
+            // Divider — hide on first item
+            holder.binding.dividerWb.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
 
-            // Raw bonus value (points or cash, without spend req)
-            String rawBonusStr;
-            if (isCashBackStatic(wb.bonusCurrencyName)) {
-                rawBonusStr = CurrencyUtil.centsToString(wb.bonusPoints) + " Cash Back";
-            } else {
-                rawBonusStr = NumberFormat.getInstance(Locale.US).format(wb.bonusPoints)
-                        + " " + shortCurrencyName(wb.bonusCurrencyName);
+            holder.binding.tvWbCardName.setText(item.cardName);
+
+            // Bonus value + spend req + effective rate
+            String bonusStr = isCashBackStatic(wb.bonusCurrencyName)
+                    ? CurrencyUtil.centsToString(wb.bonusPoints) + " Cash Back"
+                    : NumberFormat.getInstance(Locale.US).format(wb.bonusPoints)
+                            + " " + shortCurrencyName(wb.bonusCurrencyName);
+            String detailsLine = bonusStr + " · Spend "
+                    + CurrencyUtil.centsToString(wb.spendRequirementCents);
+            if (showEffective) {
+                detailsLine += String.format(Locale.US, " · %.2f%% eff.", item.effectiveReturnPct);
             }
+            holder.binding.tvWbBonusLine.setText(detailsLine);
 
-            // Spend req + optional deadline (always shown in the secondary slot)
-            String detailsLine = "Spend " + CurrencyUtil.centsToString(wb.spendRequirementCents);
+            // Expires row
             if (wb.deadline != null) {
-                detailsLine += " · due " + com.example.ccrewards.util.DateUtil.toDisplayString(wb.deadline);
+                holder.binding.tvWbExpires.setText("Expires " + DateUtil.toDisplayString(wb.deadline));
+                holder.binding.tvWbExpires.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.tvWbExpires.setVisibility(View.INVISIBLE);
             }
 
-            // Effective return string
-            String effectiveStr = String.format(Locale.US, "~%.3f%% eff.", item.effectiveReturnPct);
+            // SeekBar for spend progress — reliably draggable
+            int reqDollars = wb.spendRequirementCents > 0 ? wb.spendRequirementCents / 100 : 100;
+            holder.binding.seekbarWbSpend.setMax(reqDollars);
+            int usedDollars = Math.min(wb.spendUsedCents / 100, reqDollars);
+            holder.binding.seekbarWbSpend.setProgress(usedDollars);
+            updateSpentLabel(holder, wb.spendUsedCents, wb.spendRequirementCents);
 
-            // Swap primary/secondary based on toggle — same pattern as CategoryTileAdapter
-            String combined = showEffective
-                    ? effectiveStr + " · " + rawBonusStr   // "~8.2% eff. · 60,000 UR"
-                    : rawBonusStr + " · " + effectiveStr;  // "60,000 UR · ~8.2% eff."
-            holder.binding.tvWbbEffectiveRate.setText(combined);
-            holder.binding.tvWbbBonusLine.setText(detailsLine);
+            holder.binding.seekbarWbSpend.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    seekBar.getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (!fromUser) return;
+                    updateSpentLabel(holder, progress * 100, wb.spendRequirementCents);
+                }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    int newUsedCents = seekBar.getProgress() * 100;
+                    viewModel.updateWelcomeBonusSpend(wb.userCardId, newUsedCents);
+                }
+            });
 
-            holder.binding.btnWbbDone.setOnClickListener(v -> {
+            holder.binding.btnWbMarkAchieved.setOnClickListener(v -> {
                 viewModel.markBonusAchieved(wb.userCardId);
                 Snackbar.make(binding.getRoot(), "Welcome bonus marked as achieved",
                         Snackbar.LENGTH_SHORT).show();
             });
+        }
+
+        private void updateSpentLabel(VH holder, int usedCents, int reqCents) {
+            holder.binding.tvWbSpentAmount.setText(
+                    "$" + (usedCents / 100) + " / $" + (reqCents / 100));
         }
 
         @Override

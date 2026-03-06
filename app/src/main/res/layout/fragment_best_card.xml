@@ -20,32 +20,6 @@
             app:title="Best Card"
             app:titleTextColor="@color/white" />
 
-        <!-- My Cards filter toggle -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorSurfaceVariant"
-            android:paddingStart="16dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="My Cards only"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_my_cards"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Scrollable content: WB banner + category tiles -->
@@ -62,32 +36,89 @@
             android:orientation="vertical">
 
             <!-- WB Banner: hidden when empty -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/section_welcome_bonuses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:visibility="gone">
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="?attr/colorSecondaryContainer">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="★ Welcome Bonuses"
-                    android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textColor="?attr/colorPrimary" />
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_welcome_bonuses"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="★ Welcome Bonuses"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSecondaryContainer" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_welcome_bonuses"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Quarterly Bonuses panel — always visible -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_quarterly_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="?attr/colorSecondaryContainer">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false" />
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
-            </LinearLayout>
+                    <!-- Header -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="⚡ Quarterly Rotating Bonuses"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSecondaryContainer" />
+
+                    <!-- Active bonuses list -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_rotational_bonuses"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:visibility="gone" />
+
+                    <!-- Empty state -->
+                    <TextView
+                        android:id="@+id/tv_quarterly_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No active quarterly bonuses.\nGo to a card's detail page and tap + Add Quarterly Benefit."
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSecondaryContainer"
+                        android:alpha="0.7"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Category tiles (moved inside NestedScrollView) -->
             <androidx.recyclerview.widget.RecyclerView

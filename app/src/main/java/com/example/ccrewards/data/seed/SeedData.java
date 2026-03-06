@@ -236,6 +236,13 @@ public class SeedData {
             new CardDefinition("bilt_palladium", "Bilt Palladium", "Bilt",  "Mastercard", 495, false, false, PALLADIUM,  BILT_BLACK, "Bilt Points"),
 
             // Chase Business
+            new CardDefinition("csr_business",                   "Chase Sapphire Reserve Business",             "Chase", "Visa",  795, false, true, CHASE_DARK,   CHASE_BLUE,   "Chase Ultimate Rewards Points"),
+            new CardDefinition("southwest_performance_business", "Southwest Rapid Rewards Performance Business","Chase", "Visa",  299, false, true, SW_RED,       SW_DARK,      "Southwest Rapid Rewards"),
+            new CardDefinition("southwest_premier_business",     "Southwest Rapid Rewards Premier Business",    "Chase", "Visa",  149, false, true, SW_RED,       SW_DARK,      "Southwest Rapid Rewards"),
+            new CardDefinition("ihg_premier_business",           "IHG One Rewards Premier Business",           "Chase", "Visa",   99, false, true, IHG_BLUE,     IHG_TEAL,     "IHG One Rewards Points"),
+            new CardDefinition("united_business",                "United Business Card",                        "Chase", "Visa",  150, false, true, UNITED_DARK,  UNITED_BLUE,  "United MileagePlus"),
+            new CardDefinition("united_club_business",           "United Club Business Card",                   "Chase", "Visa",  695, false, true, UNITED_DARK,  UNITED_BLUE,  "United MileagePlus"),
+            new CardDefinition("world_of_hyatt_business",        "World of Hyatt Business Credit Card",         "Chase", "Visa",  199, false, true, HYATT_DARK,   HYATT_GOLD,   "World of Hyatt Points"),
             new CardDefinition("ink_preferred",       "Ink Business Preferred",    "Chase", "Visa",   95, false, true, CHASE_BLUE, CHASE_DARK, "Chase Ultimate Rewards Points"),
             new CardDefinition("ink_cash",            "Ink Business Cash",         "Chase", "Visa",    0, false, true, CHASE_BLUE, CHASE_DARK, "Chase Ultimate Rewards Points"),
             new CardDefinition("ink_unlimited",       "Ink Business Unlimited",    "Chase", "Visa",    0, false, true, CHASE_BLUE, CHASE_DARK, "Chase Ultimate Rewards Points"),
@@ -249,6 +256,7 @@ public class SeedData {
             new CardDefinition("amex_blue_business_cash",      "Amex Blue Business Cash",                "American Express", "Amex",   0, false, true, AMEX_BLUE, AMEX_BLUE_D, "Cash Back"),
             new CardDefinition("delta_gold_business_amex",     "Delta SkyMiles Gold Business Amex",      "American Express", "Amex", 150, false, true, DELTA_RED, DELTA_PURP, "Delta SkyMiles"),
             new CardDefinition("delta_platinum_business_amex", "Delta SkyMiles Platinum Business Amex",  "American Express", "Amex", 350, false, true, DELTA_PURP, DELTA_RED, "Delta SkyMiles"),
+            new CardDefinition("delta_reserve_business_amex",  "Delta SkyMiles Reserve Business Amex",   "American Express", "Amex", 650, false, true, DELTA_PURP, DELTA_RED, "Delta SkyMiles"),
             new CardDefinition("hilton_business_amex",         "Hilton Honors Business Amex",            "American Express", "Amex", 195, false, true, HILTON_BLUE, HILTON_LIGHT, "Hilton Honors Points"),
 
             // Capital One Business
@@ -405,9 +413,10 @@ public class SeedData {
         list.add(new RewardRate("iberia_visa", RewardCategory.TRAVEL_IBERIA, RateType.MILES, 3.0));
         list.add(new RewardRate("iberia_visa", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
-        // Amex Platinum (5X air & prepaid hotels via Amex Travel, 1X general)
-        list.add(new RewardRate("amex_platinum", RewardCategory.TRAVEL,  RateType.POINTS, 5.0));
-        list.add(new RewardRate("amex_platinum", RewardCategory.GENERAL, RateType.POINTS, 1.0));
+        // Amex Platinum (5X via Amex Travel portal, 5X flights booked direct, 1X general)
+        list.add(new RewardRate("amex_platinum", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
+        list.add(new RewardRate("amex_platinum", RewardCategory.TRAVEL,        RateType.POINTS, 5.0));
+        list.add(new RewardRate("amex_platinum", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
 
         // Amex Gold (4X dining, 4X U.S. supermarkets, 3X flights, 1X general)
         list.add(new RewardRate("amex_gold", RewardCategory.DINING,    RateType.POINTS, 4.0));
@@ -720,6 +729,11 @@ public class SeedData {
         list.add(new RewardRate("bilt_palladium", RewardCategory.GENERAL,       RateType.BILT_CASH, 4.0));
         list.add(new RewardRate("bilt_palladium", RewardCategory.RENT_MORTGAGE, RateType.BILT_CASH, 4.0));
 
+        // Chase Sapphire Reserve Business (8x portal, 4x travel/hotels direct, 1x general)
+        list.add(new RewardRate("csr_business", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 8.0));
+        list.add(new RewardRate("csr_business", RewardCategory.TRAVEL,        RateType.POINTS, 4.0));
+        list.add(new RewardRate("csr_business", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
+
         // Ink Business Preferred
         list.add(new RewardRate("ink_preferred", RewardCategory.TRAVEL,  RateType.POINTS, 3.0));
         list.add(new RewardRate("ink_preferred", RewardCategory.GENERAL, RateType.POINTS, 1.0));
@@ -743,6 +757,40 @@ public class SeedData {
         list.add(new RewardRate("amazon_business_prime", RewardCategory.GAS,             RateType.CASHBACK, 2.0));
         list.add(new RewardRate("amazon_business_prime", RewardCategory.GENERAL,         RateType.CASHBACK, 1.0));
 
+        // Southwest Rapid Rewards Performance Business (4x SW, 2x travel/hotels direct, 1x general)
+        list.add(new RewardRate("southwest_performance_business", RewardCategory.TRAVEL_SOUTHWEST, RateType.MILES, 4.0));
+        list.add(new RewardRate("southwest_performance_business", RewardCategory.TRAVEL,           RateType.MILES, 2.0));
+        list.add(new RewardRate("southwest_performance_business", RewardCategory.GENERAL,          RateType.MILES, 1.0));
+
+        // Southwest Rapid Rewards Premier Business (3x SW, 2x gas/dining first $8k, 1x general)
+        list.add(new RewardRate("southwest_premier_business", RewardCategory.TRAVEL_SOUTHWEST, RateType.MILES, 3.0));
+        list.add(new RewardRate("southwest_premier_business", RewardCategory.GAS,             RateType.MILES, 2.0));
+        list.add(new RewardRate("southwest_premier_business", RewardCategory.DINING,          RateType.MILES, 2.0));
+        list.add(new RewardRate("southwest_premier_business", RewardCategory.GENERAL,         RateType.MILES, 1.0));
+
+        // IHG One Rewards Premier Business (10x IHG, 5x travel/gas/dining, 3x general)
+        list.add(new RewardRate("ihg_premier_business", RewardCategory.TRAVEL_IHG, RateType.POINTS, 10.0));
+        list.add(new RewardRate("ihg_premier_business", RewardCategory.TRAVEL,     RateType.POINTS,  5.0));
+        list.add(new RewardRate("ihg_premier_business", RewardCategory.GAS,        RateType.POINTS,  5.0));
+        list.add(new RewardRate("ihg_premier_business", RewardCategory.DINING,     RateType.POINTS,  5.0));
+        list.add(new RewardRate("ihg_premier_business", RewardCategory.GENERAL,    RateType.POINTS,  3.0));
+
+        // United Business Card (2x United/dining/gas, 1x general)
+        list.add(new RewardRate("united_business", RewardCategory.TRAVEL_UNITED, RateType.MILES, 2.0));
+        list.add(new RewardRate("united_business", RewardCategory.DINING,        RateType.MILES, 2.0));
+        list.add(new RewardRate("united_business", RewardCategory.GAS,           RateType.MILES, 2.0));
+        list.add(new RewardRate("united_business", RewardCategory.GENERAL,       RateType.MILES, 1.0));
+
+        // United Club Business Card (2x United, 1.5x general)
+        list.add(new RewardRate("united_club_business", RewardCategory.TRAVEL_UNITED, RateType.MILES, 2.0));
+        list.add(new RewardRate("united_club_business", RewardCategory.GENERAL,       RateType.MILES, 1.5));
+
+        // World of Hyatt Business (4x Hyatt, 2x dining/gas choice, 1x general)
+        list.add(new RewardRate("world_of_hyatt_business", RewardCategory.TRAVEL_HYATT, RateType.POINTS, 4.0));
+        list.add(new RewardRate("world_of_hyatt_business", RewardCategory.DINING,       RateType.POINTS, 2.0, true, "hyatt_biz_choice", false));
+        list.add(new RewardRate("world_of_hyatt_business", RewardCategory.GAS,          RateType.POINTS, 2.0, true, "hyatt_biz_choice", false));
+        list.add(new RewardRate("world_of_hyatt_business", RewardCategory.GENERAL,      RateType.POINTS, 1.0));
+
         // Amex Business Gold (auto top-2 categories — modelled as choice)
         list.add(new RewardRate("amex_business_gold", RewardCategory.DINING,          RateType.POINTS, 4.0, true, "amex_biz_gold_top2", false));
         list.add(new RewardRate("amex_business_gold", RewardCategory.TRAVEL,          RateType.POINTS, 4.0, true, "amex_biz_gold_top2", false));
@@ -750,9 +798,10 @@ public class SeedData {
         list.add(new RewardRate("amex_business_gold", RewardCategory.GAS,             RateType.POINTS, 4.0, true, "amex_biz_gold_top2", false));
         list.add(new RewardRate("amex_business_gold", RewardCategory.GENERAL,         RateType.POINTS, 1.0));
 
-        // Amex Business Platinum
-        list.add(new RewardRate("amex_business_platinum", RewardCategory.TRAVEL,  RateType.POINTS, 5.0));
-        list.add(new RewardRate("amex_business_platinum", RewardCategory.GENERAL, RateType.POINTS, 1.0));
+        // Amex Business Platinum (5X via Amex Travel portal, 5X flights booked direct, 1X general)
+        list.add(new RewardRate("amex_business_platinum", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
+        list.add(new RewardRate("amex_business_platinum", RewardCategory.TRAVEL,        RateType.POINTS, 5.0));
+        list.add(new RewardRate("amex_business_platinum", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
 
         // Amex Blue Business Plus
         list.add(new RewardRate("amex_blue_business_plus", RewardCategory.GENERAL, RateType.POINTS, 2.0));
@@ -770,6 +819,10 @@ public class SeedData {
         list.add(new RewardRate("delta_platinum_business_amex", RewardCategory.TRAVEL_DELTA, RateType.MILES, 3.0));
         list.add(new RewardRate("delta_platinum_business_amex", RewardCategory.DINING,       RateType.MILES, 1.5));
         list.add(new RewardRate("delta_platinum_business_amex", RewardCategory.GENERAL,      RateType.MILES, 1.0));
+
+        // Delta SkyMiles Reserve Business Amex (3x Delta, 1x general; 1.5x transit/shipping/office supply not modeled)
+        list.add(new RewardRate("delta_reserve_business_amex", RewardCategory.TRAVEL_DELTA, RateType.MILES, 3.0));
+        list.add(new RewardRate("delta_reserve_business_amex", RewardCategory.GENERAL,      RateType.MILES, 1.0));
 
         // Hilton Business Amex
         list.add(new RewardRate("hilton_business_amex", RewardCategory.TRAVEL_HILTON, RateType.POINTS, 12.0));
@@ -940,12 +993,10 @@ public class SeedData {
             new CardBenefit("free_spirit_travel_more", "Companion Flight Voucher", "$100 companion flight voucher each anniversary year after $5,000 in purchases in the prior anniversary year.", 10000, ResetPeriod.ANNUALLY, false),
             new CardBenefit("usbank_altitude_reserve",  "Travel Credit", "$325 annual travel/dining credit", 32500, ResetPeriod.ANNUALLY, false),
             new CardBenefit("bilt_palladium",           "Annual Bilt Cash", "$200 annual Bilt Cash credit", 20000, ResetPeriod.ANNUALLY, false),
+            new CardBenefit("bilt_palladium",           "Travel Hotel Credit", "Up to $200 semi-annually ($400/yr) for eligible hotel stays booked through Bilt Travel.", 20000, ResetPeriod.SEMI_ANNUALLY, false),
 
-            // Discover it Cash Back
-            new CardBenefit("discover_it_cashback", "5% Quarterly Categories", "Up to $75/quarter ($300/yr) in cash back at rotating quarterly categories (up to $1,500 in purchases per quarter at 5%). Activate each quarter.", 7500, ResetPeriod.QUARTERLY, false),
-
-            // Chase Freedom Flex
-            new CardBenefit("chase_freedom_flex", "5% Quarterly Categories", "Up to $75/quarter ($300/yr) in cash back at rotating quarterly categories (up to $1,500 in purchases per quarter at 5%). Activate each quarter.", 7500, ResetPeriod.QUARTERLY, false),
+            // (Discover it & Chase Freedom Flex quarterly rotating categories
+            //  are tracked via the Quarterly Benefit feature, not as fixed credits)
 
             // Southwest Priority
             new CardBenefit("southwest_priority", "Anniversary Bonus Points", "7,500 bonus Rapid Rewards points each card anniversary year.", 9750, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY),
@@ -957,19 +1008,59 @@ public class SeedData {
             new CardBenefit("capital_one_venture", "Global Entry / TSA PreCheck", "Up to $100 statement credit for Global Entry ($100) or TSA PreCheck (~$85) application fee.", 10000, ResetPeriod.ANNUALLY, false),
 
             // Amex Business Platinum
-            new CardBenefit("amex_business_platinum", "Airline Fee Credit", "Up to $200/yr for airline incidental charges (checked bags, seat upgrades, etc.) at one selected U.S. airline. Resets each calendar year. Enrollment required.", 20000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "FHR/THC Hotel Credit", "Up to $300 semi-annually ($600/yr) at Fine Hotels & Resorts or The Hotel Collection. Prepaid rate required.", 30000, ResetPeriod.SEMI_ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "Dell Technologies Credit", "Up to $1,150/yr in statement credits for U.S. Dell Technologies purchases. Enrollment required.", 115000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "Adobe Credit", "Up to $250/yr in statement credits for Adobe Creative Cloud or Acrobat Pro subscriptions (after $600 spend requirement). Enrollment required.", 25000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "Amex Travel Flight Credit", "Up to $1,200/yr in statement credits for eligible flight purchases through amextravel.com (for high-spending cardmembers). Enrollment required.", 120000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "One AP Statement Credit", "Up to $2,400/yr in statement credits through the One AP program (for high-spending cardmembers). Enrollment required.", 240000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("amex_business_platinum", "Hilton Credit", "Up to $50/quarter ($200/yr) in statement credits for eligible Hilton portfolio charges. Enrollment required.", 5000, ResetPeriod.QUARTERLY, false, ResetType.ANNIVERSARY),
-            new CardBenefit("amex_business_platinum", "Indeed Credit", "Up to $90/quarter ($360/yr) in statement credits for Indeed job posting purchases. Enrollment required.", 9000, ResetPeriod.QUARTERLY, false),
+            new CardBenefit("amex_business_platinum", "Airline Fee Credit", "Up to $200/yr for incidental charges (e.g. checked bags) at one selected U.S. airline. Resets each calendar year — not on card anniversary, so you can use it twice in your first year. Enrollment required.", 20000, ResetPeriod.ANNUALLY, false),
+            new CardBenefit("amex_business_platinum", "FHR/THC Hotel Credit", "Up to $300 semi-annually ($600/yr) at Fine Hotels & Resorts or The Hotel Collection. Prepaid rate required. FHR = 1 night min; THC = 2 nights min.", 30000, ResetPeriod.SEMI_ANNUALLY, false),
+            new CardBenefit("amex_business_platinum", "Hilton Credit", "Up to $50/quarter ($200/yr) in statement credits for eligible Hilton portfolio charges. Enrollment requires a Hilton for Business account.", 5000, ResetPeriod.QUARTERLY, false),
+            new CardBenefit("amex_business_platinum", "Dell Technologies Credit", "Up to $150/yr in statement credits for U.S. Dell Technologies purchases. No minimum purchase required. Enrollment required.", 15000, ResetPeriod.ANNUALLY, false),
             new CardBenefit("amex_business_platinum", "Wireless Credit", "Up to $10/month ($120/yr) in statement credits for U.S. wireless telephone service purchases. Enrollment required.", 1000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("amex_business_platinum", "Indeed Credit", "Up to $90/quarter ($360/yr) in statement credits for Indeed job posting purchases. Enrollment required.", 9000, ResetPeriod.QUARTERLY, false),
+            new CardBenefit("amex_business_platinum", "Adobe Credit", "Up to $150/yr in statement credits for an annually prepaid Adobe plan. Enrollment required.", 15000, ResetPeriod.ANNUALLY, false),
+            new CardBenefit("amex_business_platinum", "Global Entry / TSA PreCheck", "Up to $100 statement credit for Global Entry ($100) or TSA PreCheck (~$85) application fee.", 10000, ResetPeriod.ANNUALLY, false),
+            new CardBenefit("amex_business_platinum", "Clear Credit", "Up to $179/yr statement credit for a CLEAR Plus membership — same as the annual CLEAR fee. Enrollment required.", 17900, ResetPeriod.ANNUALLY, false),
+
+            // Chase Sapphire Reserve Business
+            new CardBenefit("csr_business", "Travel Credit", "Up to $300/yr in automatic statement credits for travel purchases (airfare, hotels, taxis, tolls, etc.). Resets each card anniversary year. No enrollment needed.", 30000, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY),
+            new CardBenefit("csr_business", "The Edit Hotel Credit", "Up to $250 per period (Jan–Jun + Jul–Dec = $500/yr) for prepaid bookings at The Edit luxury hotels via Chase Travel. Two-night minimum required. Starting 2026, two $250 credits usable anytime throughout the year.", 25000, ResetPeriod.SEMI_ANNUALLY, false),
+            new CardBenefit("csr_business", "DoorDash Credit", "Up to $25/month on DoorDash (includes $5 promo on restaurant orders + two $10 promos on groceries/retail). Complimentary DashPass included. Through 12/31/2027.", 2500, ResetPeriod.MONTHLY, false),
+            new CardBenefit("csr_business", "Lyft Credit", "Up to $10/month in Lyft in-app credits through 9/30/2027.", 1000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("csr_business", "ZipRecruiter Credit", "Up to $200 per period (Jan–Jun + Jul–Dec = $400/yr) in statement credits for ZipRecruiter.", 20000, ResetPeriod.SEMI_ANNUALLY, false),
+            new CardBenefit("csr_business", "Google Workspace Credit", "Up to $200/yr in statement credits for purchases made directly on Google Workspace.", 20000, ResetPeriod.ANNUALLY, false),
+            new CardBenefit("csr_business", "Giftcards.com Credit", "Up to $50 per period (Jan–Jun + Jul–Dec = $100/yr) in statement credits for gift cards from the curated collection at giftcards.com/reservebusiness.", 5000, ResetPeriod.SEMI_ANNUALLY, false),
+
+            // Southwest Rapid Rewards Performance Business
+            // (no tracked statement credits)
+
+            // Southwest Rapid Rewards Premier Business
+            // (no tracked statement credits)
+
+            // IHG One Rewards Premier Business
+            new CardBenefit("ihg_premier_business", "United TravelBank Credit", "$25 United TravelBank cash deposited on or about January 1 and again on or about July 1 ($50/yr). Usable on united.com.", 2500, ResetPeriod.SEMI_ANNUALLY, false),
+
+            // United Business Card
+            new CardBenefit("united_business", "United Hotels Credit", "$50 statement credit for each of your first 2 prepaid hotel stays per anniversary year ($100/yr) booked directly through United Hotels with this card.", 5000, ResetPeriod.SEMI_ANNUALLY, false, ResetType.ANNIVERSARY),
+            new CardBenefit("united_business", "Avis/Budget Credit", "$25 United TravelBank cash for each of your first 2 Avis or Budget car rentals per anniversary year ($50/yr) booked directly through cars.united.com.", 2500, ResetPeriod.SEMI_ANNUALLY, false, ResetType.ANNIVERSARY),
+            new CardBenefit("united_business", "Rideshare Credit", "Up to $8/month back on rideshare ($12 in December = $100/yr total). Yearly opt-in required.", 800, ResetPeriod.MONTHLY, false),
+            new CardBenefit("united_business", "Instacart Credit", "$10/month in Instacart credits ($120/yr) for purchases directly through Instacart. Through 12/31/2027.", 1000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("united_business", "JSX Credit", "Up to $100/yr statement credit when booking flights directly with JSX.", 10000, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY),
+
+            // United Club Business Card
+            new CardBenefit("united_club_business", "Renowned Hotels Credit", "Up to $200/yr in statement credits for prepaid hotel stays through Renowned Hotels and Resorts with this card.", 20000, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY),
+            new CardBenefit("united_club_business", "Avis/Budget Credit", "$50 United TravelBank cash for each of your first 2 Avis or Budget car rentals per anniversary year ($100/yr) booked directly through cars.united.com.", 5000, ResetPeriod.SEMI_ANNUALLY, false, ResetType.ANNIVERSARY),
+            new CardBenefit("united_club_business", "Rideshare Credit", "Up to $12/month back on rideshare ($18 in December = $150/yr total). Yearly opt-in required.", 1200, ResetPeriod.MONTHLY, false),
+            new CardBenefit("united_club_business", "Instacart Credit", "Two $10/month Instacart credits ($240/yr) for purchases directly through Instacart. Through 12/31/2027.", 2000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("united_club_business", "JSX Credit", "Up to $200/yr statement credit when booking flights directly with JSX — a hop-on jet service offering a semi-private flying experience at commercial fares.", 20000, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY),
+
+            // World of Hyatt Business
+            new CardBenefit("world_of_hyatt_business", "Hyatt Credit", "Up to $50 twice per cardmember year ($100/yr) in statement credits at Hyatt properties.", 5000, ResetPeriod.SEMI_ANNUALLY, false, ResetType.ANNIVERSARY),
 
             // Amex Business Gold
             new CardBenefit("amex_business_gold", "Flexible Business Credit", "Up to $20/month ($240/yr) in statement credits at FedEx, Grubhub, or eligible office supply stores. Enrollment required.", 2000, ResetPeriod.MONTHLY, false),
             new CardBenefit("amex_business_gold", "Walmart+ Credit", "$12.95/month statement credit when you pay for your Walmart+ membership with this card.", 1295, ResetPeriod.MONTHLY, false),
+
+            // Delta SkyMiles Reserve Business Amex
+            new CardBenefit("delta_reserve_business_amex", "Resy Credit", "Up to $20/month ($240/yr) at Resy-partnered restaurants. No reservation required — just dine at a Resy partner and pay with this card. Enrollment required.", 2000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("delta_reserve_business_amex", "Rideshare Credit", "Up to $10/month ($120/yr) in statement credits on rideshare purchases. Enrollment required.", 1000, ResetPeriod.MONTHLY, false),
+            new CardBenefit("delta_reserve_business_amex", "Delta Stays Credit", "Up to $250/yr in statement credits for prepaid hotels or vacation rentals booked through Delta Stays on delta.com/stays.", 25000, ResetPeriod.ANNUALLY, false),
 
             // Hilton Honors Business Amex
             new CardBenefit("hilton_business_amex", "Hilton Credit", "Up to $60/quarter ($240/yr) in statement credits for eligible Hilton portfolio charges.", 6000, ResetPeriod.QUARTERLY, false),

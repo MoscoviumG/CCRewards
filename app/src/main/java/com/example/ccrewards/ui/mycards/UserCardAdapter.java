@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
 import com.example.ccrewards.databinding.ItemUserCardBinding;
 import com.example.ccrewards.util.CurrencyUtil;
@@ -59,7 +60,8 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
             binding.cardColorStrip.setBackgroundColor((int) item.definition.cardColorPrimary);
 
             // Card name
-            binding.tvCardName.setText(item.definition.displayName);
+            binding.tvCardName.setText(
+                    UserCard.label(item.definition.displayName, item.userCard.lastFour, item.userCard.nickname));
 
             // Annual fee
             binding.tvAnnualFee.setText(CurrencyUtil.formatAnnualFee(item.definition.annualFee));
@@ -71,13 +73,8 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
             binding.chipBusinessBadge.setVisibility(
                     item.definition.isBusinessCard ? View.VISIBLE : View.GONE);
 
-            // Nickname (shown only if set)
-            if (item.userCard.nickname != null && !item.userCard.nickname.isEmpty()) {
-                binding.tvNickname.setVisibility(View.VISIBLE);
-                binding.tvNickname.setText("\u201C" + item.userCard.nickname + "\u201D");
-            } else {
-                binding.tvNickname.setVisibility(View.GONE);
-            }
+            // Nickname is now included inline in tvCardName via UserCard.label()
+            binding.tvNickname.setVisibility(View.GONE);
 
             // Open / close date
             binding.tvOpenDate.setText(

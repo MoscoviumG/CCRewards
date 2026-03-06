@@ -47,4 +47,8 @@ public class WelcomeBonusRepository {
     public void markAchieved(long userCardId) {
         executor.execute(() -> dao.markAchieved(userCardId));
     }
+
+    public void updateSpendUsed(long userCardId, int cents) {
+        executor.execute(() -> dao.updateSpendUsed(userCardId, cents));
+    }
 }

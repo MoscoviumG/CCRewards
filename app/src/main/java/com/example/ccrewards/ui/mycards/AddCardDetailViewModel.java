@@ -70,8 +70,8 @@ public class AddCardDetailViewModel extends ViewModel {
     public void clearPendingWelcomeBonus() { pendingWelcomeBonus = null; }
     public WelcomeBonus getPendingWelcomeBonus() { return pendingWelcomeBonus; }
 
-    public void addUserCard(String nickname, int creditLimitCents, LocalDate openDate,
-                            Runnable onComplete) {
+    public void addUserCard(String nickname, String lastFour, int creditLimitCents,
+                            LocalDate openDate, Runnable onComplete) {
         if (cardDefinitionId == null) return;
         UserCard card = new UserCard(
                 cardDefinitionId,
@@ -80,6 +80,7 @@ public class AddCardDetailViewModel extends ViewModel {
                 openDate,
                 null,
                 0);
+        card.lastFour = (lastFour != null && !lastFour.isEmpty()) ? lastFour : null;
         cardRepository.addUserCard(card, newId -> {
             if (pendingWelcomeBonus != null) {
                 pendingWelcomeBonus.userCardId = newId;

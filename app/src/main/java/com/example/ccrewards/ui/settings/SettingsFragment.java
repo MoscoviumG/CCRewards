@@ -12,8 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.example.ccrewards.R;
 import com.example.ccrewards.databinding.FragmentSettingsBinding;
+import com.example.ccrewards.worker.BenefitReminderWorker;
 import com.example.ccrewards.worker.WorkManagerScheduler;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -25,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SettingsFragment extends Fragment {
 
     public static final String PREF_NOTIFICATIONS_ENABLED = "notifications_enabled";
+    public static final String PREF_DARK_MODE = "dark_mode";
     /** When true (default), tiles show effective return (8.20%) as primary; false → raw rate (4x UR) as primary. */
     public static final String PREF_BEST_CARD_SHOW_EFFECTIVE = "best_card_show_effective";
     public static final String PREF_NOTIF_DAYS_THRESHOLD = "notification_days_threshold";
@@ -51,6 +55,10 @@ public class SettingsFragment extends Fragment {
         binding.rowPointValuations.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_settings_to_pointValuations));
 
+        // Theme picker
+        updateDarkModeLabel(prefs);
+        binding.rowDarkMode.setOnClickListener(v -> showThemeDialog(prefs));
+
         // Best Card display mode toggle
         boolean showEffective = prefs.getBoolean(PREF_BEST_CARD_SHOW_EFFECTIVE, true);
         binding.switchBestCardDisplay.setChecked(showEffective);
@@ -64,6 +72,7 @@ public class SettingsFragment extends Fragment {
             prefs.edit().putBoolean(PREF_NOTIFICATIONS_ENABLED, checked).apply();
             if (checked) {
                 WorkManagerScheduler.scheduleBenefitReminders(requireContext(), prefs);
+                BenefitReminderWorker.sendTestNotification(requireContext());
             } else {
                 WorkManagerScheduler.cancelBenefitReminders(requireContext());
             }
@@ -130,6 +139,38 @@ public class SettingsFragment extends Fragment {
             WorkManagerScheduler.scheduleBenefitReminders(requireContext(), prefs);
         });
         picker.show(getParentFragmentManager(), "time_picker");
+    }
+
+    private void updateDarkModeLabel(SharedPreferences prefs) {
+        int mode = prefs.getInt(PREF_DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        String label;
+        if (mode == AppCompatDelegate.MODE_NIGHT_YES) label = "Dark";
+        else if (mode == AppCompatDelegate.MODE_NIGHT_NO) label = "Light";
+        else label = "System";
+        binding.tvDarkModeValue.setText(label);
+    }
+
+    private void showThemeDialog(SharedPreferences prefs) {
+        String[] options = {"System default", "Light", "Dark"};
+        int[] modes = {
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+                AppCompatDelegate.MODE_NIGHT_NO,
+                AppCompatDelegate.MODE_NIGHT_YES
+        };
+        int current = prefs.getInt(PREF_DARK_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        int checkedItem = 0;
+        for (int i = 0; i < modes.length; i++) {
+            if (modes[i] == current) { checkedItem = i; break; }
+        }
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Theme")
+                .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                    prefs.edit().putInt(PREF_DARK_MODE, modes[which]).apply();
+                    AppCompatDelegate.setDefaultNightMode(modes[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

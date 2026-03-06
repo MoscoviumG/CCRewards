@@ -11,12 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.databinding.FragmentCreditsBinding;
 import com.example.ccrewards.databinding.ItemBenefitRowBinding;
-import com.example.ccrewards.databinding.ItemCreditsHeaderBinding;
 import com.example.ccrewards.util.CurrencyUtil;
 
 import java.util.ArrayList;
@@ -44,7 +45,14 @@ public class CreditsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(CreditsViewModel.class);
 
-        adapter = new CreditsListAdapter(viewModel);
+        adapter = new CreditsListAdapter(item -> {
+            Bundle args = new Bundle();
+            args.putLong("userCardId", item.benefitWithUsage.userCard.id);
+            args.putLong("benefitId",  item.benefitWithUsage.benefit.id);
+            Navigation.findNavController(requireView())
+                    .navigate(com.example.ccrewards.R.id.action_credits_to_benefitDetail, args);
+        });
+
         binding.recyclerCredits.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerCredits.setAdapter(adapter);
 
@@ -55,11 +63,9 @@ public class CreditsFragment extends Fragment {
             adapter.setItems(items);
         });
 
-        // Hide-used switch
         binding.switchHideUsed.setOnCheckedChangeListener((btn, checked) ->
                 viewModel.setHideUsed(checked));
 
-        // Search bar
         if (binding.etCreditsSearch != null) {
             binding.etCreditsSearch.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
@@ -72,20 +78,32 @@ public class CreditsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh usage data when returning from BenefitDetailFragment
+        if (viewModel != null) viewModel.refresh();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
 
-    // ── Credits Adapter ──────────────────────────────────────────────────────
+    // ── Adapter ──────────────────────────────────────────────────────────────
 
-    private static class CreditsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    interface OnItemClickListener {
+        void onClick(CreditsViewModel.ListItem item);
+    }
+
+    private static class CreditsListAdapter
+            extends RecyclerView.Adapter<CreditsListAdapter.BenefitVH> {
 
         private List<CreditsViewModel.ListItem> items = new ArrayList<>();
-        private final CreditsViewModel viewModel;
+        private final OnItemClickListener clickListener;
 
-        CreditsListAdapter(CreditsViewModel vm) {
-            this.viewModel = vm;
+        CreditsListAdapter(OnItemClickListener listener) {
+            this.clickListener = listener;
         }
 
         void setItems(List<CreditsViewModel.ListItem> data) {
@@ -93,89 +111,60 @@ public class CreditsFragment extends Fragment {
             notifyDataSetChanged();
         }
 
-        @Override
-        public int getItemViewType(int position) {
-            return items.get(position).type;
-        }
-
         @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            if (viewType == CreditsViewModel.ListItem.TYPE_HEADER) {
-                ItemCreditsHeaderBinding b = ItemCreditsHeaderBinding.inflate(
-                        LayoutInflater.from(parent.getContext()), parent, false);
-                return new HeaderVH(b);
-            }
+        public BenefitVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             ItemBenefitRowBinding b = ItemBenefitRowBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false);
             return new BenefitVH(b);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            CreditsViewModel.ListItem item = items.get(position);
-            if (holder instanceof HeaderVH) {
-                HeaderVH h = (HeaderVH) holder;
-                h.binding.tvCreditsSectionTitle.setText(item.headerLabel);
-                h.binding.tvCreditsDaysReset.setText(item.daysUntilReset + " days to reset");
-            } else if (holder instanceof BenefitVH && item.benefitWithUsage != null) {
-                BenefitVH b = (BenefitVH) holder;
-                b.bind(item, viewModel);
-            }
+        public void onBindViewHolder(@NonNull BenefitVH holder, int position) {
+            holder.bind(items.get(position), clickListener);
         }
 
         @Override
         public int getItemCount() { return items.size(); }
 
-        static class HeaderVH extends RecyclerView.ViewHolder {
-            final ItemCreditsHeaderBinding binding;
-            HeaderVH(ItemCreditsHeaderBinding b) {
-                super(b.getRoot());
-                binding = b;
-            }
-        }
-
         static class BenefitVH extends RecyclerView.ViewHolder {
             final ItemBenefitRowBinding binding;
+
             BenefitVH(ItemBenefitRowBinding b) {
                 super(b.getRoot());
                 binding = b;
             }
 
-            void bind(CreditsViewModel.ListItem item, CreditsViewModel vm) {
+            void bind(CreditsViewModel.ListItem item, OnItemClickListener listener) {
                 com.example.ccrewards.data.model.relations.BenefitWithUsage bwu =
                         item.benefitWithUsage;
-                binding.tvBenefitCardName.setText(bwu.definition.displayName +
-                        (bwu.userCard.nickname != null && !bwu.userCard.nickname.isEmpty()
-                                ? " (\u201C" + bwu.userCard.nickname + "\u201D)" : ""));
+
+                binding.tvBenefitCardName.setText(
+                        UserCard.label(bwu.definition.displayName, bwu.userCard.lastFour, bwu.userCard.nickname));
                 binding.tvBenefitRowName.setText(bwu.benefit.name);
-                binding.tvBenefitRowAmount.setText(CurrencyUtil.centsToString(bwu.benefit.amountCents)
-                        + " / " + formatPeriod(bwu.benefit.resetPeriod));
 
-                // Anniversary badge
-                if (item.isAnniversary) {
-                    binding.tvAnniversaryBadge.setVisibility(View.VISIBLE);
-                    binding.tvAnniversaryBadge.setText(
-                            "Anniversary \u00B7 Resets in " + item.benefitDaysUntilReset + " days");
+                // Days to reset
+                String daysLabel = item.isAnniversary
+                        ? item.daysUntilReset + " days \u00B7 Anniversary"
+                        : item.daysUntilReset + " days";
+                binding.tvDaysReset.setText(daysLabel);
+
+                // Used amount + progress
+                if (bwu.benefit.amountCents > 0) {
+                    int usedCents = item.usedCents;
+                    int totalCents = bwu.benefit.amountCents;
+                    binding.tvBenefitUsedAmount.setText(
+                            "$" + (usedCents / 100) + " of "
+                                    + CurrencyUtil.centsToString(totalCents) + " used");
+                    int progress = totalCents > 0 ? (usedCents * 100 / totalCents) : 0;
+                    binding.progressBenefit.setProgressCompat(progress, false);
+                    binding.progressBenefit.setVisibility(View.VISIBLE);
                 } else {
-                    binding.tvAnniversaryBadge.setVisibility(View.GONE);
+                    binding.tvBenefitUsedAmount.setText(bwu.isUsed() ? "Used" : "Not used");
+                    binding.progressBenefit.setVisibility(View.GONE);
                 }
 
-                // Suppress listener while setting state
-                binding.switchBenefitUsed.setOnCheckedChangeListener(null);
-                binding.switchBenefitUsed.setChecked(bwu.isUsed());
-                binding.switchBenefitUsed.setOnCheckedChangeListener((buttonView, isChecked) ->
-                        vm.markUsed(bwu.userCard.id, bwu.benefit.id, bwu.benefit.resetPeriod,
-                                bwu.benefit.resetType, bwu.userCard.openDate, isChecked));
-            }
-
-            private String formatPeriod(com.example.ccrewards.data.model.ResetPeriod p) {
-                switch (p) {
-                    case MONTHLY: return "mo";
-                    case QUARTERLY: return "qtr";
-                    case SEMI_ANNUALLY: return "6mo";
-                    default: return "yr";
-                }
+                binding.getRoot().setOnClickListener(v -> listener.onClick(item));
             }
         }
     }

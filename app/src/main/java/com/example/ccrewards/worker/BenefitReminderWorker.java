@@ -1,13 +1,10 @@
 package com.example.ccrewards.worker;
 
-import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
@@ -18,12 +15,19 @@ import android.preference.PreferenceManager;
 import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.BenefitUsage;
 import com.example.ccrewards.data.model.CardBenefit;
+import com.example.ccrewards.data.model.CardDefinition;
+import com.example.ccrewards.data.model.ResetType;
 import com.example.ccrewards.data.model.UserCard;
+import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 import com.example.ccrewards.ui.settings.SettingsFragment;
 import com.example.ccrewards.util.CurrencyUtil;
 import com.example.ccrewards.util.PeriodKeyUtil;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import java.util.List;
 
@@ -34,7 +38,7 @@ import dagger.hilt.components.SingletonComponent;
 
 public class BenefitReminderWorker extends Worker {
 
-    private static final String CHANNEL_ID = "benefit_reminders";
+    private static final String CHANNEL_ID = "benefit_reminders_v2"; // v2 = IMPORTANCE_HIGH
     private static final int NOTIFICATION_ID_BASE = 1000;
 
     public BenefitReminderWorker(@NonNull Context context, @NonNull WorkerParameters params) {
@@ -46,6 +50,21 @@ public class BenefitReminderWorker extends Worker {
     interface BenefitReminderEntryPoint {
         CardRepository cardRepository();
         BenefitRepository benefitRepository();
+        WelcomeBonusRepository welcomeBonusRepository();
+    }
+
+    /** Fires an immediate "reminders are on" notification. Call when the user enables the toggle. */
+    public static void sendTestNotification(Context context) {
+        createNotificationChannel(context);
+        NotificationManagerCompat nm = NotificationManagerCompat.from(context);
+        if (!nm.areNotificationsEnabled()) return;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_nav_credits)
+                .setContentTitle("Benefit reminders are on")
+                .setContentText("You'll be notified when benefits are about to expire unused")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+        nm.notify(NOTIFICATION_ID_BASE - 1, builder.build());
     }
 
     @NonNull
@@ -54,8 +73,12 @@ public class BenefitReminderWorker extends Worker {
         Context appContext = getApplicationContext();
         createNotificationChannel(appContext);
 
-        if (ActivityCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
+        // Guard: respect the toggle even if work wasn't cancelled yet
+        boolean enabled = PreferenceManager.getDefaultSharedPreferences(appContext)
+                .getBoolean(SettingsFragment.PREF_NOTIFICATIONS_ENABLED, true);
+        if (!enabled) return Result.success();
+
+        if (!NotificationManagerCompat.from(appContext).areNotificationsEnabled()) {
             return Result.success();
         }
 
@@ -63,6 +86,7 @@ public class BenefitReminderWorker extends Worker {
                 appContext, BenefitReminderEntryPoint.class);
         CardRepository cardRepo = entryPoint.cardRepository();
         BenefitRepository benefitRepo = entryPoint.benefitRepository();
+        WelcomeBonusRepository wbRepo = entryPoint.welcomeBonusRepository();
 
         // Use sync queries since doWork() runs on background thread
         List<UserCard> activeCards = cardRepo.getAllActiveUserCardsSync();
@@ -78,10 +102,16 @@ public class BenefitReminderWorker extends Worker {
             for (CardBenefit benefit : allBenefits) {
                 if (!benefit.cardDefinitionId.equals(card.cardDefinitionId)) continue;
 
-                int daysLeft = PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
+                boolean isAnniv = benefit.resetType == ResetType.ANNIVERSARY
+                        && card.openDate != null;
+                int daysLeft = isAnniv
+                        ? PeriodKeyUtil.daysUntilAnniversaryReset(benefit.resetPeriod, card.openDate)
+                        : PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
                 if (daysLeft > threshold) continue;
 
-                String periodKey = PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
+                String periodKey = isAnniv
+                        ? PeriodKeyUtil.getCurrentAnniversaryPeriodKey(benefit.resetPeriod, card.openDate)
+                        : PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
                 BenefitUsage usage = benefitRepo.getUsageSync(card.id, benefit.id, periodKey);
 
                 if (usage == null || !usage.isUsed) {
@@ -90,7 +120,7 @@ public class BenefitReminderWorker extends Worker {
                             .setSmallIcon(R.drawable.ic_nav_credits)
                             .setContentTitle("Unused benefit: " + benefit.name)
                             .setContentText(amount + " expires in " + daysLeft + " days")
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
                             .setAutoCancel(true);
 
                     NotificationManagerCompat.from(appContext).notify(notifId++, builder.build());
@@ -98,14 +128,53 @@ public class BenefitReminderWorker extends Worker {
             }
         }
 
+        // Welcome bonus notifications
+        List<WelcomeBonus> activeWbs = wbRepo.getActiveSync();
+        if (activeWbs != null) {
+            LocalDate today = LocalDate.now();
+            for (WelcomeBonus wb : activeWbs) {
+                if (wb.deadline == null) continue; // no urgency without a deadline
+
+                int daysLeft = (int) today.until(wb.deadline, ChronoUnit.DAYS);
+                if (daysLeft < 0 || daysLeft > threshold) continue;
+
+                // Find the matching active UserCard
+                UserCard card = null;
+                for (UserCard c : activeCards) {
+                    if (c.id == wb.userCardId) { card = c; break; }
+                }
+                if (card == null) continue;
+
+                CardDefinition def = cardRepo.getCardDefinitionSync(card.cardDefinitionId);
+                String cardName = UserCard.label(
+                        def != null ? def.displayName : "Card",
+                        card.lastFour, card.nickname);
+
+                int remainCents = Math.max(0, wb.spendRequirementCents - wb.spendUsedCents);
+                String body = daysLeft == 0 ? "Deadline is today!"
+                        : daysLeft + " day" + (daysLeft == 1 ? "" : "s") + " left";
+                if (remainCents > 0) {
+                    body += " · " + CurrencyUtil.centsToString(remainCents) + " to go";
+                }
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_nav_credits)
+                        .setContentTitle("Welcome bonus expiring: " + cardName)
+                        .setContentText(body)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setAutoCancel(true);
+                NotificationManagerCompat.from(appContext).notify(notifId++, builder.build());
+            }
+        }
+
         return Result.success();
     }
 
-    private void createNotificationChannel(Context context) {
+    private static void createNotificationChannel(Context context) {
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 "Benefit Reminders",
-                NotificationManager.IMPORTANCE_DEFAULT);
+                NotificationManager.IMPORTANCE_HIGH);
         channel.setDescription("Reminders for unused card benefits near their reset date");
         NotificationManager nm = context.getSystemService(NotificationManager.class);
         if (nm != null) nm.createNotificationChannel(channel);
