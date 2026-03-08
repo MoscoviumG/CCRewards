@@ -280,8 +280,12 @@ public class BestCardViewModel extends ViewModel {
                     for (RotationalBonusCategory cat : cats) {
                         try {
                             RewardCategory rc = RewardCategory.valueOf(cat.categoryName);
+                            // The quarterly rate is the *total* earn rate for those categories.
+                            // Subtract 1.0 so we add only the net additional on top of the
+                            // card's base earn rate that is already included in stored rates.
+                            double netBonus = Math.max(0, cat.rate - 1.0);
                             RewardRate synthRate = new RewardRate(
-                                    cardDefId, rc, cat.rateType, cat.rate, false, null, false);
+                                    cardDefId, rc, cat.rateType, netBonus, false, null, false);
                             if (cat.currencyName != null && !cat.currencyName.isEmpty()) {
                                 synthRate.currencyName = cat.currencyName;
                             }
