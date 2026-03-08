@@ -20,6 +20,11 @@ public class CardBenefit {
     @NonNull
     public ResetType resetType;
 
+    /** Month (1–12) of the custom reset date. Null unless resetType == CUSTOM. */
+    public Integer customResetMonth;
+    /** Day of month (1–31) of the custom reset date. Null unless resetType == CUSTOM. */
+    public Integer customResetDay;
+
     /** Room constructor — used for deserialization. */
     public CardBenefit(String cardDefinitionId, String name, String description,
                        int amountCents, ResetPeriod resetPeriod, boolean isCustom, @NonNull ResetType resetType) {

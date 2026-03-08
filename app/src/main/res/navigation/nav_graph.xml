@@ -271,6 +271,27 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_settings_to_manageCategories"
+            app:destination="@id/manageCategoriesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/manageCategoriesFragment"
+        android:name="com.example.ccrewards.ui.settings.ManageCategoriesFragment"
+        android:label="Best Card Categories"
+        tools:layout="@layout/fragment_manage_categories">
+        <action
+            android:id="@+id/action_manageCategories_to_customCategoryDetail"
+            app:destination="@id/customCategoryDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment

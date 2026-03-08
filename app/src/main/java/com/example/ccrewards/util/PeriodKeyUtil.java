@@ -46,7 +46,9 @@ public class PeriodKeyUtil {
     public static LocalDate periodKeyStartDate(String key) {
         if (key == null) return null;
         try {
-            if (key.startsWith("anniv-")) {
+            if (key.startsWith("custom-")) {
+                return LocalDate.parse(key.substring(7));  // "custom-2025-06-20" → 2025-06-20
+            } else if (key.startsWith("anniv-")) {
                 return LocalDate.parse(key.substring(6));  // "anniv-2025-06-15" → 2025-06-15
             } else if (key.contains("-Q")) {               // "2026-Q2"
                 int year = Integer.parseInt(key.substring(0, 4));
@@ -91,6 +93,76 @@ public class PeriodKeyUtil {
         }
 
         return (int) today.until(nextReset, ChronoUnit.DAYS);
+    }
+
+    // ── Custom date-based reset methods ───────────────────────────────────────
+
+    /**
+     * Period key for a custom-date benefit (user-specified month+day anchor).
+     * Format: "custom-YYYY-MM-DD" where date = start of the current period.
+     */
+    public static String getCurrentCustomPeriodKey(ResetPeriod period, int month, int day) {
+        return getCustomPeriodKey(LocalDate.now(), period, month, day);
+    }
+
+    public static String getCustomPeriodKey(LocalDate date, ResetPeriod period, int month, int day) {
+        return "custom-" + getCustomPeriodStart(date, period, month, day).toString();
+    }
+
+    /** Days until the next reset for a custom-date benefit. */
+    public static int daysUntilCustomReset(ResetPeriod period, int month, int day) {
+        LocalDate today = LocalDate.now();
+        LocalDate start = getCustomPeriodStart(today, period, month, day);
+        LocalDate nextReset;
+        switch (period) {
+            case MONTHLY:       nextReset = start.plusMonths(1); break;
+            case QUARTERLY:     nextReset = start.plusMonths(3); break;
+            case SEMI_ANNUALLY: nextReset = start.plusMonths(6); break;
+            case ANNUALLY:
+            default:            nextReset = start.plusYears(1);  break;
+        }
+        return (int) today.until(nextReset, ChronoUnit.DAYS);
+    }
+
+    /**
+     * Start date of the custom period containing {@code date}.
+     * The anchor repeats every period starting from the given month+day.
+     */
+    private static LocalDate getCustomPeriodStart(LocalDate date, ResetPeriod period,
+                                                   int month, int day) {
+        switch (period) {
+            case MONTHLY: {
+                int clampedDay = Math.min(day, date.lengthOfMonth());
+                LocalDate candidate = date.withDayOfMonth(clampedDay);
+                if (candidate.isAfter(date)) {
+                    candidate = candidate.minusMonths(1);
+                    candidate = candidate.withDayOfMonth(Math.min(day, candidate.lengthOfMonth()));
+                }
+                return candidate;
+            }
+            case QUARTERLY: {
+                LocalDate base = safeDate(date.getYear(), month, day);
+                while (base.isAfter(date)) base = base.minusMonths(3);
+                while (!base.plusMonths(3).isAfter(date)) base = base.plusMonths(3);
+                return base;
+            }
+            case SEMI_ANNUALLY: {
+                LocalDate base = safeDate(date.getYear(), month, day);
+                while (base.isAfter(date)) base = base.minusMonths(6);
+                while (!base.plusMonths(6).isAfter(date)) base = base.plusMonths(6);
+                return base;
+            }
+            case ANNUALLY:
+            default: {
+                LocalDate candidate = safeDate(date.getYear(), month, day);
+                return candidate.isAfter(date) ? candidate.minusYears(1) : candidate;
+            }
+        }
+    }
+
+    private static LocalDate safeDate(int year, int month, int day) {
+        int maxDay = java.time.YearMonth.of(year, month).lengthOfMonth();
+        return LocalDate.of(year, month, Math.min(day, maxDay));
     }
 
     // ── Anniversary-based reset methods ───────────────────────────────────────

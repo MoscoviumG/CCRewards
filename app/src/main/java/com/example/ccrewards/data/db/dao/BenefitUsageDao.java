@@ -31,6 +31,9 @@ public interface BenefitUsageDao {
     @Update
     void update(BenefitUsage usage);
 
+    @androidx.room.Delete
+    void delete(BenefitUsage usage);
+
     @Query("UPDATE benefit_usage SET isUsed = :isUsed " +
            "WHERE userCardId = :userCardId AND benefitId = :benefitId AND periodKey = :periodKey")
     void setUsed(long userCardId, long benefitId, String periodKey, boolean isUsed);

@@ -48,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
             setupBottomNav();
+            if (savedInstanceState == null) {
+                navigateToLaunchScreen();
+            }
         }
 
         // Request POST_NOTIFICATIONS permission (Android 13+)
@@ -92,6 +95,24 @@ public class MainActivity extends AppCompatActivity {
             }
             binding.bottomNav.getMenu().findItem(tabId).setChecked(true);
         });
+    }
+
+    private void navigateToLaunchScreen() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String key = prefs.getString(SettingsFragment.PREF_LAUNCH_SCREEN,
+                SettingsFragment.LAUNCH_MY_CARDS);
+        int destId;
+        switch (key) {
+            case SettingsFragment.LAUNCH_BEST_CARD: destId = R.id.bestCardFragment;  break;
+            case SettingsFragment.LAUNCH_CREDITS:   destId = R.id.creditsFragment;   break;
+            case SettingsFragment.LAUNCH_SETTINGS:  destId = R.id.settingsFragment;  break;
+            default:                                return; // already at My Cards
+        }
+        NavOptions opts = new NavOptions.Builder()
+                .setLaunchSingleTop(true)
+                .setPopUpTo(R.id.myCardsFragment, true)
+                .build();
+        navController.navigate(destId, null, opts);
     }
 
     private void requestNotificationPermission() {

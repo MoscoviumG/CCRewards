@@ -1,5 +1,6 @@
 package com.example.ccrewards.ui.mycards;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,8 @@ public class AddEditBenefitFragment extends Fragment {
     private AddEditBenefitViewModel viewModel;
     private String cardDefinitionId;
     private long benefitId;
+    private Integer customMonth = null;
+    private Integer customDay = null;
 
     @Nullable
     @Override
@@ -63,6 +66,35 @@ public class AddEditBenefitFragment extends Fragment {
 
         viewModel.loadBenefit(benefitId);
 
+        // Show/hide custom date row when reset type changes
+        binding.rgResetType.setOnCheckedChangeListener((group, checkedId) -> {
+            boolean showCustom = checkedId == binding.rbCustom.getId();
+            binding.layoutCustomDate.setVisibility(showCustom ? View.VISIBLE : View.GONE);
+        });
+
+        binding.btnPickCustomDate.setOnClickListener(v -> {
+            int initMonth = customMonth != null ? customMonth - 1 : java.time.LocalDate.now().getMonthValue() - 1;
+            int initDay   = customDay   != null ? customDay       : java.time.LocalDate.now().getDayOfMonth();
+            // Use year 2000 (fixed, we only care about month+day)
+            DatePickerDialog dpd = new DatePickerDialog(requireContext(),
+                    (picker, year, month0, dayOfMonth) -> {
+                        customMonth = month0 + 1;
+                        customDay   = dayOfMonth;
+                        binding.tvCustomDateLabel.setText(
+                                java.time.Month.of(customMonth).getDisplayName(
+                                        java.time.format.TextStyle.SHORT,
+                                        java.util.Locale.getDefault()) + " " + customDay);
+                    }, 2000, initMonth, initDay);
+            // Hide year spinner — we only want month+day
+            try {
+                java.lang.reflect.Field f = dpd.getDatePicker().getClass().getDeclaredField("mYearSpinner");
+                f.setAccessible(true);
+                android.view.View yearSpinner = (android.view.View) f.get(dpd.getDatePicker());
+                if (yearSpinner != null) yearSpinner.setVisibility(View.GONE);
+            } catch (Exception ignored) {}
+            dpd.show();
+        });
+
         // Populate fields if editing
         viewModel.getExistingBenefit().observe(getViewLifecycleOwner(), benefit -> {
             if (benefit != null) {
@@ -78,10 +110,24 @@ public class AddEditBenefitFragment extends Fragment {
                     default: binding.rgResetPeriod.check(binding.rbAnnually.getId()); break;
                 }
                 // Set reset type radio
-                if (benefit.resetType == ResetType.ANNIVERSARY) {
-                    binding.rgResetType.check(binding.rbAnniversary.getId());
-                } else {
-                    binding.rgResetType.check(binding.rbCalendar.getId());
+                switch (benefit.resetType) {
+                    case ANNIVERSARY:
+                        binding.rgResetType.check(binding.rbAnniversary.getId());
+                        break;
+                    case CUSTOM:
+                        binding.rgResetType.check(binding.rbCustom.getId());
+                        if (benefit.customResetMonth != null && benefit.customResetDay != null) {
+                            customMonth = benefit.customResetMonth;
+                            customDay   = benefit.customResetDay;
+                            binding.tvCustomDateLabel.setText(
+                                    java.time.Month.of(customMonth).getDisplayName(
+                                            java.time.format.TextStyle.SHORT,
+                                            java.util.Locale.getDefault()) + " " + customDay);
+                        }
+                        break;
+                    default:
+                        binding.rgResetType.check(binding.rbCalendar.getId());
+                        break;
                 }
             }
         });
@@ -110,8 +156,16 @@ public class AddEditBenefitFragment extends Fragment {
             ResetPeriod period = getSelectedPeriod();
             ResetType resetType = getSelectedResetType();
 
+            if (resetType == ResetType.CUSTOM && (customMonth == null || customDay == null)) {
+                Snackbar.make(v, "Please pick a start date for Custom reset type", Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+            Integer saveMonth = resetType == ResetType.CUSTOM ? customMonth : null;
+            Integer saveDay   = resetType == ResetType.CUSTOM ? customDay   : null;
+
             viewModel.saveBenefit(cardDefinitionId, name, description, amountCents, period,
-                    resetType, benefitId, () -> requireActivity().runOnUiThread(() ->
+                    resetType, saveMonth, saveDay, benefitId,
+                    () -> requireActivity().runOnUiThread(() ->
                             Navigation.findNavController(requireView()).navigateUp()));
         });
     }
@@ -137,8 +191,10 @@ public class AddEditBenefitFragment extends Fragment {
     }
 
     private ResetType getSelectedResetType() {
-        return binding.rgResetType.getCheckedRadioButtonId() == binding.rbAnniversary.getId()
-                ? ResetType.ANNIVERSARY : ResetType.CALENDAR;
+        int id = binding.rgResetType.getCheckedRadioButtonId();
+        if (id == binding.rbAnniversary.getId()) return ResetType.ANNIVERSARY;
+        if (id == binding.rbCustom.getId())      return ResetType.CUSTOM;
+        return ResetType.CALENDAR;
     }
 
     @Override

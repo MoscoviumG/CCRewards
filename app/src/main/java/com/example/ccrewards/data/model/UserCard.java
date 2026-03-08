@@ -19,6 +19,9 @@ public class UserCard {
     public LocalDate closeDate;     // null = still active
     public int sortOrder;
 
+    /** User-overridden card strip color (ARGB). Null = use definition's cardColorPrimary. */
+    public Long customColorPrimary;
+
     public UserCard(String cardDefinitionId, String nickname, int creditLimit,
                     LocalDate openDate, LocalDate closeDate, int sortOrder) {
         this.cardDefinitionId = cardDefinitionId;

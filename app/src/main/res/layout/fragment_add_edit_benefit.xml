@@ -161,7 +161,47 @@
                     android:layout_height="wrap_content"
                     android:text="Anniversary (card open date)" />
 
+                <RadioButton
+                    android:id="@+id/rb_custom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Custom (specific start date)" />
+
             </RadioGroup>
+
+            <!-- Custom date picker — shown only when Custom is selected -->
+            <LinearLayout
+                android:id="@+id/layout_custom_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Period starts on:"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_pick_custom_date"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pick Date" />
+
+                <TextView
+                    android:id="@+id/tv_custom_date_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:text="" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

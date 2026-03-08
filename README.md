@@ -13,7 +13,7 @@ A US credit card portfolio optimizer for Android. CCRewards helps you track ever
 
 1. [Features Overview](#features-overview)
 2. [Supported Cards](#supported-cards)
-3. [Using the App](#using-the-app)
+3. [How to Use](#how-to-use)
    - [My Cards](#my-cards)
    - [Best Card](#best-card)
    - [Credits](#credits)
@@ -37,10 +37,17 @@ A US credit card portfolio optimizer for Android. CCRewards helps you track ever
 | **Welcome Bonus Tracking** | Monitor active sign-up bonuses with spend progress and deadlines |
 | **Quarterly Rotational Bonuses** | Track time-limited bonus rates (e.g. 5% on gas this quarter) per card |
 | **Credits Tracker** | Log and toggle recurring statement credits before they reset |
+| **Editable Usage History** | Tap any past usage entry to correct amounts, toggle status, or delete it; add entries for past periods |
+| **Custom Benefit Reset Date** | Set a specific calendar date as the annual reset anchor — ideal for free nights and oddly-timed credits |
 | **Benefit Reminders** | Daily notifications for credits and welcome bonuses about to expire |
 | **Point Valuations** | Per-currency ¢/pt editor powering all effective-return math |
 | **Transfer Partner Reference** | In-app lookup of transfer ratios for each transferable currency |
 | **Product Change History** | Record card upgrades and downgrades with full account history |
+| **Sort My Cards** | Sort your card list by open date, name, annual fee, issuer, or anniversary month |
+| **Card Color Customization** | Override the display color strip on any card to your preference |
+| **Portfolio Statistics** | At-a-glance total card count, total annual fees, and Chase 5/24 tracker with next drop-to-4 date |
+| **Manage Best Card Categories** | Choose which categories appear in the Best Card grid, reorder them via drag-and-drop, and add custom categories |
+| **Launch Screen** | Choose which tab the app opens to on launch |
 | **Dark / Light / System Theme** | Choose app theme in Settings |
 
 ---
@@ -53,23 +60,38 @@ For the full catalog — including every card's reward rates, annual fee, and tr
 
 ---
 
-## Using the App
+## How to Use
 
 ### My Cards
 
 The **My Cards** tab is your card portfolio. Every card you own lives here.
 
+---
+
 #### Card List
 
-The main view shows all cards you have added, each tile displaying the card name, last four digits, and nickname (if set). Tap any card to open its detail screen. Use the filter button (top-right) to narrow the list by:
+The main view shows all cards you have added. Each tile displays the card name, last four digits, nickname (if set), annual fee, and issuer. A colored strip along the left edge reflects the card's brand color.
 
+**Filter** — Tap the filter icon (top-right) to narrow the list by:
 - **Type** — Personal, Business
 - **Issuer** — Chase, Amex, Citi, Capital One, Bank of America, and more
 - **Network** — Visa, Mastercard, Amex, Discover
 - **Anniversary month** — surface cards whose annual fee renewal is coming up
 - **Card age** — new (< 30 days), under 1 year, 1–3 years, 3+ years
 
-An active-filter badge on the button shows how many filters are on. Tap the button again to clear or adjust them.
+An active-filter badge on the button shows how many filters are on. Tap again to clear or adjust them.
+
+**Sort** — Tap the sort icon (top-left, next to the filter) to change the order of the card list. Options:
+- **Default** — order cards were added to the portfolio
+- **Open date** — oldest to newest by the date the card was opened
+- **Alphabetical** — A–Z by card name
+- **Annual fee** — lowest to highest
+- **Issuer** — grouped alphabetically by issuer name
+- **Anniversary month** — grouped by the month the card anniversary falls in
+
+Your sort preference is saved and persists between app restarts.
+
+---
 
 #### Adding a Card
 
@@ -87,126 +109,143 @@ Tap **Add** to save.
 
 **Custom card** — Tap "Create Custom Card" for a card not in the catalog. Enter the name, issuer, annual fee, and the same optional fields above. You can add reward rates and benefits inline before saving.
 
+---
+
 #### Card Detail
 
 Tap any card in the list to open its full profile.
 
-**Header** shows the card name, issuer, network, annual fee, credit limit, open date, and nickname. A brand-colored strip runs along the top of the card.
+**Header** — Shows the card name, issuer, network, annual fee, credit limit, and open date. A brand-colored strip runs along the top.
 
-**Reward Rates** lists every earn rate on the card (e.g. "Dining: 3x UR Points", "General: 1.5x UR Points"). Tap **Edit Reward Rates** to override any rate — useful when a card has a limited-time promotion or when you want to model a downgraded base rate.
+Tap **Change Card Color** (below the header) to open a color picker and override the strip color with any of 20 preset card-like colors. Select a swatch to apply it immediately. Tap **Reset to Default** to restore the card's original brand color.
 
-**Welcome Bonus** tracks an active sign-up bonus on this card (see [Welcome Bonus](#welcome-bonus) below).
+**Reward Rates** — Lists every earn rate on the card (e.g. "Dining: 3x UR Points"). Tap **Edit Reward Rates** to override any rate.
 
-**Quarterly Bonuses** shows all active rotational/quarterly bonus rates on this card (see [Quarterly Rotational Bonuses](#quarterly-rotational-bonuses) below). Tap **+ Add Quarterly Bonus** to add one.
+**Welcome Bonus** — Tracks an active sign-up bonus on this card (see [Welcome Bonus](#welcome-bonus)).
 
-**Benefits & Credits** lists all statement credits and perks attached to the card. Tap any benefit to view its full usage history or edit it. Tap **+ Add Benefit** to create a custom benefit (e.g. a free night certificate or a lounge access credit).
+**Quarterly Bonuses** — Shows all active rotational bonus rates on this card. Tap **+ Add Quarterly Bonus** to add one.
 
-**Account History** records every product change (upgrade/downgrade) made to this card's underlying account line.
+**Benefits & Credits** — Lists all statement credits and perks. Tap any benefit to view its full usage history and edit usage. Tap **+ Add Benefit** to create a custom benefit.
 
-At the bottom: **Product Change** to log a card upgrade or downgrade, and **Delete Card** (with confirmation) to remove the card from your portfolio entirely.
+**Account History** — Records every product change (upgrade/downgrade) made to this account.
+
+**Bottom actions** — **Product Change** to log a card upgrade or downgrade; **Delete Card** to remove the card (with confirmation).
+
+---
 
 #### Editing Reward Rates
 
-Tap **Edit Reward Rates** on the Card Detail screen. Every spend category is listed with an editable rate field and rate-type chips (Points / Miles / Cash Back). Change any value and tap **Save**. Customized rates are highlighted so you can tell them apart from defaults at a glance. Tap **Add Category** to add a rate for a category not currently listed. Tap **Reset Rates** to restore all values to the seed defaults.
+Tap **Edit Reward Rates** on the Card Detail screen. Every spend category is listed with an editable rate field and rate-type chips (Points / Miles / Cash Back). Change any value and tap **Save**. Customized rows are highlighted so you can tell them apart from defaults. Tap **Add Category** to add a rate for a category not listed. Tap **Reset Rates** to restore all values to the seed defaults.
+
+---
 
 #### Product Change
 
 If you upgrade or downgrade a card (e.g. Chase Sapphire Preferred → Chase Freedom Unlimited), tap **Product Change**. The app shows all other cards from the same issuer. Tap the target card, confirm, and the app:
 - Switches the card's definition (new name, rates, and benefits)
 - Preserves the original open date and account history
-- Records the change in the Account History section with today's date
+- Records the change in Account History with today's date
+
+---
 
 #### Welcome Bonus
 
-Each card can have one active welcome bonus tracked at a time. In the Card Detail screen, under **Welcome Bonus**, tap **+ Set Welcome Bonus**. In the bottom sheet that appears, enter:
+Each card can have one active welcome bonus tracked at a time. In Card Detail, under **Welcome Bonus**, tap **+ Set Welcome Bonus**. In the bottom sheet, enter:
 
 - **Bonus amount** — points/miles count (e.g. 60,000) or dollar value for cash-back cards (e.g. $200)
 - **Spend requirement** — minimum spend to earn the bonus (e.g. $4,000)
 - **Deadline** — optional; tap to open a date picker. Bonuses past their deadline are automatically hidden from the Best Card banner
 - **Show in Best Card** — toggle whether this bonus appears in the Best Card banner (on by default)
 
-Once saved, the Card Detail screen shows the bonus details. Three actions are available:
-- **Mark Done** — records the bonus as earned; it disappears from the Best Card banner but remains visible on the card's detail screen
-- **Edit** — reopens the bottom sheet pre-filled with current values
+Once saved, three actions are available from Card Detail:
+- **Mark Done** — records the bonus as earned; disappears from the Best Card banner but remains visible on Card Detail
+- **Edit** — reopens the bottom sheet pre-filled
 - **Remove** — deletes the bonus record after a confirmation dialog
+
+---
 
 #### Quarterly Rotational Bonuses
 
-Some cards offer time-limited bonus rates on rotating or user-selected categories (e.g. "5% on gas stations through March 31"). Tap **+ Add Quarterly Bonus** on the Card Detail screen to record one. Fill in:
+Some cards offer time-limited bonus rates on rotating or user-selected categories (e.g. "5% on gas stations through March 31"). Tap **+ Add Quarterly Bonus** to record one. Fill in:
 
 - **Label** — a short name for the bonus period (e.g. "Q1 2026 Gas")
 - **End date** — when the bonus expires; defaults to the end of the current quarter
 - **Spend limit** — maximum spend eligible for the bonus rate (e.g. $1,500)
 - **Categories** — one or more spend categories with their bonus rate and rate type
 
-Once saved, the bonus appears on the Card Detail screen with a progress bar showing how much of the spend limit has been used. You can drag the bar to update usage. Tap **Mark Done** when the limit is reached or the period ends.
+Once saved, the bonus appears on Card Detail with a progress bar. Drag the bar to update usage. Tap **Mark Done** when the limit is reached or the period ends.
 
-Active quarterly bonuses are automatically injected into the **Best Card** rankings for their categories while the bonus is live and spend is available, so the right card always floats to the top.
+Active quarterly bonuses are automatically injected into **Best Card** rankings for their categories while live and spend is available.
 
 ---
 
 ### Best Card
 
-The **Best Card** tab answers the question *"which card should I swipe right now?"* for every spending category.
+The **Best Card** tab answers *"which card should I swipe right now?"* for every spend category.
+
+---
 
 #### Category Grid
 
-The main view is a 2-column grid of spend category tiles showing cards from your portfolio. Each tile shows:
+The main view is a 2-column grid of spend category tiles. Each tile shows:
 - The spend category name
-- The best card for that category
+- The best card in your portfolio for that category
 - The effective return percentage (e.g. "3.00%") — or the raw earn rate (e.g. "3x UR") depending on your Settings display preference
-- For non-cash-back cards, a secondary line with the complementary view
 
-The eight built-in categories are: **General, Dining, Groceries, Travel, Gas, Entertainment, Online Shopping, Rent / Mortgage.**
+The categories shown, their order, and their visibility are all configurable from **Settings → Best Card Categories** (see [Manage Best Card Categories](#manage-best-card-categories)).
 
-Custom categories you have created appear below the built-in tiles.
+---
 
 #### Travel Group
 
 Tapping the **Travel** tile opens a dedicated Travel screen with 19 sub-category tiles:
 - **General Travel** — true general travel cards (CSP, CSR, Amex Platinum, etc.)
 - **Travel Portal** — booking through card-specific travel portals
-- **Airlines** — Alaska Airlines, American Airlines, Aer Lingus, Air France / KLM, Aeroplan, Allegiant, British Airways, Delta, Iberia, Southwest, Spirit, United
+- **Airlines** — Alaska, American, Aer Lingus, Air France / KLM, Aeroplan, Allegiant, British Airways, Delta, Iberia, Southwest, Spirit, United
 - **Hotels** — Hilton, Hyatt, IHG, Marriott
 - **Cruises**
 
-Each sub-category tile shows only cards that actually earn that brand's currency (e.g. the Hilton tile shows only Hilton co-branded cards). General-travel cards do not bleed into brand-specific tiles.
+Each sub-category tile shows only cards that earn that brand's currency. General-travel cards do not bleed into brand-specific tiles.
+
+---
 
 #### Welcome Bonus Banner
 
 When you have active, unachieved welcome bonuses, a **Welcome Bonuses** banner appears at the top of the Best Card screen. Each row shows:
-- The card name (with last four digits and nickname if set)
-- Bonus details — points/miles amount, reward currency, and effective return estimate
-- Spending required and spend progress
-- A progress bar showing spend-to-goal completion
-- Expiry date (bottom-left) and spend progress amount (bottom-right, format: `$used / $total`)
+- Card name with last four and nickname
+- Bonus details — points/miles amount and effective return estimate
+- Spending required and a progress bar showing spend-to-goal completion
+- Expiry date and spend progress format: `$used / $total`
 
-Tap **Mark Done** on any row to record the bonus as achieved. The row disappears from the banner.
+Tap **Mark Done** on any row to record the bonus as achieved.
+
+---
 
 #### Quarterly Bonus Banner
 
-When you have active quarterly rotational bonuses, a **Quarterly Bonuses** section appears on the Best Card screen below the welcome bonus banner. Each row shows:
-- The card name and bonus label
-- The bonus categories and their rates
-- A progress bar for spend against the limit
-- Expiry date (bottom-left) and spend progress amount (bottom-right, format: `$used / $total`)
+When you have active quarterly rotational bonuses, a **Quarterly Bonuses** section appears below the welcome bonus banner. Each row shows:
+- Card name and bonus label
+- Bonus categories and their rates
+- A spend progress bar with the `$used / $total` format
 
-Drag the progress bar to update how much of the spend limit has been used. Tap **Mark Done** when the bonus is exhausted or expired.
+Drag the progress bar to update spend. Tap **Mark Done** when the bonus is exhausted or expired.
+
+---
 
 #### Tap a Tile → Category Detail
 
-Tapping any tile (other than Travel, which opens the Travel Group) opens a ranked list of all eligible cards for that category, sorted by effective return. Each row shows the card name (with last four and nickname), effective return %, and an "Owned" chip if the card is in your portfolio.
+Tapping any tile (other than Travel) opens a ranked list of all eligible cards for that category, sorted by effective return. Each row shows the card name, effective return %, and an "Owned" chip if the card is in your portfolio.
+
+---
 
 #### Custom Categories
 
-Tap the **+** FAB (bottom-right) to create a custom spending category. Enter a name (e.g. "Apple.com", "Costco", "Pharmacy") and tap **Create**. The app navigates directly to the Custom Category Detail screen.
+To add a custom spend category (e.g. "Apple.com", "Costco"), go to **Settings → Best Card Categories** and tap the **+** FAB. Enter a name and tap **Create**. The app navigates directly to the Custom Category Detail screen.
 
 **Custom Category Detail** shows every card in your portfolio. For each card you can:
-- Enter a custom earn rate for this specific category
+- Enter a custom earn rate for this category
 - Leave it blank to fall back to the card's General rate
 - Tap **×** to clear a previously entered override
-
-The ranked recommendations for the custom tile are computed the same way as built-in categories — using your ¢/pt valuations to convert everything to a comparable effective return.
 
 To rename or delete a custom category, use the overflow menu (⋮) on the Custom Category Detail screen.
 
@@ -216,38 +255,60 @@ To rename or delete a custom category, use the overflow menu (⋮) on the Custom
 
 The **Credits** tab is your benefit coupon book — every statement credit, free night, and recurring perk across all your cards in one place.
 
+---
+
 #### Benefit List
 
 Benefits are grouped by card and reset period. Each group header shows the card name (with last four digits and nickname) and how many days until its next reset. Each benefit row shows:
 - The benefit name and dollar value (e.g. "$300 / yr", "$15 / mo")
-- An **anniversary** badge if this benefit resets on your card's open-date anniversary rather than the calendar year
+- An **anniversary** badge if this benefit resets on the card's open-date anniversary
 - A **Used / Not used** toggle switch
 
-Flipping the toggle to **Used** marks the benefit as used for the current period and records today's date. The toggle automatically resets to "Not used" when the new period begins.
+Flipping the toggle to **Used** marks the benefit as used for the current period and records today's date. The toggle automatically resets to "Not used" when a new period begins.
 
 **Search** — type in the search bar at the top to filter benefits by name or card.
 
-**Hide Used** — tap the chip to hide all benefits already marked used in the current period, so you can focus on what's left to claim.
+**Hide Used** — tap the chip to hide all benefits already marked used in the current period.
+
+---
 
 #### Benefit Detail
 
-Tap any benefit row to open its detail view. At the top you'll find the name, description, and value. Below that is a **full usage history** — every period since you added the card, showing whether the benefit was used and, if so, the exact date it was marked used. This is useful for tracking annual credits across multiple years or spotting missed monthly credits.
+Tap any benefit row to open its detail view. At the top: the name, description, and value. A **slider** (for monetary benefits) or **toggle** (for non-monetary perks) lets you log usage for the current period.
 
-You can also toggle the used status directly from this screen.
+**Mark as Fully Used** — tap the button to jump the slider to 100% and mark the full amount as used.
 
-#### Adding Custom Benefits
+**Usage History** — below the usage controls, every past period is listed showing whether the benefit was used, how much was used, and the date it was marked.
 
-From Card Detail, tap **+ Add Benefit**. Fill in:
+**Editing a past entry** — Tap any row in the Usage History list to open an edit dialog:
+- For monetary benefits: adjust the dollar amount used (the "fully used" flag updates automatically)
+- For non-monetary perks: toggle the used/not-used state
+- Tap **Delete** (with a confirmation dialog) to remove the entry entirely
+- Changes to the current period instantly sync the slider at the top — no re-entry needed
+
+**Adding a past entry** — Tap **+ Add Past Entry** (next to the Usage History header). A date picker appears; pick any date. The app computes the correct period key from that date (respecting the benefit's reset type and period), then prompts you to enter the usage amount or toggle. This lets you backfill credits you forgot to log.
+
+---
+
+#### Adding and Editing Benefits
+
+From Card Detail, tap **+ Add Benefit** (or tap a benefit row and use the edit icon in the toolbar). Fill in:
+
 - **Name** — what the benefit is (e.g. "Priority Pass Lounge Credit")
 - **Description** — optional notes
-- **Amount** — dollar value (e.g. $30); enter 0 for non-monetary perks
+- **Amount** — dollar value (e.g. $30); enter 0 for non-monetary perks like free nights or lounge visits
 - **Reset period** — Monthly, Quarterly, Semi-annual, or Annual
-- **Reset type** — *Calendar* (resets Jan 1 / Apr 1 / Jul 1 / Oct 1 etc.) or *Anniversary* (resets on your card's open-date anniversary)
+- **Reset type:**
+  - *Calendar* — resets on Jan 1 / Apr 1 / Jul 1 / Oct 1, etc.
+  - *Anniversary* — resets on the exact same month and day the card was opened
+  - *Custom (specific start date)* — resets on a user-chosen month and day each year. Use this for benefits that don't align with either the calendar or the card anniversary. Tap **Pick Date** to choose the month and day (year is ignored). Ideal for free night certificates, which often post a few days after the card anniversary rather than on it exactly.
+
+---
 
 #### Reminders
 
 The app sends a daily notification for:
-- **Benefit expiry** — benefits that are about to reset unused within your configured threshold
+- **Benefit expiry** — benefits about to reset unused within your configured threshold
 - **Welcome bonus deadlines** — unachieved bonuses within N days of their deadline, with remaining spend shown
 
 Configure reminders in **Settings → Notifications**.
@@ -256,7 +317,50 @@ Configure reminders in **Settings → Notifications**.
 
 ### Settings
 
-The **Settings** tab controls how the app calculates and displays reward value, manages reminder notifications, and controls the app's visual theme.
+The **Settings** tab controls how the app calculates and displays reward value, manages notifications, and controls the visual theme.
+
+---
+
+#### Portfolio Statistics
+
+At the very top of Settings, a stats panel shows three numbers updated in real time from your card portfolio:
+
+| Stat | What it shows |
+|---|---|
+| **Total Cards** | Number of cards currently in your portfolio |
+| **Total Annual Fees** | Sum of annual fees across all owned cards |
+| **5/24 Status** | Number of cards opened in the past 24 months (Chase's unofficial rule-of-thumb: approval is typically declined if this number is 5 or more) |
+
+> **Note:** Product changes (card upgrades/downgrades) do not count toward 5/24, since only new account openings are considered.
+
+When your 5/24 count is 5 or higher, a subtitle appears below showing the estimated date your count will drop back to 4 — i.e., when the oldest qualifying card ages out of the 24-month window. This tells you the earliest you can apply for a Chase card under the 5/24 rule.
+
+---
+
+#### Best Card Categories
+
+**Settings → Best Card Categories** opens a management screen for the category grid in the Best Card tab.
+
+- **Visibility toggle** — the switch on each row shows or hides that category's tile in the Best Card grid. Hidden categories are still computed internally; they simply don't appear in the grid.
+- **Reorder** — hold the drag handle (≡) on the right of any row and drag it to a new position. The grid order updates as soon as you release.
+- **Delete custom category** — tap the trash icon on any custom category row. Built-in categories cannot be deleted (only hidden).
+- **Add custom category** — tap the **+** FAB (bottom-right). Enter a name and tap Create. The app navigates directly to the Custom Category Detail screen to set per-card rates.
+
+Changes take effect the next time the Best Card tab is opened (or immediately on return).
+
+---
+
+#### Launch Screen
+
+**Settings → Appearance → Launch Screen** lets you choose which tab the app opens to when launched from the home screen. Options:
+- My Cards
+- Best Card
+- Credits
+- Settings
+
+The selection is saved immediately and persists across app restarts.
+
+---
 
 #### Point Valuations
 
@@ -287,19 +391,27 @@ The default valuations shipped with the app are conservative 1¢-per-point basel
 
 Tap any currency to open its detail screen. Enter your personal ¢/pt value and tap **Save**. Tap **Reset to Default** to restore the app's baseline. Changes take effect immediately — all Best Card percentages recalculate on the next open.
 
+---
+
 #### Transfer Partners
 
 On a currency's detail screen, below the ¢/pt editor, a **Transfer Partners** section lists all airline and hotel programs the points transfer to, along with the transfer ratio (e.g. "1:1", "1:1.5"). This is a reference guide to help you decide what valuation to enter.
 
+---
+
 #### Appearance
 
 **Theme** — choose between **Light**, **Dark**, or **System default**. The setting is applied immediately and persists across app restarts.
+
+---
 
 #### Display Mode
 
 **Show effective return %** (default ON): Best Card tiles display the computed percentage (e.g. "3.00%") as the primary value, with the raw earn rate (e.g. "3x UR") shown smaller below.
 
 Turn this OFF to flip the display — raw earn rate becomes primary and the effective % is secondary. Useful if you prefer to see "5x UR" rather than "5.00%" at a glance.
+
+---
 
 #### Notifications
 
@@ -347,9 +459,10 @@ app/src/main/java/com/example/ccrewards/
 │   ├── bestcard/         # Best Card tab — grid, travel group, category detail,
 │   │                     #   custom category detail
 │   ├── credits/          # Credits tab — benefit list, benefit detail
-│   └── settings/         # Settings tab — valuations list, currency detail, main settings
+│   └── settings/         # Settings tab — valuations list, currency detail,
+│                         #   manage categories, main settings
 ├── worker/               # BenefitReminderWorker, WorkManagerScheduler
-├── util/                 # DateUtil, CurrencyUtil, PeriodKeyUtil
+├── util/                 # DateUtil, CurrencyUtil, PeriodKeyUtil, CategoryDisplayPrefs
 ├── MainActivity.java
 └── CCRewardsApp.java
 ```
@@ -380,7 +493,7 @@ On next launch the app detects the version mismatch and refreshes the catalog in
 | `card_benefits` | Non-custom rows replaced per card | User-added benefits (`isCustom = true`) |
 | `point_valuations` | New currencies inserted; `defaultCentsPerPoint` updated | User's `centsPerPoint` edits |
 | `transfer_partners` | Fully replaced | — |
-| `user_cards` | Untouched | All owned cards, nicknames, limits, dates |
+| `user_cards` | Untouched | All owned cards, nicknames, limits, dates, custom colors |
 | `benefit_usage` | Untouched | All mark-used state and history |
 | `product_change_records` | Untouched | Full account history |
 | `welcome_bonuses` | Untouched | All bonus data |
@@ -544,6 +657,8 @@ new CardBenefit(
 | $300 | `30000` |
 | Non-monetary (free night, bonus miles) | `0` |
 
+> Seeded benefits always use `ResetType.CALENDAR` (the default). Users can change the reset type to `ANNIVERSARY` or `CUSTOM` from the benefit's edit screen after adding the card to their portfolio.
+
 ---
 
 ### Part 3 — Changing Point Valuations
@@ -576,3 +691,5 @@ To add a brand-new reward currency:
 - Navigation XML `long` arguments require the `L` suffix on default values: `android:defaultValue="-1L"`
 - `BenefitReminderWorker` uses `@EntryPoint` + `EntryPointAccessors` for Hilt injection (not `@HiltWorker`) due to WorkManager/Hilt compatibility constraints with this build config
 - Notification channel ID must be changed (e.g. `benefit_reminders_v2`) if importance level is updated, since Android ignores importance changes on existing channels
+- `CategoryDisplayPrefs` stores Best Card category order and visibility in SharedPreferences using the key format `"B:DINING"` (built-in) and `"C:42"` (custom, by ID)
+- The benefit reset type `CUSTOM` stores a month (1–12) and day (1–31) as separate nullable `INTEGER` columns on `card_benefits`; period keys use the `"custom-YYYY-MM-DD"` prefix format, consistent with the `"anniv-"` prefix used for anniversary-based benefits

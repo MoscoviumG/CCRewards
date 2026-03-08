@@ -89,16 +89,26 @@ public class CreditsViewModel extends ViewModel {
             for (UserCardWithDetails item : cards) {
                 if (item.definition == null || item.benefits == null) continue;
                 for (CardBenefit benefit : item.benefits) {
-                    boolean isAnniv = benefit.resetType == ResetType.ANNIVERSARY
+                    boolean isCustom = benefit.resetType == ResetType.CUSTOM
+                            && benefit.customResetMonth != null && benefit.customResetDay != null;
+                    boolean isAnniv = !isCustom && benefit.resetType == ResetType.ANNIVERSARY
                             && item.userCard.openDate != null;
-                    String periodKey = isAnniv
-                            ? PeriodKeyUtil.getCurrentAnniversaryPeriodKey(
-                                    benefit.resetPeriod, item.userCard.openDate)
-                            : PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
-                    int daysUntilReset = isAnniv
-                            ? PeriodKeyUtil.daysUntilAnniversaryReset(
-                                    benefit.resetPeriod, item.userCard.openDate)
-                            : PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
+                    String periodKey;
+                    int daysUntilReset;
+                    if (isCustom) {
+                        periodKey = PeriodKeyUtil.getCurrentCustomPeriodKey(
+                                benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
+                        daysUntilReset = PeriodKeyUtil.daysUntilCustomReset(
+                                benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
+                    } else if (isAnniv) {
+                        periodKey = PeriodKeyUtil.getCurrentAnniversaryPeriodKey(
+                                benefit.resetPeriod, item.userCard.openDate);
+                        daysUntilReset = PeriodKeyUtil.daysUntilAnniversaryReset(
+                                benefit.resetPeriod, item.userCard.openDate);
+                    } else {
+                        periodKey = PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
+                        daysUntilReset = PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
+                    }
 
                     BenefitUsage usage = benefitRepository.getUsageSync(
                             item.userCard.id, benefit.id, periodKey);

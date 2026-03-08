@@ -45,10 +45,13 @@ public class AddEditBenefitViewModel extends ViewModel {
 
     public void saveBenefit(String cardDefinitionId, String name, String description,
                             int amountCents, ResetPeriod resetPeriod, ResetType resetType,
+                            Integer customMonth, Integer customDay,
                             long editingBenefitId, Runnable onComplete) {
         if (editingBenefitId == -1L) {
             CardBenefit benefit = new CardBenefit(
                     cardDefinitionId, name, description, amountCents, resetPeriod, true, resetType);
+            benefit.customResetMonth = customMonth;
+            benefit.customResetDay = customDay;
             benefitRepository.insertBenefit(benefit, onComplete);
         } else {
             CardBenefit current = existingBenefit.getValue();
@@ -58,6 +61,8 @@ public class AddEditBenefitViewModel extends ViewModel {
                 current.amountCents = amountCents;
                 current.resetPeriod = resetPeriod;
                 current.resetType = resetType;
+                current.customResetMonth = customMonth;
+                current.customResetDay = customDay;
                 benefitRepository.updateBenefit(current);
                 if (onComplete != null) onComplete.run();
             }

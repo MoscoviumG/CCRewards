@@ -112,6 +112,14 @@ public class BenefitRepository {
         });
     }
 
+    public void updateUsage(BenefitUsage usage) {
+        executor.execute(() -> benefitUsageDao.update(usage));
+    }
+
+    public void deleteUsage(BenefitUsage usage) {
+        executor.execute(() -> benefitUsageDao.delete(usage));
+    }
+
     public void setUsed(long userCardId, long benefitId, String periodKey, boolean isUsed) {
         executor.execute(() -> {
             BenefitUsage existing = benefitUsageDao.getUsageSync(userCardId, benefitId, periodKey);

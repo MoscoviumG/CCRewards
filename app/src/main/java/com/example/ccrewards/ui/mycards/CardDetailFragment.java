@@ -1,11 +1,15 @@
 package com.example.ccrewards.ui.mycards;
 
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.GridLayout;
+
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,6 +47,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class CardDetailFragment extends Fragment {
+
+    private static final int[] PRESET_COLORS = {
+        0xFF1A237E, 0xFF0D47A1, 0xFF1565C0, 0xFF006994, 0xFF00695C,
+        0xFF1B5E20, 0xFF33691E, 0xFF880E4F, 0xFFB71C1C, 0xFF6A1520,
+        0xFF4A148C, 0xFF7B1FA2, 0xFFAD1457, 0xFFE65100, 0xFF212121,
+        0xFF37474F, 0xFF455A64, 0xFF546E7A, 0xFFBF9000, 0xFF78909C,
+    };
 
     private FragmentCardDetailBinding binding;
     private CardDetailViewModel viewModel;
@@ -158,6 +169,8 @@ public class CardDetailFragment extends Fragment {
 
         binding.btnDeleteCard.setOnClickListener(v -> confirmDelete());
 
+        binding.btnChangeColor.setOnClickListener(v -> showColorPickerDialog());
+
         binding.btnAddQuarterlyBenefit.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putLong("userCardId", userCardId);
@@ -217,7 +230,10 @@ public class CardDetailFragment extends Fragment {
         currentCurrencyName = item.definition.rewardCurrencyName;
         String cardLabel = UserCard.label(item.definition.displayName, item.userCard.lastFour, item.userCard.nickname);
         binding.toolbar.setTitle(cardLabel);
-        binding.detailColorStrip.setBackgroundColor((int) item.definition.cardColorPrimary);
+        int stripColor = item.userCard.customColorPrimary != null
+                ? item.userCard.customColorPrimary.intValue()
+                : (int) item.definition.cardColorPrimary;
+        binding.detailColorStrip.setBackgroundColor(stripColor);
         binding.tvDetailCardName.setText(cardLabel);
         binding.tvDetailIssuer.setText(item.definition.issuer + " · " + item.definition.network);
         binding.tvDetailAnnualFee.setText(CurrencyUtil.formatAnnualFee(item.definition.annualFee));
@@ -303,6 +319,65 @@ public class CardDetailFragment extends Fragment {
             case "Free Spirit Points":             return "FS";
             default:                               return "pts";
         }
+    }
+
+    private void showColorPickerDialog() {
+        UserCardWithDetails current = viewModel.getCardDetails().getValue();
+        if (current == null) return;
+
+        float density = getResources().getDisplayMetrics().density;
+        int swatchSize = (int) (52 * density);
+        int swatchMargin = (int) (5 * density);
+        int padding = (int) (16 * density);
+
+        GridLayout grid = new GridLayout(requireContext());
+        grid.setColumnCount(5);
+        grid.setPadding(padding, padding, padding, 0);
+
+        long effectiveColor = current.userCard.customColorPrimary != null
+                ? current.userCard.customColorPrimary
+                : current.definition.cardColorPrimary;
+
+        AlertDialog[] dialogHolder = new AlertDialog[1];
+
+        for (int color : PRESET_COLORS) {
+            GradientDrawable circle = new GradientDrawable();
+            circle.setShape(GradientDrawable.OVAL);
+            circle.setColor(color);
+            if ((int) effectiveColor == color) {
+                circle.setStroke((int) (3 * density), 0xFFFFFFFF);
+            }
+
+            View swatch = new View(requireContext());
+            swatch.setBackground(circle);
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = swatchSize;
+            params.height = swatchSize;
+            params.setMargins(swatchMargin, swatchMargin, swatchMargin, swatchMargin);
+            swatch.setLayoutParams(params);
+
+            final int selectedColor = color;
+            swatch.setOnClickListener(v -> {
+                current.userCard.customColorPrimary = (long) selectedColor;
+                viewModel.updateCard(current.userCard);
+                binding.detailColorStrip.setBackgroundColor(selectedColor);
+                if (dialogHolder[0] != null) dialogHolder[0].dismiss();
+            });
+            grid.addView(swatch);
+        }
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Card Color")
+                .setView(grid)
+                .setNeutralButton("Reset to Default", (d, w) -> {
+                    current.userCard.customColorPrimary = null;
+                    viewModel.updateCard(current.userCard);
+                    binding.detailColorStrip.setBackgroundColor((int) current.definition.cardColorPrimary);
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialogHolder[0] = dialog;
+        dialog.show();
     }
 
     private void showEditDialog() {

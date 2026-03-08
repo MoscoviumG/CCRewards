@@ -56,8 +56,11 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
         void bind(UserCardWithDetails item) {
             if (item.definition == null) return;
 
-            // Color strip (cardColorPrimary is stored as long ARGB, cast to int for Android API)
-            binding.cardColorStrip.setBackgroundColor((int) item.definition.cardColorPrimary);
+            // Color strip — use user's custom color if set, else definition default
+            int stripColor = item.userCard.customColorPrimary != null
+                    ? item.userCard.customColorPrimary.intValue()
+                    : (int) item.definition.cardColorPrimary;
+            binding.cardColorStrip.setBackgroundColor(stripColor);
 
             // Card name
             binding.tvCardName.setText(
@@ -105,7 +108,9 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
                             && Objects.equals(oldItem.userCard.cardDefinitionId,
                                               newItem.userCard.cardDefinitionId)
                             && Objects.equals(oldItem.userCard.nickname, newItem.userCard.nickname)
-                            && Objects.equals(oldItem.userCard.openDate, newItem.userCard.openDate);
+                            && Objects.equals(oldItem.userCard.openDate, newItem.userCard.openDate)
+                            && Objects.equals(oldItem.userCard.customColorPrimary,
+                                              newItem.userCard.customColorPrimary);
                 }
             };
 }

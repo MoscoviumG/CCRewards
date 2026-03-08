@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.ccrewards.R;
 import com.example.ccrewards.databinding.FragmentMyCardsBinding;
 import com.example.ccrewards.ui.common.CardFilterState;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -59,15 +60,8 @@ public class MyCardsFragment extends Fragment {
             binding.recyclerMyCards.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         });
 
-        // Observe total annual fee
-        viewModel.getTotalAnnualFee().observe(getViewLifecycleOwner(), fee -> {
-            if (fee != null && fee > 0) {
-                binding.tvTotalFee.setVisibility(View.VISIBLE);
-                binding.tvTotalFee.setText("$" + fee + "/year total annual fees");
-            } else {
-                binding.tvTotalFee.setVisibility(View.GONE);
-            }
-        });
+        // Sort button
+        binding.btnSort.setOnClickListener(v -> showSortDialog());
 
         // Filter button
         binding.btnFilter.setOnClickListener(v -> {
@@ -105,6 +99,38 @@ public class MyCardsFragment extends Fragment {
                     result.getString("cardAge", "ANY"));
         }
         return state;
+    }
+
+    private void showSortDialog() {
+        String[] options = {
+                "Default (date added)",
+                "Open date",
+                "Alphabetical",
+                "Annual fee",
+                "Issuer",
+                "Anniversary month"
+        };
+        MyCardsViewModel.SortOrder[] orders = {
+                MyCardsViewModel.SortOrder.DEFAULT,
+                MyCardsViewModel.SortOrder.OPEN_DATE,
+                MyCardsViewModel.SortOrder.ALPHABETICAL,
+                MyCardsViewModel.SortOrder.ANNUAL_FEE,
+                MyCardsViewModel.SortOrder.ISSUER,
+                MyCardsViewModel.SortOrder.ANNIVERSARY_MONTH
+        };
+        MyCardsViewModel.SortOrder current = viewModel.getCurrentSortOrder();
+        int checkedItem = 0;
+        for (int i = 0; i < orders.length; i++) {
+            if (orders[i] == current) { checkedItem = i; break; }
+        }
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Sort by")
+                .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                    viewModel.setSort(orders[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void updateFilterBadge(int activeCount) {

@@ -24,7 +24,12 @@ import com.example.ccrewards.databinding.ItemHistoryRecordBinding;
 import com.example.ccrewards.util.CurrencyUtil;
 import com.example.ccrewards.util.DateUtil;
 import com.example.ccrewards.util.PeriodKeyUtil;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import android.app.DatePickerDialog;
+import android.widget.EditText;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -43,6 +48,9 @@ public class BenefitDetailFragment extends Fragment {
     private long userCardId;
     private long benefitId;
     private String loadedCardDefinitionId;
+    private CardBenefit loadedBenefit;
+    private UserCard loadedUserCard;
+    private String currentPeriodKey;
     private boolean sliderChanging = false;
 
     @Nullable
@@ -71,7 +79,7 @@ public class BenefitDetailFragment extends Fragment {
             return false;
         });
 
-        // Usage history adapter
+        // Usage history adapter — non-static so it can show edit dialog
         UsageHistoryAdapter historyAdapter = new UsageHistoryAdapter();
         binding.recyclerUsageHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerUsageHistory.setAdapter(historyAdapter);
@@ -79,6 +87,9 @@ public class BenefitDetailFragment extends Fragment {
 
         benefitRepository.getUsageHistoryForBenefit(benefitId).observe(
                 getViewLifecycleOwner(), historyAdapter::setData);
+        historyAdapter.setOnClickListener(this::showEditUsageDialog);
+
+        binding.btnAddPastEntry.setOnClickListener(v -> showAddUsageDialog());
 
         // Load benefit + user card on background thread
         Executors.newSingleThreadExecutor().execute(() -> {
@@ -86,18 +97,32 @@ public class BenefitDetailFragment extends Fragment {
             if (benefit == null || !isAdded()) return;
 
             UserCard userCard = cardRepository.getUserCardByIdSync(userCardId);
-            boolean isAnniv = benefit.resetType == ResetType.ANNIVERSARY
+            boolean isCustom = benefit.resetType == ResetType.CUSTOM
+                    && benefit.customResetMonth != null && benefit.customResetDay != null;
+            boolean isAnniv = !isCustom && benefit.resetType == ResetType.ANNIVERSARY
                     && userCard != null && userCard.openDate != null;
-            String periodKey = isAnniv
-                    ? PeriodKeyUtil.getCurrentAnniversaryPeriodKey(benefit.resetPeriod, userCard.openDate)
-                    : PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
-            int daysUntilReset = isAnniv
-                    ? PeriodKeyUtil.daysUntilAnniversaryReset(benefit.resetPeriod, userCard.openDate)
-                    : PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
+            String periodKey;
+            int daysUntilReset;
+            if (isCustom) {
+                periodKey = PeriodKeyUtil.getCurrentCustomPeriodKey(
+                        benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
+                daysUntilReset = PeriodKeyUtil.daysUntilCustomReset(
+                        benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
+            } else if (isAnniv) {
+                periodKey = PeriodKeyUtil.getCurrentAnniversaryPeriodKey(
+                        benefit.resetPeriod, userCard.openDate);
+                daysUntilReset = PeriodKeyUtil.daysUntilAnniversaryReset(
+                        benefit.resetPeriod, userCard.openDate);
+            } else {
+                periodKey = PeriodKeyUtil.getCurrentPeriodKey(benefit.resetPeriod);
+                daysUntilReset = PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
+            }
             BenefitUsage currentUsage = benefitRepository.getUsageSync(userCardId, benefitId, periodKey);
-            String cardDefId = userCard != null ? userCard.cardDefinitionId : "";
 
-            loadedCardDefinitionId = cardDefId;
+            loadedBenefit = benefit;
+            loadedUserCard = userCard;
+            currentPeriodKey = periodKey;
+            loadedCardDefinitionId = userCard != null ? userCard.cardDefinitionId : "";
 
             requireActivity().runOnUiThread(() -> {
                 if (!isAdded() || binding == null) return;
@@ -188,10 +213,164 @@ public class BenefitDetailFragment extends Fragment {
         binding = null;
     }
 
+    // ── Edit usage history dialog ─────────────────────────────────────────────
+
+    private void showEditUsageDialog(BenefitUsage usage) {
+        if (loadedBenefit == null) return;
+        boolean monetary = loadedBenefit.amountCents > 0;
+
+        android.widget.LinearLayout container = new android.widget.LinearLayout(requireContext());
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        container.setPadding(pad, pad, pad, 0);
+
+        EditText etAmount = null;
+        android.widget.Switch swUsed = null;
+
+        if (monetary) {
+            etAmount = new EditText(requireContext());
+            etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            etAmount.setHint("Amount used ($)");
+            etAmount.setText(String.valueOf(usage.usedCents / 100));
+            container.addView(etAmount);
+        } else {
+            swUsed = new android.widget.Switch(requireContext());
+            swUsed.setText("Marked as used");
+            swUsed.setChecked(usage.isUsed);
+            container.addView(swUsed);
+        }
+
+        final EditText finalEtAmount = etAmount;
+        final android.widget.Switch finalSwUsed = swUsed;
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Edit: " + usage.periodKey)
+                .setView(container)
+                .setPositiveButton("Save", (d, w) -> {
+                    if (monetary && finalEtAmount != null) {
+                        String s = finalEtAmount.getText().toString().trim();
+                        int cents = s.isEmpty() ? 0 : (int)(Double.parseDouble(s) * 100);
+                        usage.usedCents = cents;
+                        usage.isUsed = cents >= loadedBenefit.amountCents;
+                    } else if (finalSwUsed != null) {
+                        usage.isUsed = finalSwUsed.isChecked();
+                    }
+                    benefitRepository.updateUsage(usage);
+                    // Immediately sync the current-period slider/toggle if this is the active period
+                    if (usage.periodKey.equals(currentPeriodKey) && binding != null) {
+                        if (monetary) {
+                            float maxDollars = loadedBenefit.amountCents / 100f;
+                            float newDollars = Math.min(usage.usedCents / 100f, maxDollars);
+                            sliderChanging = true;
+                            binding.sliderBdUsage.setValue(newDollars);
+                            sliderChanging = false;
+                            updateUsedLabel(usage.usedCents, loadedBenefit.amountCents);
+                        } else {
+                            binding.switchBdUsed.setOnCheckedChangeListener(null);
+                            binding.switchBdUsed.setChecked(usage.isUsed);
+                            binding.switchBdUsed.setOnCheckedChangeListener((btn, checked) ->
+                                    benefitRepository.setUsed(userCardId, benefitId, currentPeriodKey, checked));
+                        }
+                    }
+                })
+                .setNeutralButton("Delete", (d, w) ->
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Delete entry")
+                                .setMessage("Remove usage record for " + usage.periodKey + "?")
+                                .setPositiveButton("Delete", (d2, w2) -> benefitRepository.deleteUsage(usage))
+                                .setNegativeButton("Cancel", null)
+                                .show())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // ── Add past usage entry ──────────────────────────────────────────────────
+
+    private void showAddUsageDialog() {
+        if (loadedBenefit == null) return;
+        LocalDate today = LocalDate.now();
+        new DatePickerDialog(requireContext(), (picker, year, month0, dayOfMonth) -> {
+            LocalDate picked = LocalDate.of(year, month0 + 1, dayOfMonth);
+            String periodKey = computePeriodKeyForDate(picked);
+            if (periodKey == null) return;
+            showUsageAmountDialog(periodKey);
+        }, today.getYear(), today.getMonthValue() - 1, today.getDayOfMonth()).show();
+    }
+
+    private String computePeriodKeyForDate(LocalDate date) {
+        if (loadedBenefit == null) return null;
+        boolean isCustom = loadedBenefit.resetType == ResetType.CUSTOM
+                && loadedBenefit.customResetMonth != null && loadedBenefit.customResetDay != null;
+        boolean isAnniv = !isCustom && loadedBenefit.resetType == ResetType.ANNIVERSARY
+                && loadedUserCard != null && loadedUserCard.openDate != null;
+        if (isCustom) {
+            return PeriodKeyUtil.getCustomPeriodKey(
+                    date, loadedBenefit.resetPeriod,
+                    loadedBenefit.customResetMonth, loadedBenefit.customResetDay);
+        } else if (isAnniv) {
+            return PeriodKeyUtil.getAnniversaryPeriodKey(
+                    date, loadedBenefit.resetPeriod, loadedUserCard.openDate);
+        } else {
+            return PeriodKeyUtil.getPeriodKey(date, loadedBenefit.resetPeriod);
+        }
+    }
+
+    private void showUsageAmountDialog(String periodKey) {
+        if (loadedBenefit == null) return;
+        boolean monetary = loadedBenefit.amountCents > 0;
+
+        android.widget.LinearLayout container = new android.widget.LinearLayout(requireContext());
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        container.setPadding(pad, pad, pad, 0);
+
+        EditText etAmount = null;
+        android.widget.Switch swUsed = null;
+
+        if (monetary) {
+            etAmount = new EditText(requireContext());
+            etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            etAmount.setHint("Amount used ($)");
+            container.addView(etAmount);
+        } else {
+            swUsed = new android.widget.Switch(requireContext());
+            swUsed.setText("Marked as used");
+            swUsed.setChecked(false);
+            container.addView(swUsed);
+        }
+
+        final EditText finalEt = etAmount;
+        final android.widget.Switch finalSw = swUsed;
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Add Entry: " + periodKey)
+                .setView(container)
+                .setPositiveButton("Save", (d, w) -> {
+                    if (monetary && finalEt != null) {
+                        String s = finalEt.getText().toString().trim();
+                        int cents = s.isEmpty() ? 0 : (int)(Double.parseDouble(s) * 100);
+                        benefitRepository.setUsedAmount(
+                                userCardId, benefitId, periodKey, cents, loadedBenefit.amountCents);
+                    } else if (finalSw != null) {
+                        benefitRepository.setUsed(
+                                userCardId, benefitId, periodKey, finalSw.isChecked());
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     // ── Usage History Adapter ────────────────────────────────────────────────
 
-    private static class UsageHistoryAdapter extends RecyclerView.Adapter<UsageHistoryAdapter.VH> {
+    interface OnUsageClickListener {
+        void onClick(BenefitUsage usage);
+    }
+
+    private class UsageHistoryAdapter extends RecyclerView.Adapter<UsageHistoryAdapter.VH> {
         private List<BenefitUsage> items = new ArrayList<>();
+        private OnUsageClickListener clickListener;
+
+        void setOnClickListener(OnUsageClickListener l) { clickListener = l; }
 
         void setData(List<BenefitUsage> data) {
             items = data != null ? new ArrayList<>(data) : new ArrayList<>();
@@ -222,12 +401,15 @@ public class BenefitDetailFragment extends Fragment {
                 status += " · " + DateUtil.toDisplayString(usage.usedDate);
             }
             holder.binding.tvHistoryDescription.setText(status);
+            holder.itemView.setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onClick(usage);
+            });
         }
 
         @Override
         public int getItemCount() { return items.size(); }
 
-        static class VH extends RecyclerView.ViewHolder {
+        class VH extends RecyclerView.ViewHolder {
             final ItemHistoryRecordBinding binding;
             VH(ItemHistoryRecordBinding b) { super(b.getRoot()); binding = b; }
         }

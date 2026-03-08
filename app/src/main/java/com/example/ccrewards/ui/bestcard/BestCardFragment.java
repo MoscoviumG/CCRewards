@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
 import android.view.ViewGroup;
-import android.widget.EditText;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -22,6 +20,7 @@ import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.RateType;
 import com.example.ccrewards.data.model.RewardCategory;
 import com.example.ccrewards.data.model.WelcomeBonus;
+import com.example.ccrewards.util.CategoryDisplayPrefs;
 import com.example.ccrewards.data.model.relations.BestCardForCategory;
 import com.example.ccrewards.databinding.FragmentBestCardBinding;
 import com.example.ccrewards.databinding.ItemCategoryTileBinding;
@@ -44,28 +43,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class BestCardFragment extends Fragment {
 
-    // Built-in display order — Travel is an umbrella tile (TRAVEL_PORTAL lives inside the group)
-    private static final RewardCategory[] CATEGORY_ORDER = {
-            RewardCategory.GENERAL,
-            RewardCategory.DINING,
-            RewardCategory.GROCERIES,
-            RewardCategory.TRAVEL,
-            RewardCategory.GAS,
-            RewardCategory.ENTERTAINMENT,
-            RewardCategory.ONLINE_SHOPPING,
-            RewardCategory.RENT_MORTGAGE
-    };
-
-    private static final String[] CATEGORY_LABELS = {
-            "General", "Dining", "Groceries", "Travel",
-            "Gas", "Entertainment", "Online Shopping", "Rent / Mortgage"
-    };
 
     private FragmentBestCardBinding binding;
     private BestCardViewModel viewModel;
     private CategoryTileAdapter adapter;
     private WelcomeBonusAdapter wbAdapter;
     private RotationalBonusAdapter rbAdapter;
+    private View navView;
 
     // Last observed values for combining standard + custom tiles
     private Map<RewardCategory, List<BestCardForCategory>> latestRanked = null;
@@ -85,6 +69,7 @@ public class BestCardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(BestCardViewModel.class);
+        navView = view;
 
         // Welcome bonus banner
         wbAdapter = new WelcomeBonusAdapter();
@@ -120,15 +105,15 @@ public class BestCardFragment extends Fragment {
             if (tile.isCustom) {
                 Bundle args = new Bundle();
                 args.putLong("customCategoryId", tile.customCategoryId);
-                Navigation.findNavController(view)
+                Navigation.findNavController(navView)
                         .navigate(R.id.action_bestCard_to_customCategoryDetail, args);
             } else if (tile.category == RewardCategory.TRAVEL) {
-                Navigation.findNavController(view)
+                Navigation.findNavController(navView)
                         .navigate(R.id.action_bestCard_to_travelGroup);
             } else {
                 Bundle args = new Bundle();
                 args.putString("categoryName", tile.category.name());
-                Navigation.findNavController(view)
+                Navigation.findNavController(navView)
                         .navigate(R.id.action_bestCard_to_categoryDetail, args);
             }
         });
@@ -136,17 +121,14 @@ public class BestCardFragment extends Fragment {
         // Observe built-in rankings
         viewModel.getRanked().observe(getViewLifecycleOwner(), ranked -> {
             latestRanked = ranked;
-            refreshTiles(view);
+            refreshTiles();
         });
 
         // Observe custom category rankings
         viewModel.getCustomRanked().observe(getViewLifecycleOwner(), customRanked -> {
             latestCustomRanked = customRanked;
-            refreshTiles(view);
+            refreshTiles();
         });
-
-        // FAB — add custom category
-        binding.fabAddCustomCategory.setOnClickListener(v -> showAddCustomCategoryDialog(view));
 
         // Display mode preference
         showEffective = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -168,55 +150,52 @@ public class BestCardFragment extends Fragment {
             wbAdapter.setShowEffective(showEffective);
             wbAdapter.notifyDataSetChanged();
         }
+        // Re-apply category order/visibility in case user changed it in Settings
+        refreshTiles();
     }
 
-    private void refreshTiles(View view) {
-        List<CategoryTileAdapter.TileData> tiles = new ArrayList<>();
+    private void refreshTiles() {
+        if (latestRanked == null && latestCustomRanked == null) return;
 
-        // Built-in categories
+        // Build lookup maps
+        Map<RewardCategory, BestCardForCategory> builtinTop = new java.util.HashMap<>();
         if (latestRanked != null) {
-            for (int i = 0; i < CATEGORY_ORDER.length; i++) {
-                RewardCategory cat = CATEGORY_ORDER[i];
-                BestCardForCategory top = BestCardViewModel.getTop(latestRanked, cat);
-                tiles.add(new CategoryTileAdapter.TileData(cat, CATEGORY_LABELS[i], top));
+            for (RewardCategory cat : latestRanked.keySet()) {
+                builtinTop.put(cat, BestCardViewModel.getTop(latestRanked, cat));
             }
         }
-
-        // Custom categories appended at end
+        Map<Long, BestCardViewModel.CustomCategoryRanking> customMap = new java.util.HashMap<>();
+        List<Long> customIds = new ArrayList<>();
         if (latestCustomRanked != null) {
-            for (BestCardViewModel.CustomCategoryRanking ranking : latestCustomRanked) {
-                BestCardForCategory top = ranking.rankings.isEmpty() ? null : ranking.rankings.get(0);
-                tiles.add(new CategoryTileAdapter.TileData(
-                        ranking.category.id, ranking.category.name, top));
+            for (BestCardViewModel.CustomCategoryRanking r : latestCustomRanked) {
+                customMap.put(r.category.id, r);
+                customIds.add(r.category.id);
             }
         }
 
+        // Get user's ordered + filtered keys from prefs
+        List<String> orderedKeys = CategoryDisplayPrefs.getMergedOrderedKeys(requireContext(), customIds);
+        java.util.Set<String> hiddenKeys = CategoryDisplayPrefs.getHiddenKeys(requireContext());
+
+        List<CategoryTileAdapter.TileData> tiles = new ArrayList<>();
+        for (String key : orderedKeys) {
+            if (hiddenKeys.contains(key)) continue;
+            if (CategoryDisplayPrefs.isCustomKey(key)) {
+                long id = CategoryDisplayPrefs.customIdFromKey(key);
+                BestCardViewModel.CustomCategoryRanking r = customMap.get(id);
+                if (r == null) continue;
+                BestCardForCategory top = r.rankings.isEmpty() ? null : r.rankings.get(0);
+                tiles.add(new CategoryTileAdapter.TileData(r.category.id, r.category.name, top));
+            } else {
+                try {
+                    RewardCategory cat = CategoryDisplayPrefs.builtinCategoryFromKey(key);
+                    String label = CategoryDisplayPrefs.labelForBuiltin(cat);
+                    BestCardForCategory top = builtinTop.get(cat);
+                    tiles.add(new CategoryTileAdapter.TileData(cat, label, top));
+                } catch (IllegalArgumentException ignored) { }
+            }
+        }
         adapter.setTiles(tiles);
-    }
-
-    private void showAddCustomCategoryDialog(View navView) {
-        EditText input = new EditText(requireContext());
-        input.setHint("Category name (e.g., Apple.com)");
-        input.setPadding(48, 24, 48, 0);
-
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Add Custom Category")
-                .setView(input)
-                .setPositiveButton("Create", (dialog, which) -> {
-                    String name = input.getText() != null
-                            ? input.getText().toString().trim() : "";
-                    if (name.isEmpty()) return;
-                    viewModel.getCustomCategoryRepository().insertCategory(name, newId -> {
-                        requireActivity().runOnUiThread(() -> {
-                            Bundle args = new Bundle();
-                            args.putLong("customCategoryId", newId);
-                            Navigation.findNavController(navView)
-                                    .navigate(R.id.action_bestCard_to_customCategoryDetail, args);
-                        });
-                    });
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
     }
 
     @Override
