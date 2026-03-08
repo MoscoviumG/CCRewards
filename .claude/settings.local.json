@@ -42,7 +42,14 @@
       "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug:*)",
       "Bash(export:*)",
       "WebFetch(domain:www.doctorofcredit.com)",
-      "WebFetch(domain:www.dailydrop.com)"
+      "WebFetch(domain:www.dailydrop.com)",
+      "Bash(./gradlew:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew :app:compileDebugJavaWithJavac:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
