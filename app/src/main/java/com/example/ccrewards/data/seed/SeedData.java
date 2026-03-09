@@ -302,12 +302,12 @@ public class SeedData {
         List<RewardRate> list = new ArrayList<>();
 
         // Chase Sapphire Preferred
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL_PORTAL,  RateType.POINTS, 5.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL,         RateType.POINTS, 2.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.DINING,         RateType.POINTS, 3.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GROCERIES,      RateType.POINTS, 3.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.ENTERTAINMENT,  RateType.POINTS, 3.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GENERAL,        RateType.POINTS, 1.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL_PORTAL,    RateType.POINTS, 5.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL,           RateType.POINTS, 2.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.DINING,           RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.ONLINE_GROCERIES, RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.ENTERTAINMENT,    RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GENERAL,          RateType.POINTS, 1.0));
 
         // Chase Sapphire Reserve
         list.add(new RewardRate("chase_sapphire_reserve", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 8.0));

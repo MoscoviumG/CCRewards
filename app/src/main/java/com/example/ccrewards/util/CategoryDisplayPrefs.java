@@ -33,6 +33,7 @@ public class CategoryDisplayPrefs {
             RewardCategory.GAS,
             RewardCategory.ENTERTAINMENT,
             RewardCategory.ONLINE_SHOPPING,
+            RewardCategory.ONLINE_GROCERIES,
             RewardCategory.DRUGSTORES,
             RewardCategory.TRANSIT,
             RewardCategory.RENT_MORTGAGE
@@ -43,6 +44,7 @@ public class CategoryDisplayPrefs {
             RewardCategory.GAS,
             RewardCategory.ENTERTAINMENT,
             RewardCategory.ONLINE_SHOPPING,
+            RewardCategory.ONLINE_GROCERIES,
             RewardCategory.DRUGSTORES,
             RewardCategory.TRANSIT,
             RewardCategory.RENT_MORTGAGE
@@ -79,6 +81,7 @@ public class CategoryDisplayPrefs {
             case GAS:              return "Gas";
             case ENTERTAINMENT:    return "Entertainment";
             case ONLINE_SHOPPING:  return "Online Shopping";
+            case ONLINE_GROCERIES: return "Online Groceries";
             case DRUGSTORES:       return "Drugstores";
             case TRANSIT:          return "Transit & Rideshare";
             case RENT_MORTGAGE:    return "Rent / Mortgage";

@@ -143,7 +143,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 |---|---|---|---|
 | Travel Portal | 5x | Points | |
 | Dining | 3x | Points | |
-| Groceries | 3x | Points | |
+| Online Groceries | 3x | Points | Excludes Target, Walmart, and wholesale clubs |
 | Entertainment | 3x | Points | Includes select streaming services |
 | Travel | 2x | Points | |
 | General | 1x | Points | |

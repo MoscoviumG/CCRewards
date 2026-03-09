@@ -464,6 +464,7 @@ public class EditRewardRatesFragment extends Fragment {
             case "TRAVEL_AIR_FRANCE_KLM": return "Air France / KLM";
             case "TRAVEL_SPIRIT":         return "Spirit";
             case "TRAVEL_ALLEGIANT":      return "Allegiant";
+            case "ONLINE_GROCERIES":      return "Online Groceries";
             case "TRAVEL_ALASKA":         return "Alaska Airlines";
             case "TRAVEL_JETBLUE":        return "JetBlue";
             case "TRAVEL_HAWAIIAN":       return "Hawaiian Airlines";

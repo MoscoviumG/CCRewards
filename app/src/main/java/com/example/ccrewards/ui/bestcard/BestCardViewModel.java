@@ -489,8 +489,9 @@ public class BestCardViewModel extends ViewModel {
                 case TRAVEL_PORTAL:   return "Travel Portal";
                 case GAS:             return "Gas";
                 case ENTERTAINMENT:   return "Entertainment";
-                case ONLINE_SHOPPING: return "Online Shopping";
-                case DRUGSTORES:      return "Drugstores";
+                case ONLINE_SHOPPING:  return "Online Shopping";
+                case ONLINE_GROCERIES: return "Online Groceries";
+                case DRUGSTORES:       return "Drugstores";
                 case TRANSIT:         return "Transit & Rideshare";
                 case RENT_MORTGAGE:   return "Rent / Mortgage";
                 case TRAVEL_HILTON:   return "Hilton";

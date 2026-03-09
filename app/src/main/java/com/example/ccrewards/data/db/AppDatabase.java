@@ -174,7 +174,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * Existing installs will automatically refresh their catalog on next launch while
      * preserving all user data (owned cards, usage history, custom rates, ¢/pt edits).
      */
-    public static final int SEED_VERSION = 21;
+    public static final int SEED_VERSION = 22;
 
     private static final String PREF_NAME = "ccrewards_seed_prefs";
     private static final String KEY_SEED_VERSION = "seed_version";
