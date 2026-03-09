@@ -509,6 +509,12 @@ public class BestCardViewModel extends ViewModel {
                 case TRAVEL_SPIRIT:   return "Spirit";
                 case TRAVEL_ALLEGIANT:return "Allegiant";
                 case TRAVEL_ALASKA:   return "Alaska Airlines";
+                case TRAVEL_JETBLUE:  return "JetBlue";
+                case TRAVEL_HAWAIIAN: return "Hawaiian Airlines";
+                case TRAVEL_WYNDHAM:  return "Wyndham";
+                case TRAVEL_FRONTIER: return "Frontier";
+                case TRAVEL_LUFTHANSA:return "Lufthansa";
+                case TRAVEL_EMIRATES: return "Emirates";
                 case TRAVEL_CRUISES:  return "Cruises";
                 default:              return name;
             }
@@ -523,7 +529,9 @@ public class BestCardViewModel extends ViewModel {
             case TRAVEL_DELTA: case TRAVEL_UNITED: case TRAVEL_SOUTHWEST: case TRAVEL_AA:
             case TRAVEL_AEROPLAN: case TRAVEL_BRITISH_AIRWAYS: case TRAVEL_AER_LINGUS:
             case TRAVEL_IBERIA: case TRAVEL_AIR_FRANCE_KLM: case TRAVEL_SPIRIT:
-            case TRAVEL_ALLEGIANT: case TRAVEL_ALASKA: case TRAVEL_CRUISES:
+            case TRAVEL_ALLEGIANT: case TRAVEL_ALASKA: case TRAVEL_JETBLUE:
+            case TRAVEL_HAWAIIAN: case TRAVEL_WYNDHAM: case TRAVEL_FRONTIER:
+            case TRAVEL_LUFTHANSA: case TRAVEL_EMIRATES: case TRAVEL_CRUISES:
                 return true;
             default:
                 return false;

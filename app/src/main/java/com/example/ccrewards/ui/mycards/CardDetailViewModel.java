@@ -256,6 +256,13 @@ public class CardDetailViewModel extends ViewModel {
                 case DRUGSTORES:      return "Drugstores";
                 case TRANSIT:         return "Transit & Rideshare";
                 case RENT_MORTGAGE:   return "Rent / Mortgage";
+                case TRAVEL_ALASKA:   return "Alaska Airlines";
+                case TRAVEL_JETBLUE:  return "JetBlue";
+                case TRAVEL_HAWAIIAN: return "Hawaiian Airlines";
+                case TRAVEL_WYNDHAM:  return "Wyndham";
+                case TRAVEL_FRONTIER: return "Frontier";
+                case TRAVEL_LUFTHANSA:return "Lufthansa";
+                case TRAVEL_EMIRATES: return "Emirates";
                 default:              break;
             }
         } catch (IllegalArgumentException ignored) {}

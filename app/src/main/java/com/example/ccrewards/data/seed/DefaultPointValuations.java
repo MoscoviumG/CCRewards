@@ -38,6 +38,11 @@ public class DefaultPointValuations {
             // Airline miles — co-brand programs (1¢ baseline)
             new PointValuation("Flying Blue Miles",               1.0,  1.0),
             new PointValuation("Free Spirit Points",              1.0,  1.0),
+            new PointValuation("JetBlue TrueBlue Points",         1.0,  1.0),
+            new PointValuation("Wyndham Rewards Points",          1.0,  1.0),
+            new PointValuation("Frontier Miles",                  1.0,  1.0),
+            new PointValuation("Miles & More Miles",              1.0,  1.0),
+            new PointValuation("Emirates Skywards Miles",         1.0,  1.0),
             // HSBC
             new PointValuation("HSBC Rewards Points",             1.0,  1.0),
             // Cash back (fixed)

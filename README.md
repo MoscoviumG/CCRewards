@@ -54,7 +54,7 @@ A US credit card portfolio optimizer for Android. CCRewards helps you track ever
 
 ## Supported Cards
 
-The app ships with 109 pre-loaded cards (personal + business) across Chase, Amex, Citi, Capital One, Bank of America, US Bank, Wells Fargo, Bilt, Discover, HSBC, and more.
+The app ships with 118 pre-loaded cards (personal + business) across Chase, Amex, Citi, Capital One, Bank of America, US Bank, Wells Fargo, Bilt, Discover, HSBC, Barclays, and more.
 
 For the full catalog — including every card's reward rates, annual fee, and tracked benefits — see **[CARDS.md](CARDS.md)**.
 

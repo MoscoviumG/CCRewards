@@ -465,6 +465,12 @@ public class EditRewardRatesFragment extends Fragment {
             case "TRAVEL_SPIRIT":         return "Spirit";
             case "TRAVEL_ALLEGIANT":      return "Allegiant";
             case "TRAVEL_ALASKA":         return "Alaska Airlines";
+            case "TRAVEL_JETBLUE":        return "JetBlue";
+            case "TRAVEL_HAWAIIAN":       return "Hawaiian Airlines";
+            case "TRAVEL_WYNDHAM":        return "Wyndham";
+            case "TRAVEL_FRONTIER":       return "Frontier";
+            case "TRAVEL_LUFTHANSA":      return "Lufthansa";
+            case "TRAVEL_EMIRATES":       return "Emirates";
             case "TRAVEL_CRUISES":        return "Cruises";
             default:
                 String[] parts = enumName.split("_");

@@ -39,7 +39,12 @@ public class TravelGroupFragment extends Fragment {
             RewardCategory.TRAVEL_ALLEGIANT,
             RewardCategory.TRAVEL_BRITISH_AIRWAYS,
             RewardCategory.TRAVEL_DELTA,
+            RewardCategory.TRAVEL_EMIRATES,
+            RewardCategory.TRAVEL_FRONTIER,
+            RewardCategory.TRAVEL_HAWAIIAN,
             RewardCategory.TRAVEL_IBERIA,
+            RewardCategory.TRAVEL_JETBLUE,
+            RewardCategory.TRAVEL_LUFTHANSA,
             RewardCategory.TRAVEL_SOUTHWEST,
             RewardCategory.TRAVEL_SPIRIT,
             RewardCategory.TRAVEL_UNITED,
@@ -48,6 +53,7 @@ public class TravelGroupFragment extends Fragment {
             RewardCategory.TRAVEL_HYATT,
             RewardCategory.TRAVEL_IHG,
             RewardCategory.TRAVEL_MARRIOTT,
+            RewardCategory.TRAVEL_WYNDHAM,
             // Other
             RewardCategory.TRAVEL_CRUISES
     };
@@ -64,7 +70,12 @@ public class TravelGroupFragment extends Fragment {
             "Allegiant",
             "British Airways",
             "Delta",
+            "Emirates",
+            "Frontier",
+            "Hawaiian Airlines",
             "Iberia",
+            "JetBlue",
+            "Lufthansa",
             "Southwest",
             "Spirit",
             "United",
@@ -73,6 +84,7 @@ public class TravelGroupFragment extends Fragment {
             "Hyatt",
             "IHG",
             "Marriott",
+            "Wyndham",
             // Other
             "Cruises"
     };

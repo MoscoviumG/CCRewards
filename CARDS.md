@@ -122,6 +122,15 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | `bilt_palladium` | Bilt Palladium | Bilt | $495 | Personal | Bilt Points |
 | `hsbc_premier` | HSBC Premier World Elite Mastercard | HSBC | $0 | Personal | HSBC Rewards Points |
 | `hsbc_elite` | HSBC Elite World Elite Mastercard | HSBC | $495 | Personal | HSBC Rewards Points |
+| `barclays_jetblue_plus` | JetBlue Plus Card | Barclays | $99 | Personal | JetBlue TrueBlue Points |
+| `barclays_jetblue` | JetBlue Card | Barclays | $0 | Personal | JetBlue TrueBlue Points |
+| `barclays_hawaiian_airlines` | Hawaiian Airlines World Elite | Barclays | $99 | Personal | Atmos/Alaska Rewards Miles |
+| `wyndham_earner_plus` | Wyndham Rewards Earner Plus | Barclays | $75 | Personal | Wyndham Rewards Points |
+| `wyndham_earner` | Wyndham Rewards Earner | Barclays | $0 | Personal | Wyndham Rewards Points |
+| `frontier_world_mastercard` | Frontier Airlines World Mastercard | Barclays | $79 | Personal | Frontier Miles |
+| `barclays_lufthansa` | Lufthansa Miles & More Credit Card | Barclays | $89 | Personal | Miles & More Miles |
+| `barclays_emirates_rewards` | Emirates Skywards Rewards Card | Barclays | $99 | Personal | Emirates Skywards Miles |
+| `barclays_emirates_premium` | Emirates Skywards Premium Card | Barclays | $499 | Personal | Emirates Skywards Miles |
 
 ---
 
@@ -1647,3 +1656,115 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 |---|---|---|
 | Annual Bilt Cash | $200 | Annual |
 | Travel Hotel Credit | $200 | Semi-Annual |
+
+---
+
+## Barclays
+
+### JetBlue Plus Card
+`barclays_jetblue_plus` · Mastercard · $99/yr · Personal · JetBlue TrueBlue Points
+
+| Category | Rate | Type |
+|---|---|---|
+| JetBlue | 6x | Miles |
+| Dining | 2x | Miles |
+| Groceries | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### JetBlue Card
+`barclays_jetblue` · Mastercard · $0/yr · Personal · JetBlue TrueBlue Points
+
+| Category | Rate | Type |
+|---|---|---|
+| JetBlue | 3x | Miles |
+| Dining | 2x | Miles |
+| Groceries | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Hawaiian Airlines World Elite
+`barclays_hawaiian_airlines` · Mastercard · $99/yr · Personal · Atmos/Alaska Rewards Miles
+
+| Category | Rate | Type |
+|---|---|---|
+| Hawaiian Airlines | 3x | Miles |
+| Dining | 2x | Miles |
+| Gas | 2x | Miles |
+| Groceries | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Wyndham Rewards Earner Plus
+`wyndham_earner_plus` · Visa · $75/yr · Personal · Wyndham Rewards Points
+
+| Category | Rate | Type |
+|---|---|---|
+| Wyndham | 6x | Points |
+| Gas | 6x | Points |
+| Dining | 4x | Points |
+| Groceries | 4x | Points |
+| General | 1x | Points |
+
+---
+
+### Wyndham Rewards Earner
+`wyndham_earner` · Visa · $0/yr · Personal · Wyndham Rewards Points
+
+| Category | Rate | Type |
+|---|---|---|
+| Wyndham | 5x | Points |
+| Gas | 5x | Points |
+| Dining | 2x | Points |
+| Groceries | 2x | Points |
+| General | 1x | Points |
+
+---
+
+### Frontier Airlines World Mastercard
+`frontier_world_mastercard` · Mastercard · $79/yr · Personal · Frontier Miles
+
+| Category | Rate | Type |
+|---|---|---|
+| Frontier | 5x | Miles |
+| Dining | 3x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Lufthansa Miles & More Credit Card
+`barclays_lufthansa` · Mastercard · $89/yr · Personal · Miles & More Miles
+
+| Category | Rate | Type |
+|---|---|---|
+| Lufthansa | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Emirates Skywards Rewards Card
+`barclays_emirates_rewards` · Mastercard · $99/yr · Personal · Emirates Skywards Miles
+
+| Category | Rate | Type |
+|---|---|---|
+| Emirates | 3x | Miles |
+| General Travel | 2x | Miles |
+| General | 1x | Miles |
+
+---
+
+### Emirates Skywards Premium Card
+`barclays_emirates_premium` · Mastercard · $499/yr · Personal · Emirates Skywards Miles
+
+| Category | Rate | Type |
+|---|---|---|
+| Emirates | 3x | Miles |
+| General Travel | 2x | Miles |
+| General | 1x | Miles |
+
+| Benefit | Amount | Period |
+|---|---|---|
+| Global Entry / TSA PreCheck | $100 | Annual (Anniversary) |

@@ -107,6 +107,18 @@ public class SeedData {
     private static final long RITZ_GOLD       = argb(255, 172, 142,  72);
     private static final long HSBC_RED        = argb(255, 219,   0,  35);  // HSBC
     private static final long HSBC_DARK       = argb(255, 139,   0,   0);
+    private static final long JETBLUE_BLUE    = argb(255,   0,  61, 165);  // JetBlue
+    private static final long JETBLUE_LIGHT   = argb(255,   0, 160, 220);
+    private static final long HAWAIIAN_PURPLE = argb(255,  92,  45, 145);  // Hawaiian Airlines
+    private static final long HAWAIIAN_TEAL   = argb(255,   0, 164, 168);
+    private static final long WYNDHAM_DARK    = argb(255,   0,  28,  76);  // Wyndham
+    private static final long WYNDHAM_BLUE    = argb(255,   0,  94, 165);
+    private static final long FRONTIER_GREEN  = argb(255,   0, 133,  67);  // Frontier
+    private static final long FRONTIER_DARK   = argb(255,   0,  70,  35);
+    private static final long LUFTHANSA_NAVY  = argb(255,   5,  80, 140);  // Lufthansa
+    private static final long LUFTHANSA_YELLOW= argb(255, 255, 206,   0);
+    private static final long EMIRATES_RED    = argb(255, 210,  16,  52);  // Emirates
+    private static final long EMIRATES_GOLD   = argb(255, 180, 144,  60);
 
     // ── Card Definitions ──────────────────────────────────────────────────────
 
@@ -234,6 +246,17 @@ public class SeedData {
             new CardDefinition("bilt_blue",      "Bilt Blue",      "Bilt",  "Mastercard",   0, false, false, BILT_BLACK, BILT_GRAY,  "Bilt Points"),
             new CardDefinition("bilt_obsidian",  "Bilt Obsidian",  "Bilt",  "Mastercard",  95, false, false, BILT_BLACK, BILT_GOLD,  "Bilt Points"),
             new CardDefinition("bilt_palladium", "Bilt Palladium", "Bilt",  "Mastercard", 495, false, false, PALLADIUM,  BILT_BLACK, "Bilt Points"),
+
+            // Barclays Personal
+            new CardDefinition("barclays_jetblue_plus",     "JetBlue Plus Card",                   "Barclays", "Mastercard",  99, false, false, JETBLUE_BLUE,    JETBLUE_LIGHT,    "JetBlue TrueBlue Points"),
+            new CardDefinition("barclays_jetblue",          "JetBlue Card",                        "Barclays", "Mastercard",   0, false, false, JETBLUE_BLUE,    JETBLUE_LIGHT,    "JetBlue TrueBlue Points"),
+            new CardDefinition("barclays_hawaiian_airlines","Hawaiian Airlines World Elite",        "Barclays", "Mastercard",  99, false, false, HAWAIIAN_PURPLE, HAWAIIAN_TEAL,    "Atmos/Alaska Rewards Miles"),
+            new CardDefinition("wyndham_earner_plus",       "Wyndham Rewards Earner Plus",         "Barclays", "Visa",        75, false, false, WYNDHAM_DARK,    WYNDHAM_BLUE,     "Wyndham Rewards Points"),
+            new CardDefinition("wyndham_earner",            "Wyndham Rewards Earner",              "Barclays", "Visa",         0, false, false, WYNDHAM_BLUE,    WYNDHAM_DARK,     "Wyndham Rewards Points"),
+            new CardDefinition("frontier_world_mastercard", "Frontier Airlines World Mastercard",  "Barclays", "Mastercard",  79, false, false, FRONTIER_GREEN,  FRONTIER_DARK,    "Frontier Miles"),
+            new CardDefinition("barclays_lufthansa",        "Lufthansa Miles & More Credit Card",  "Barclays", "Mastercard",  89, false, false, LUFTHANSA_NAVY,  LUFTHANSA_YELLOW, "Miles & More Miles"),
+            new CardDefinition("barclays_emirates_rewards", "Emirates Skywards Rewards Card",      "Barclays", "Mastercard",  99, false, false, EMIRATES_RED,    EMIRATES_GOLD,    "Emirates Skywards Miles"),
+            new CardDefinition("barclays_emirates_premium", "Emirates Skywards Premium Card",      "Barclays", "Mastercard", 499, false, false, EMIRATES_RED,    EMIRATES_GOLD,    "Emirates Skywards Miles"),
 
             // Chase Business
             new CardDefinition("csr_business",                   "Chase Sapphire Reserve Business",             "Chase", "Visa",  795, false, true, CHASE_DARK,   CHASE_BLUE,   "Chase Ultimate Rewards Points"),
@@ -743,6 +766,58 @@ public class SeedData {
         list.add(new RewardRate("bilt_palladium", RewardCategory.GENERAL,       RateType.BILT_CASH, 4.0));
         list.add(new RewardRate("bilt_palladium", RewardCategory.RENT_MORTGAGE, RateType.BILT_CASH, 4.0));
 
+        // JetBlue Plus Card
+        list.add(new RewardRate("barclays_jetblue_plus", RewardCategory.TRAVEL_JETBLUE, RateType.MILES, 6.0));
+        list.add(new RewardRate("barclays_jetblue_plus", RewardCategory.DINING,         RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_jetblue_plus", RewardCategory.GROCERIES,      RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_jetblue_plus", RewardCategory.GENERAL,        RateType.MILES, 1.0));
+
+        // JetBlue Card
+        list.add(new RewardRate("barclays_jetblue", RewardCategory.TRAVEL_JETBLUE, RateType.MILES, 3.0));
+        list.add(new RewardRate("barclays_jetblue", RewardCategory.DINING,         RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_jetblue", RewardCategory.GROCERIES,      RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_jetblue", RewardCategory.GENERAL,        RateType.MILES, 1.0));
+
+        // Hawaiian Airlines World Elite
+        list.add(new RewardRate("barclays_hawaiian_airlines", RewardCategory.TRAVEL_HAWAIIAN, RateType.MILES, 3.0));
+        list.add(new RewardRate("barclays_hawaiian_airlines", RewardCategory.DINING,           RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_hawaiian_airlines", RewardCategory.GAS,              RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_hawaiian_airlines", RewardCategory.GROCERIES,        RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_hawaiian_airlines", RewardCategory.GENERAL,          RateType.MILES, 1.0));
+
+        // Wyndham Rewards Earner Plus
+        list.add(new RewardRate("wyndham_earner_plus", RewardCategory.TRAVEL_WYNDHAM, RateType.POINTS, 6.0));
+        list.add(new RewardRate("wyndham_earner_plus", RewardCategory.GAS,             RateType.POINTS, 6.0));
+        list.add(new RewardRate("wyndham_earner_plus", RewardCategory.DINING,          RateType.POINTS, 4.0));
+        list.add(new RewardRate("wyndham_earner_plus", RewardCategory.GROCERIES,       RateType.POINTS, 4.0));
+        list.add(new RewardRate("wyndham_earner_plus", RewardCategory.GENERAL,         RateType.POINTS, 1.0));
+
+        // Wyndham Rewards Earner
+        list.add(new RewardRate("wyndham_earner", RewardCategory.TRAVEL_WYNDHAM, RateType.POINTS, 5.0));
+        list.add(new RewardRate("wyndham_earner", RewardCategory.GAS,             RateType.POINTS, 5.0));
+        list.add(new RewardRate("wyndham_earner", RewardCategory.DINING,          RateType.POINTS, 2.0));
+        list.add(new RewardRate("wyndham_earner", RewardCategory.GROCERIES,       RateType.POINTS, 2.0));
+        list.add(new RewardRate("wyndham_earner", RewardCategory.GENERAL,         RateType.POINTS, 1.0));
+
+        // Frontier Airlines World Mastercard
+        list.add(new RewardRate("frontier_world_mastercard", RewardCategory.TRAVEL_FRONTIER, RateType.MILES, 5.0));
+        list.add(new RewardRate("frontier_world_mastercard", RewardCategory.DINING,           RateType.MILES, 3.0));
+        list.add(new RewardRate("frontier_world_mastercard", RewardCategory.GENERAL,          RateType.MILES, 1.0));
+
+        // Lufthansa Miles & More Credit Card
+        list.add(new RewardRate("barclays_lufthansa", RewardCategory.TRAVEL_LUFTHANSA, RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_lufthansa", RewardCategory.GENERAL,           RateType.MILES, 1.0));
+
+        // Emirates Skywards Rewards Card
+        list.add(new RewardRate("barclays_emirates_rewards", RewardCategory.TRAVEL_EMIRATES, RateType.MILES, 3.0));
+        list.add(new RewardRate("barclays_emirates_rewards", RewardCategory.TRAVEL,           RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_emirates_rewards", RewardCategory.GENERAL,          RateType.MILES, 1.0));
+
+        // Emirates Skywards Premium Card
+        list.add(new RewardRate("barclays_emirates_premium", RewardCategory.TRAVEL_EMIRATES, RateType.MILES, 3.0));
+        list.add(new RewardRate("barclays_emirates_premium", RewardCategory.TRAVEL,           RateType.MILES, 2.0));
+        list.add(new RewardRate("barclays_emirates_premium", RewardCategory.GENERAL,          RateType.MILES, 1.0));
+
         // Chase Sapphire Reserve Business (8x portal, 4x travel/hotels direct, 1x general)
         list.add(new RewardRate("csr_business", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 8.0));
         list.add(new RewardRate("csr_business", RewardCategory.TRAVEL,        RateType.POINTS, 4.0));
@@ -1092,7 +1167,10 @@ public class SeedData {
 
             // HSBC Elite
             new CardBenefit("hsbc_elite", "Priceline Travel Credit", "Up to $400/yr in statement credits for eligible travel booked through the Priceline platform. Resets each calendar year.", 40000, ResetPeriod.ANNUALLY, false),
-            new CardBenefit("hsbc_elite", "Rideshare Credit", "Up to $10/month ($120/yr) in statement credits for eligible rideshare purchases.", 1000, ResetPeriod.MONTHLY, false)
+            new CardBenefit("hsbc_elite", "Rideshare Credit", "Up to $10/month ($120/yr) in statement credits for eligible rideshare purchases.", 1000, ResetPeriod.MONTHLY, false),
+
+            // Emirates Skywards Premium
+            new CardBenefit("barclays_emirates_premium", "Global Entry / TSA PreCheck", "Up to $100 statement credit for Global Entry or TSA PreCheck application fee.", 10000, ResetPeriod.ANNUALLY, false, ResetType.ANNIVERSARY)
         );
     }
 }
