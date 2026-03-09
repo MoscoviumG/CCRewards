@@ -24,15 +24,27 @@ public class CategoryDisplayPrefs {
     private static final String KEY_ORDER  = "category_order";
     private static final String KEY_HIDDEN = "category_hidden";
 
-    // Default built-in categories shown in the Best Card grid
+    // Default built-in category order in the Best Card grid
     public static final RewardCategory[] DEFAULT_BUILTIN = {
             RewardCategory.GENERAL,
+            RewardCategory.TRAVEL,
             RewardCategory.DINING,
             RewardCategory.GROCERIES,
-            RewardCategory.TRAVEL,
             RewardCategory.GAS,
             RewardCategory.ENTERTAINMENT,
             RewardCategory.ONLINE_SHOPPING,
+            RewardCategory.DRUGSTORES,
+            RewardCategory.TRANSIT,
+            RewardCategory.RENT_MORTGAGE
+    };
+
+    // Categories hidden by default on first install (users can show them via Settings)
+    private static final RewardCategory[] DEFAULT_HIDDEN_BUILTIN = {
+            RewardCategory.GAS,
+            RewardCategory.ENTERTAINMENT,
+            RewardCategory.ONLINE_SHOPPING,
+            RewardCategory.DRUGSTORES,
+            RewardCategory.TRANSIT,
             RewardCategory.RENT_MORTGAGE
     };
 
@@ -67,6 +79,8 @@ public class CategoryDisplayPrefs {
             case GAS:              return "Gas";
             case ENTERTAINMENT:    return "Entertainment";
             case ONLINE_SHOPPING:  return "Online Shopping";
+            case DRUGSTORES:       return "Drugstores";
+            case TRANSIT:          return "Transit & Rideshare";
             case RENT_MORTGAGE:    return "Rent / Mortgage";
             default:               return cat.name();
         }
@@ -95,6 +109,10 @@ public class CategoryDisplayPrefs {
             for (RewardCategory cat : DEFAULT_BUILTIN) result.add(builtinKey(cat));
             for (long id : existingCustomIds) result.add(customKey(id));
             saveOrder(ctx, result);
+            // Initialize hidden set so only General/Travel/Dining/Groceries show by default
+            Set<String> hidden = new HashSet<>();
+            for (RewardCategory cat : DEFAULT_HIDDEN_BUILTIN) hidden.add(builtinKey(cat));
+            prefs(ctx).edit().putString(KEY_HIDDEN, String.join(",", hidden)).apply();
             return result;
         }
 
@@ -112,12 +130,30 @@ public class CategoryDisplayPrefs {
             }
         }
 
+        // Append newly added built-in categories (e.g. after an app update adds new enum values)
+        // New built-ins are added hidden by default
+        Set<String> resultSet = new HashSet<>(result);
+        Set<String> hiddenKeys = getHiddenKeys(ctx);
+        boolean hiddenChanged = false;
+        for (RewardCategory cat : DEFAULT_BUILTIN) {
+            String key = builtinKey(cat);
+            if (!resultSet.contains(key)) {
+                result.add(key);
+                hiddenKeys.add(key);  // hide new built-ins by default
+                hiddenChanged = true;
+            }
+        }
+        if (hiddenChanged) {
+            prefs(ctx).edit().putString(KEY_HIDDEN, String.join(",", hiddenKeys)).apply();
+        }
+
         // Append newly added custom categories
         for (long id : existingCustomIds) {
             String key = customKey(id);
             if (!result.contains(key)) result.add(key);
         }
 
+        saveOrder(ctx, result);
         return result;
     }
 

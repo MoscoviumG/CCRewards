@@ -25,6 +25,8 @@ public enum RewardCategory {
     GAS,
     ENTERTAINMENT,
     ONLINE_SHOPPING,
+    DRUGSTORES,
+    TRANSIT,
     RENT_MORTGAGE,
     GENERAL
 }

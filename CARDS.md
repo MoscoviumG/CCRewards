@@ -5,6 +5,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 **Rate types:** `Points` · `Miles` · `%` (cash back) · `Bilt Cash`
 **Periods:** `Monthly` · `Quarterly` · `Semi-Annual` · `Annual`
 **`[choice]`** — user selects one active category from the group at a time (rotating/choice categories)
+**Categories:** `Drugstores` — drugstores & pharmacies · `Transit & Rideshare` — local transit, buses, subway, rideshare, parking, tolls
 
 ---
 
@@ -129,13 +130,14 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Chase Sapphire Preferred
 `chase_sapphire_preferred` · Visa · $95/yr · Personal · Chase Ultimate Rewards Points
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel Portal | 5x | Points |
-| Dining | 3x | Points |
-| Groceries | 3x | Points |
-| Travel | 2x | Points |
-| General | 1x | Points |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel Portal | 5x | Points | |
+| Dining | 3x | Points | |
+| Groceries | 3x | Points | |
+| Entertainment | 3x | Points | Includes select streaming services |
+| Travel | 2x | Points | |
+| General | 1x | Points | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -174,6 +176,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 |---|---|---|
 | Travel Portal | 5x | Points |
 | Dining | 3x | Points |
+| Drugstores | 3x | Points |
 | General | 1.5x | Points |
 
 ---
@@ -181,15 +184,14 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Chase Freedom Flex
 `chase_freedom_flex` · Mastercard · $0/yr · Personal · Chase Ultimate Rewards Points
 
-| Category | Rate | Type | Notes |
-|---|---|---|---|
-| Dining | 3x | Points | [choice] rotating group |
-| Groceries | 5x | Points | [choice] rotating group |
-| Gas | 5x | Points | [choice] rotating group |
-| Entertainment | 5x | Points | [choice] rotating group |
-| Online Shopping | 5x | Points | [choice] rotating group |
-| Travel Portal | 5x | Points | |
-| General | 1x | Points | |
+| Category | Rate | Type |
+|---|---|---|
+| Travel Portal | 5x | Points |
+| Dining | 3x | Points |
+| Drugstores | 3x | Points |
+| General | 1x | Points |
+
+> Rotating 5% quarterly categories: use the Quarterly Bonus feature
 
 ---
 
@@ -218,11 +220,12 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### United Explorer Card
 `united_explorer` · Visa · $150/yr · Personal · United MileagePlus
 
-| Category | Rate | Type |
-|---|---|---|
-| United (flights) | 2x | Miles |
-| Dining | 2x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| United (flights) | 2x | Miles | |
+| Dining | 2x | Miles | |
+| Travel (general) | 2x | Miles | Hotels booked direct |
+| General | 1x | Miles | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -235,12 +238,13 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### United Quest Card
 `united_quest` · Visa · $350/yr · Personal · United MileagePlus
 
-| Category | Rate | Type |
-|---|---|---|
-| United (flights) | 3x | Miles |
-| Travel (general) | 2x | Miles |
-| Dining | 2x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| United (flights) | 3x | Miles | |
+| Travel (general) | 2x | Miles | |
+| Dining | 2x | Miles | |
+| Entertainment | 2x | Miles | Select streaming |
+| General | 1x | Miles | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -257,6 +261,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 |---|---|---|
 | United (flights) | 2x | Miles |
 | Gas | 2x | Miles |
+| Transit & Rideshare | 2x | Miles |
 | General | 1x | Miles |
 
 ---
@@ -391,11 +396,12 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### IHG One Rewards Traveler
 `ihg_traveler` · Visa · $0/yr · Personal · IHG One Rewards Points
 
-| Category | Rate | Type |
-|---|---|---|
-| Dining | 3x | Miles |
-| Gas | 3x | Miles |
-| General | 2x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Dining | 3x | Miles | |
+| Gas | 3x | Miles | |
+| Entertainment | 3x | Miles | Select streaming |
+| General | 2x | Miles | |
 
 ---
 
@@ -407,6 +413,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Hyatt Hotels | 4x | Miles |
 | Travel (airlines / transit / gyms) | 2x | Miles |
 | Dining | 2x | Miles |
+| Transit & Rideshare | 2x | Miles |
 | General | 1x | Miles |
 
 ---
@@ -414,42 +421,46 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Aeroplan Card
 `aeroplan` · Visa · $95/yr · Personal · Aeroplan Miles
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel | 3x | Miles |
-| Dining | 1.5x | Miles |
-| Groceries | 1.5x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel | 3x | Miles | |
+| Dining | 1.5x | Miles | |
+| Groceries | 1.5x | Miles | |
+| Travel (general) | 1.5x | Miles | Direct travel, non-Aeroplan partners |
+| General | 1x | Miles | |
 
 ---
 
 ### British Airways Visa Signature
 `british_airways_visa` · Visa · $95/yr · Personal · Avios
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel | 3x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel | 3x | Miles | |
+| Travel (general) | 2x | Miles | Hotels booked direct |
+| General | 1x | Miles | |
 
 ---
 
 ### Aer Lingus Visa Signature
 `aer_lingus_visa` · Visa · $95/yr · Personal · Avios
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel | 3x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel | 3x | Miles | |
+| Travel (general) | 2x | Miles | Hotels booked direct |
+| General | 1x | Miles | |
 
 ---
 
 ### Iberia Visa Signature
 `iberia_visa` · Visa · $95/yr · Personal · Avios
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel | 3x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel | 3x | Miles | |
+| Travel (general) | 2x | Miles | Hotels booked direct |
+| General | 1x | Miles | |
 
 ---
 
@@ -659,12 +670,13 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Amex Gold Card
 `amex_gold` · Amex · $325/yr · Personal · Amex Membership Rewards Points
 
-| Category | Rate | Type |
-|---|---|---|
-| Dining | 4x | Points |
-| Groceries | 4x | Points |
-| Travel | 3x | Points |
-| General | 1x | Points |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Dining | 4x | Points | |
+| Groceries | 4x | Points | |
+| Travel | 3x | Points | |
+| Travel Portal | 2x | Points | Prepaid hotels & eligible AmexTravel |
+| General | 1x | Points | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -682,6 +694,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 |---|---|---|
 | Travel | 3x | Points |
 | Dining | 3x | Points |
+| Transit & Rideshare | 3x | Points |
 | General | 1x | Points |
 
 | Benefit | Amount | Period |
@@ -698,6 +711,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Groceries | 6% | Cash Back |
 | Entertainment | 6% | Cash Back |
 | Gas | 3% | Cash Back |
+| Transit & Rideshare | 3% | Cash Back |
 | General | 1% | Cash Back |
 
 | Benefit | Amount | Period |
@@ -837,7 +851,6 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Marriott Hotels | 6x | Points |
 | Dining | 3x | Points |
 | Travel (airlines / taxis) | 3x | Points |
-| Groceries | 3x | Points |
 | General | 2x | Points |
 
 | Benefit | Amount | Period |
@@ -1074,8 +1087,8 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Category | Rate | Type |
 |---|---|---|
 | Travel Portal | 12x | Points |
-| Travel | 3x | Points |
-| Dining | 3x | Points |
+| Travel | 6x | Points |
+| Dining | 6x | Points |
 | General | 1.5x | Points |
 
 | Benefit | Amount | Period |
@@ -1113,6 +1126,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Groceries | 3x | Points | |
 | Gas | 3x | Points | |
 | Entertainment | 3x | Points | Self-select category |
+| Transit & Rideshare | 3x | Points | |
 | Dining | 2x | Points | |
 | General | 1x | Points | |
 
@@ -1138,6 +1152,8 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Travel | 5x | Points | [choice] top category each billing cycle |
 | Entertainment | 5x | Points | [choice] top category each billing cycle |
 | Online Shopping | 5x | Points | [choice] top category each billing cycle |
+| Drugstores | 5x | Points | [choice] top category each billing cycle |
+| Transit & Rideshare | 5x | Points | [choice] top category each billing cycle |
 | General | 1x | Points | |
 
 ---
@@ -1157,10 +1173,11 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Citi AAdvantage Executive
 `citi_aadvantage_executive` · Mastercard · $595/yr · Personal · AAdvantage Miles
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel (American Airlines) | 4x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel Portal | 10x | Miles | AAdvantage Hotels & Cars portal |
+| Travel (American Airlines) | 4x | Miles | |
+| General | 1x | Miles | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -1174,11 +1191,13 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Citi AAdvantage Globe
 `citi_aadvantage_globe` · Mastercard · $350/yr · Personal · AAdvantage Miles
 
-| Category | Rate | Type |
-|---|---|---|
-| Travel (American Airlines) | 3x | Miles |
-| Dining | 2x | Miles |
-| General | 1x | Miles |
+| Category | Rate | Type | Notes |
+|---|---|---|---|
+| Travel Portal | 6x | Miles | AAdvantage Hotels portal |
+| Travel (American Airlines) | 3x | Miles | |
+| Dining | 2x | Miles | |
+| Transit & Rideshare | 2x | Miles | |
+| General | 1x | Miles | |
 
 | Benefit | Amount | Period |
 |---|---|---|
@@ -1236,6 +1255,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Gas | 3% | Cash Back | [choice] one category selected by user |
 | Online Shopping | 3% | Cash Back | [choice] one category selected by user |
 | Entertainment | 3% | Cash Back | [choice] one category selected by user |
+| Drugstores | 3% | Cash Back | [choice] one category selected by user |
 | Groceries | 2% | Cash Back | |
 | General | 1% | Cash Back | |
 
@@ -1299,6 +1319,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Travel (Alaska) | 3x | Miles |
 | Gas | 2x | Miles |
 | Entertainment | 2x | Miles |
+| Transit & Rideshare | 2x | Miles |
 | General | 1x | Miles |
 
 ---
@@ -1372,6 +1393,7 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 | Category | Rate | Type |
 |---|---|---|
 | Travel (Cruises) | 3% | Cash Back |
+| Travel (general) | 2% | Cash Back |
 | General | 1% | Cash Back |
 
 ---
@@ -1485,14 +1507,11 @@ All cards currently in the seed database. Edit this file and ask Claude to sync 
 ### Discover it Cash Back
 `discover_it_cashback` · Discover · $0/yr · Personal · Cash Back
 
-| Category | Rate | Type | Notes |
-|---|---|---|---|
-| Dining | 5% | Cash Back | [choice] rotating quarterly |
-| Groceries | 5% | Cash Back | [choice] rotating quarterly |
-| Gas | 5% | Cash Back | [choice] rotating quarterly |
-| Entertainment | 5% | Cash Back | [choice] rotating quarterly |
-| Online Shopping | 5% | Cash Back | [choice] rotating quarterly |
-| General | 1% | Cash Back | |
+| Category | Rate | Type |
+|---|---|---|
+| General | 1% | Cash Back |
+
+> Rotating 5% quarterly categories: use the Quarterly Bonus feature
 
 ---
 

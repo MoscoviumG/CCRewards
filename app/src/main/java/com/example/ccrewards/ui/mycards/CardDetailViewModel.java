@@ -253,6 +253,8 @@ public class CardDetailViewModel extends ViewModel {
                 case GAS:             return "Gas";
                 case ENTERTAINMENT:   return "Entertainment";
                 case ONLINE_SHOPPING: return "Online Shopping";
+                case DRUGSTORES:      return "Drugstores";
+                case TRANSIT:         return "Transit & Rideshare";
                 case RENT_MORTGAGE:   return "Rent / Mortgage";
                 default:              break;
             }

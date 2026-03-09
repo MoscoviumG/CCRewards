@@ -279,11 +279,12 @@ public class SeedData {
         List<RewardRate> list = new ArrayList<>();
 
         // Chase Sapphire Preferred
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL,        RateType.POINTS, 2.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.DINING,        RateType.POINTS, 3.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GROCERIES,     RateType.POINTS, 3.0));
-        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL_PORTAL,  RateType.POINTS, 5.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.TRAVEL,         RateType.POINTS, 2.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.DINING,         RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GROCERIES,      RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.ENTERTAINMENT,  RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_sapphire_preferred", RewardCategory.GENERAL,        RateType.POINTS, 1.0));
 
         // Chase Sapphire Reserve
         list.add(new RewardRate("chase_sapphire_reserve", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 8.0));
@@ -294,16 +295,14 @@ public class SeedData {
         // Chase Freedom Unlimited
         list.add(new RewardRate("chase_freedom_unlimited", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
         list.add(new RewardRate("chase_freedom_unlimited", RewardCategory.DINING,        RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_freedom_unlimited", RewardCategory.DRUGSTORES,    RateType.POINTS, 3.0));
         list.add(new RewardRate("chase_freedom_unlimited", RewardCategory.GENERAL,       RateType.POINTS, 1.5));
 
-        // Chase Freedom Flex (rotating categories)
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.DINING,          RateType.POINTS, 3.0, true, "freedom_flex_rotating", false));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.GROCERIES,       RateType.POINTS, 5.0, true, "freedom_flex_rotating", false));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.GAS,             RateType.POINTS, 5.0, true, "freedom_flex_rotating", false));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.ENTERTAINMENT,   RateType.POINTS, 5.0, true, "freedom_flex_rotating", false));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.ONLINE_SHOPPING, RateType.POINTS, 5.0, true, "freedom_flex_rotating", false));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.TRAVEL_PORTAL,   RateType.POINTS, 5.0));
-        list.add(new RewardRate("chase_freedom_flex", RewardCategory.GENERAL,         RateType.POINTS, 1.0));
+        // Chase Freedom Flex (5x portal, 3x dining, 3x drugstores, 1x general; rotating 5% quarterly added via Quarterly Bonus feature)
+        list.add(new RewardRate("chase_freedom_flex", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
+        list.add(new RewardRate("chase_freedom_flex", RewardCategory.DINING,        RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_freedom_flex", RewardCategory.DRUGSTORES,    RateType.POINTS, 3.0));
+        list.add(new RewardRate("chase_freedom_flex", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
 
         // Chase Freedom Rise
         list.add(new RewardRate("chase_freedom_rise", RewardCategory.GENERAL, RateType.CASHBACK, 1.5));
@@ -317,18 +316,21 @@ public class SeedData {
 
         // United Explorer
         list.add(new RewardRate("united_explorer", RewardCategory.TRAVEL_UNITED, RateType.MILES, 2.0));
+        list.add(new RewardRate("united_explorer", RewardCategory.TRAVEL,        RateType.MILES, 2.0));
         list.add(new RewardRate("united_explorer", RewardCategory.DINING,        RateType.MILES, 2.0));
         list.add(new RewardRate("united_explorer", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
-        // United Quest (3x United, 2x travel/dining, 1x general)
+        // United Quest (3x United, 2x travel/dining/streaming, 1x general)
         list.add(new RewardRate("united_quest", RewardCategory.TRAVEL_UNITED, RateType.MILES, 3.0));
         list.add(new RewardRate("united_quest", RewardCategory.TRAVEL,        RateType.MILES, 2.0));
         list.add(new RewardRate("united_quest", RewardCategory.DINING,        RateType.MILES, 2.0));
+        list.add(new RewardRate("united_quest", RewardCategory.ENTERTAINMENT, RateType.MILES, 2.0));
         list.add(new RewardRate("united_quest", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
         // United Gateway (2x United/transit/gas, 1x general)
         list.add(new RewardRate("united_gateway", RewardCategory.TRAVEL_UNITED, RateType.MILES, 2.0));
         list.add(new RewardRate("united_gateway", RewardCategory.GAS,           RateType.MILES, 2.0));
+        list.add(new RewardRate("united_gateway", RewardCategory.TRANSIT,       RateType.MILES, 2.0));
         list.add(new RewardRate("united_gateway", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
         // United Club (4x United, 2x travel/dining, 1x general)
@@ -384,33 +386,39 @@ public class SeedData {
         list.add(new RewardRate("ihg_premier", RewardCategory.GROCERIES, RateType.MILES,  5.0));
         list.add(new RewardRate("ihg_premier", RewardCategory.GENERAL,   RateType.MILES,  3.0));
 
-        // IHG One Rewards Traveler (3x dining/gas/streaming, 2x general)
-        list.add(new RewardRate("ihg_traveler", RewardCategory.DINING,  RateType.MILES, 3.0));
-        list.add(new RewardRate("ihg_traveler", RewardCategory.GAS,     RateType.MILES, 3.0));
-        list.add(new RewardRate("ihg_traveler", RewardCategory.GENERAL, RateType.MILES, 2.0));
+        // IHG One Rewards Traveler (3x dining/gas/select streaming, 2x general)
+        list.add(new RewardRate("ihg_traveler", RewardCategory.DINING,         RateType.MILES, 3.0));
+        list.add(new RewardRate("ihg_traveler", RewardCategory.GAS,            RateType.MILES, 3.0));
+        list.add(new RewardRate("ihg_traveler", RewardCategory.ENTERTAINMENT,  RateType.MILES, 3.0));
+        list.add(new RewardRate("ihg_traveler", RewardCategory.GENERAL,        RateType.MILES, 2.0));
 
-        // World of Hyatt (4x Hyatt, 2x dining, 2x fitness/transit, 1x general)
+        // World of Hyatt (4x Hyatt, 2x dining/airlines/transit/fitness, 1x general)
         list.add(new RewardRate("world_of_hyatt", RewardCategory.TRAVEL_HYATT, RateType.MILES, 4.0));
         list.add(new RewardRate("world_of_hyatt", RewardCategory.TRAVEL,       RateType.MILES, 2.0));
         list.add(new RewardRate("world_of_hyatt", RewardCategory.DINING,       RateType.MILES, 2.0));
+        list.add(new RewardRate("world_of_hyatt", RewardCategory.TRANSIT,      RateType.MILES, 2.0));
         list.add(new RewardRate("world_of_hyatt", RewardCategory.GENERAL,      RateType.MILES, 1.0));
 
         // Aeroplan (3x Air Canada/partner airlines, 1.5x grocery/dining/direct travel, 1x general)
         list.add(new RewardRate("aeroplan", RewardCategory.TRAVEL_AEROPLAN, RateType.MILES, 3.0));
+        list.add(new RewardRate("aeroplan", RewardCategory.TRAVEL,          RateType.MILES, 1.5));
         list.add(new RewardRate("aeroplan", RewardCategory.DINING,          RateType.MILES, 1.5));
         list.add(new RewardRate("aeroplan", RewardCategory.GROCERIES,       RateType.MILES, 1.5));
         list.add(new RewardRate("aeroplan", RewardCategory.GENERAL,         RateType.MILES, 1.0));
 
         // British Airways Visa Signature (3x BA/partner airlines, 2x hotels, 1x general)
         list.add(new RewardRate("british_airways_visa", RewardCategory.TRAVEL_BRITISH_AIRWAYS, RateType.MILES, 3.0));
-        list.add(new RewardRate("british_airways_visa", RewardCategory.GENERAL,               RateType.MILES, 1.0));
+        list.add(new RewardRate("british_airways_visa", RewardCategory.TRAVEL,                 RateType.MILES, 2.0));
+        list.add(new RewardRate("british_airways_visa", RewardCategory.GENERAL,                RateType.MILES, 1.0));
 
         // Aer Lingus Visa Signature (3x Aer Lingus/partner airlines, 2x hotels, 1x general)
         list.add(new RewardRate("aer_lingus_visa", RewardCategory.TRAVEL_AER_LINGUS, RateType.MILES, 3.0));
+        list.add(new RewardRate("aer_lingus_visa", RewardCategory.TRAVEL,            RateType.MILES, 2.0));
         list.add(new RewardRate("aer_lingus_visa", RewardCategory.GENERAL,           RateType.MILES, 1.0));
 
         // Iberia Visa Signature (3x Iberia/partner airlines, 2x hotels, 1x general)
         list.add(new RewardRate("iberia_visa", RewardCategory.TRAVEL_IBERIA, RateType.MILES, 3.0));
+        list.add(new RewardRate("iberia_visa", RewardCategory.TRAVEL,        RateType.MILES, 2.0));
         list.add(new RewardRate("iberia_visa", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
         // Amex Platinum (5X via Amex Travel portal, 5X flights booked direct, 1X general)
@@ -418,21 +426,24 @@ public class SeedData {
         list.add(new RewardRate("amex_platinum", RewardCategory.TRAVEL,        RateType.POINTS, 5.0));
         list.add(new RewardRate("amex_platinum", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
 
-        // Amex Gold (4X dining, 4X U.S. supermarkets, 3X flights, 1X general)
-        list.add(new RewardRate("amex_gold", RewardCategory.DINING,    RateType.POINTS, 4.0));
-        list.add(new RewardRate("amex_gold", RewardCategory.GROCERIES, RateType.POINTS, 4.0));
-        list.add(new RewardRate("amex_gold", RewardCategory.TRAVEL,    RateType.POINTS, 3.0));
-        list.add(new RewardRate("amex_gold", RewardCategory.GENERAL,   RateType.POINTS, 1.0));
+        // Amex Gold (4X dining, 4X U.S. supermarkets, 3X flights direct, 2X prepaid hotels via AmexTravel, 1X general)
+        list.add(new RewardRate("amex_gold", RewardCategory.DINING,        RateType.POINTS, 4.0));
+        list.add(new RewardRate("amex_gold", RewardCategory.GROCERIES,     RateType.POINTS, 4.0));
+        list.add(new RewardRate("amex_gold", RewardCategory.TRAVEL,        RateType.POINTS, 3.0));
+        list.add(new RewardRate("amex_gold", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 2.0));
+        list.add(new RewardRate("amex_gold", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
 
         // Amex Green (3X travel/transit/dining, 1X general)
-        list.add(new RewardRate("amex_green", RewardCategory.TRAVEL,  RateType.POINTS, 3.0));
-        list.add(new RewardRate("amex_green", RewardCategory.DINING,  RateType.POINTS, 3.0));
-        list.add(new RewardRate("amex_green", RewardCategory.GENERAL, RateType.POINTS, 1.0));
+        list.add(new RewardRate("amex_green", RewardCategory.TRAVEL,   RateType.POINTS, 3.0));
+        list.add(new RewardRate("amex_green", RewardCategory.TRANSIT,  RateType.POINTS, 3.0));
+        list.add(new RewardRate("amex_green", RewardCategory.DINING,   RateType.POINTS, 3.0));
+        list.add(new RewardRate("amex_green", RewardCategory.GENERAL,  RateType.POINTS, 1.0));
 
         // Amex Blue Cash Preferred (6% supermarkets/streaming, 3% transit/gas, 1% general)
         list.add(new RewardRate("amex_blue_cash_preferred", RewardCategory.GROCERIES,     RateType.CASHBACK, 6.0));
         list.add(new RewardRate("amex_blue_cash_preferred", RewardCategory.ENTERTAINMENT, RateType.CASHBACK, 6.0));
         list.add(new RewardRate("amex_blue_cash_preferred", RewardCategory.GAS,           RateType.CASHBACK, 3.0));
+        list.add(new RewardRate("amex_blue_cash_preferred", RewardCategory.TRANSIT,       RateType.CASHBACK, 3.0));
         list.add(new RewardRate("amex_blue_cash_preferred", RewardCategory.GENERAL,       RateType.CASHBACK, 1.0));
 
         // Amex Blue Cash Everyday (3% supermarkets/online retail/gas, 1% general)
@@ -482,11 +493,10 @@ public class SeedData {
         list.add(new RewardRate("hilton_amex", RewardCategory.GAS,           RateType.POINTS, 5.0));
         list.add(new RewardRate("hilton_amex", RewardCategory.GENERAL,       RateType.POINTS, 3.0));
 
-        // Marriott Bonvoy Brilliant Amex (6X Marriott, 3X airfare/dining, 2X general)
+        // Marriott Bonvoy Brilliant Amex (6X Marriott, 3X airfare direct/dining, 2X general)
         list.add(new RewardRate("marriott_brilliant_amex", RewardCategory.TRAVEL_MARRIOTT, RateType.POINTS, 6.0));
         list.add(new RewardRate("marriott_brilliant_amex", RewardCategory.DINING,          RateType.POINTS, 3.0));
         list.add(new RewardRate("marriott_brilliant_amex", RewardCategory.TRAVEL,          RateType.POINTS, 3.0));
-        list.add(new RewardRate("marriott_brilliant_amex", RewardCategory.GROCERIES,       RateType.POINTS, 3.0));
         list.add(new RewardRate("marriott_brilliant_amex", RewardCategory.GENERAL,         RateType.POINTS, 2.0));
 
         // Marriott Bonvoy Bevy Amex (6X Marriott, 4X dining/supermarkets up to $15k, 2X general)
@@ -520,10 +530,10 @@ public class SeedData {
         // Capital One QuicksilverOne
         list.add(new RewardRate("capital_one_quicksilver_one", RewardCategory.GENERAL, RateType.CASHBACK, 1.5));
 
-        // Citi Strata Elite (12x via Citi Travel portal, 3x hotels/air/dining direct, 1.5x general)
+        // Citi Strata Elite (12x hotels/car/attractions via Citi Travel, 6x air via Citi Travel, 6x dining Fri/Sat, 3x dining other, 1.5x general)
         list.add(new RewardRate("citi_strata_elite", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 12.0));
-        list.add(new RewardRate("citi_strata_elite", RewardCategory.TRAVEL,        RateType.POINTS,  3.0));
-        list.add(new RewardRate("citi_strata_elite", RewardCategory.DINING,        RateType.POINTS,  3.0));
+        list.add(new RewardRate("citi_strata_elite", RewardCategory.TRAVEL,        RateType.POINTS,  6.0));
+        list.add(new RewardRate("citi_strata_elite", RewardCategory.DINING,        RateType.POINTS,  6.0));
         list.add(new RewardRate("citi_strata_elite", RewardCategory.GENERAL,       RateType.POINTS,  1.5));
 
         // Citi Strata Premier (10x via Citi Travel portal, 3x hotels/air/dining/grocery/gas direct, 1x general)
@@ -534,10 +544,11 @@ public class SeedData {
         list.add(new RewardRate("citi_strata_premier", RewardCategory.GAS,           RateType.POINTS,  3.0));
         list.add(new RewardRate("citi_strata_premier", RewardCategory.GENERAL,       RateType.POINTS,  1.0));
 
-        // Citi Strata (5x via Citi Travel portal, 3x grocery/gas/self-select, 2x dining, 1x general)
-        list.add(new RewardRate("citi_strata", RewardCategory.TRAVEL_PORTAL,   RateType.POINTS, 5.0));
+        // Citi Strata (5x via Citi Travel portal, 3x grocery/gas/transit/self-select, 2x dining, 1x general)
+        list.add(new RewardRate("citi_strata", RewardCategory.TRAVEL_PORTAL, RateType.POINTS, 5.0));
         list.add(new RewardRate("citi_strata", RewardCategory.GROCERIES,     RateType.POINTS, 3.0));
         list.add(new RewardRate("citi_strata", RewardCategory.GAS,           RateType.POINTS, 3.0));
+        list.add(new RewardRate("citi_strata", RewardCategory.TRANSIT,       RateType.POINTS, 3.0));
         list.add(new RewardRate("citi_strata", RewardCategory.ENTERTAINMENT, RateType.POINTS, 3.0));  // self-select category
         list.add(new RewardRate("citi_strata", RewardCategory.DINING,        RateType.POINTS, 2.0));
         list.add(new RewardRate("citi_strata", RewardCategory.GENERAL,       RateType.POINTS, 1.0));
@@ -552,6 +563,8 @@ public class SeedData {
         list.add(new RewardRate("citi_custom_cash", RewardCategory.TRAVEL,          RateType.POINTS, 5.0, true, "citi_custom_cash_choice", false));
         list.add(new RewardRate("citi_custom_cash", RewardCategory.ENTERTAINMENT,   RateType.POINTS, 5.0, true, "citi_custom_cash_choice", false));
         list.add(new RewardRate("citi_custom_cash", RewardCategory.ONLINE_SHOPPING, RateType.POINTS, 5.0, true, "citi_custom_cash_choice", false));
+        list.add(new RewardRate("citi_custom_cash", RewardCategory.DRUGSTORES,      RateType.POINTS, 5.0, true, "citi_custom_cash_choice", false));
+        list.add(new RewardRate("citi_custom_cash", RewardCategory.TRANSIT,         RateType.POINTS, 5.0, true, "citi_custom_cash_choice", false));
         list.add(new RewardRate("citi_custom_cash", RewardCategory.GENERAL,         RateType.POINTS, 1.0));
 
         // Costco Anywhere Visa by Citi (4% gas/EV, 3% dining/travel, 1% general)
@@ -560,14 +573,17 @@ public class SeedData {
         list.add(new RewardRate("costco_citi", RewardCategory.TRAVEL,  RateType.CASHBACK, 3.0));
         list.add(new RewardRate("costco_citi", RewardCategory.GENERAL, RateType.CASHBACK, 1.0));
 
-        // Citi AAdvantage Executive (4x AA, 10x AAdvantage Hotels/Cars, 1x general)
-        list.add(new RewardRate("citi_aadvantage_executive", RewardCategory.TRAVEL_AA, RateType.MILES, 4.0));
-        list.add(new RewardRate("citi_aadvantage_executive", RewardCategory.GENERAL,   RateType.MILES, 1.0));
+        // Citi AAdvantage Executive (4x AA, 10x AAdvantage Hotels/Cars portal, 1x general)
+        list.add(new RewardRate("citi_aadvantage_executive", RewardCategory.TRAVEL_AA,     RateType.MILES,  4.0));
+        list.add(new RewardRate("citi_aadvantage_executive", RewardCategory.TRAVEL_PORTAL, RateType.MILES, 10.0));
+        list.add(new RewardRate("citi_aadvantage_executive", RewardCategory.GENERAL,       RateType.MILES,  1.0));
 
-        // Citi AAdvantage Globe (3x AA, 6x AAdvantage Hotels, 2x dining/transit, 1x general)
-        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.TRAVEL_AA, RateType.MILES, 3.0));
-        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.DINING,    RateType.MILES, 2.0));
-        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.GENERAL,   RateType.MILES, 1.0));
+        // Citi AAdvantage Globe (3x AA, 6x AAdvantage Hotels portal, 2x dining/transit, 1x general)
+        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.TRAVEL_AA,     RateType.MILES, 3.0));
+        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.TRAVEL_PORTAL, RateType.MILES, 6.0));
+        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.DINING,        RateType.MILES, 2.0));
+        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.TRANSIT,       RateType.MILES, 2.0));
+        list.add(new RewardRate("citi_aadvantage_globe", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
         // Citi AAdvantage Platinum Select (2x AA/dining/gas, 1x general)
         list.add(new RewardRate("citi_aadvantage_platinum", RewardCategory.TRAVEL_AA, RateType.MILES, 2.0));
@@ -580,12 +596,13 @@ public class SeedData {
         list.add(new RewardRate("citi_aadvantage_mileup", RewardCategory.GROCERIES,  RateType.MILES, 2.0));
         list.add(new RewardRate("citi_aadvantage_mileup", RewardCategory.GENERAL,    RateType.MILES, 1.0));
 
-        // BofA Customized Cash Rewards (choice)
+        // BofA Customized Cash Rewards (choice — includes drug stores/pharmacies)
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.DINING,          RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.TRAVEL,          RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.GAS,             RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.ONLINE_SHOPPING, RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.ENTERTAINMENT,   RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
+        list.add(new RewardRate("bofa_customized_cash", RewardCategory.DRUGSTORES,      RateType.CASHBACK, 3.0, true, "bofa_custom_cash_choice", false));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.GROCERIES,       RateType.CASHBACK, 2.0));
         list.add(new RewardRate("bofa_customized_cash", RewardCategory.GENERAL,         RateType.CASHBACK, 1.0));
 
@@ -602,10 +619,11 @@ public class SeedData {
         list.add(new RewardRate("bofa_premium_rewards_elite", RewardCategory.DINING,  RateType.POINTS, 2.0));
         list.add(new RewardRate("bofa_premium_rewards_elite", RewardCategory.GENERAL, RateType.POINTS, 1.5));
 
-        // Atmos Ascent (3x airline/Alaska; 2x gas/EV, cable/streaming, local transit; 1x general)
+        // Atmos Ascent (3x airline/Alaska; 2x gas/EV, cable/streaming, local transit incl rideshare; 1x general)
         list.add(new RewardRate("atmos_ascent", RewardCategory.TRAVEL_ALASKA, RateType.MILES, 3.0));
         list.add(new RewardRate("atmos_ascent", RewardCategory.GAS,           RateType.MILES, 2.0));
         list.add(new RewardRate("atmos_ascent", RewardCategory.ENTERTAINMENT, RateType.MILES, 2.0));
+        list.add(new RewardRate("atmos_ascent", RewardCategory.TRANSIT,       RateType.MILES, 2.0));
         list.add(new RewardRate("atmos_ascent", RewardCategory.GENERAL,       RateType.MILES, 1.0));
 
         // Atmos Summit
@@ -639,6 +657,7 @@ public class SeedData {
 
         // Norwegian Cruise World Mastercard (3x Norwegian; 2x air + hotel; 1x general)
         list.add(new RewardRate("norwegian_cruise_card", RewardCategory.TRAVEL_CRUISES, RateType.CASHBACK, 3.0));
+        list.add(new RewardRate("norwegian_cruise_card", RewardCategory.TRAVEL,         RateType.CASHBACK, 2.0));
         list.add(new RewardRate("norwegian_cruise_card", RewardCategory.GENERAL,        RateType.CASHBACK, 1.0));
 
         // Celebrity Cruises Visa Signature (2x Celebrity + sister brands; 1x general)
@@ -677,13 +696,8 @@ public class SeedData {
         list.add(new RewardRate("usbank_altitude_reserve", RewardCategory.TRAVEL,        RateType.CASHBACK, 3.0));
         list.add(new RewardRate("usbank_altitude_reserve", RewardCategory.GENERAL,       RateType.CASHBACK, 1.0));
 
-        // Discover it Cash Back (rotating)
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.DINING,          RateType.CASHBACK, 5.0, true, "discover_rotating", false));
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.GROCERIES,       RateType.CASHBACK, 5.0, true, "discover_rotating", false));
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.GAS,             RateType.CASHBACK, 5.0, true, "discover_rotating", false));
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.ENTERTAINMENT,   RateType.CASHBACK, 5.0, true, "discover_rotating", false));
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.ONLINE_SHOPPING, RateType.CASHBACK, 5.0, true, "discover_rotating", false));
-        list.add(new RewardRate("discover_it_cashback", RewardCategory.GENERAL,         RateType.CASHBACK, 1.0));
+        // Discover it Cash Back (rotating 5% quarterly added via Quarterly Bonus feature; 1% base)
+        list.add(new RewardRate("discover_it_cashback", RewardCategory.GENERAL, RateType.CASHBACK, 1.0));
 
         // Discover it Miles
         list.add(new RewardRate("discover_it_miles", RewardCategory.GENERAL, RateType.MILES, 1.5));
