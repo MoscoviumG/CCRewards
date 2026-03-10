@@ -36,12 +36,18 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import android.widget.SeekBar;
 
+import android.app.DatePickerDialog;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -396,8 +402,18 @@ public class CardDetailFragment extends Fragment {
         if (current.userCard.creditLimit > 0)
             etCreditLimit.setText(String.valueOf(current.userCard.creditLimit));
 
-        // Hide open date for edit (it's preserved for account history)
-        etOpenDate.setVisibility(View.GONE);
+        final AtomicReference<LocalDate> selectedOpenDate =
+                new AtomicReference<>(current.userCard.openDate);
+        if (current.userCard.openDate != null)
+            etOpenDate.setText(current.userCard.openDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        etOpenDate.setOnClickListener(v -> {
+            LocalDate d = selectedOpenDate.get() != null ? selectedOpenDate.get() : LocalDate.now();
+            new DatePickerDialog(requireContext(), (dp, y, m, day) -> {
+                LocalDate picked = LocalDate.of(y, m + 1, day);
+                selectedOpenDate.set(picked);
+                etOpenDate.setText(picked.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            }, d.getYear(), d.getMonthValue() - 1, d.getDayOfMonth()).show();
+        });
 
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Edit Card")
@@ -415,6 +431,7 @@ public class CardDetailFragment extends Fragment {
                     updated.nickname = nickname.isEmpty() ? null : nickname;
                     updated.lastFour = lastFour.isEmpty() ? null : lastFour;
                     updated.creditLimit = creditLimit;
+                    updated.openDate = selectedOpenDate.get();
                     viewModel.updateCard(updated);
                 })
                 .setNegativeButton("Cancel", null)
@@ -632,6 +649,45 @@ public class CardDetailFragment extends Fragment {
         }
     }
 
+    private void showEditHistoryDialog(ProductChangeRecord record) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Product Change Record")
+                .setItems(new CharSequence[]{"Edit Date", "Edit Notes", "Delete"}, (dialog, which) -> {
+                    if (which == 0) {
+                        LocalDate d = record.changeDate != null ? record.changeDate : LocalDate.now();
+                        new DatePickerDialog(requireContext(), (dp, y, m, day) -> {
+                            record.changeDate = LocalDate.of(y, m + 1, day);
+                            viewModel.updateProductChangeRecord(record);
+                        }, d.getYear(), d.getMonthValue() - 1, d.getDayOfMonth()).show();
+                    } else if (which == 1) {
+                        android.widget.EditText etNotes = new android.widget.EditText(requireContext());
+                        etNotes.setText(record.notes != null ? record.notes : "");
+                        etNotes.setSingleLine(false);
+                        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+                        etNotes.setPadding(pad, pad, pad, pad);
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Edit Notes")
+                                .setView(etNotes)
+                                .setPositiveButton("Save", (d2, w2) -> {
+                                    String notes = etNotes.getText().toString().trim();
+                                    record.notes = notes.isEmpty() ? null : notes;
+                                    viewModel.updateProductChangeRecord(record);
+                                })
+                                .setNegativeButton("Cancel", null)
+                                .show();
+                    } else {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Delete Record")
+                                .setMessage("Remove this product change record?")
+                                .setPositiveButton("Delete", (d2, w2) ->
+                                        viewModel.deleteProductChangeRecord(record))
+                                .setNegativeButton("Cancel", null)
+                                .show();
+                    }
+                })
+                .show();
+    }
+
     private class SimpleHistoryAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<SimpleHistoryAdapter.VH> {
         private List<ProductChangeRecord> items = new ArrayList<>();
 
@@ -652,8 +708,13 @@ public class CardDetailFragment extends Fragment {
         public void onBindViewHolder(@NonNull VH holder, int position) {
             ProductChangeRecord record = items.get(position);
             holder.binding.tvHistoryDate.setText(DateUtil.toDisplayString(record.changeDate));
-            holder.binding.tvHistoryDescription.setText(
-                    record.fromCardDefinitionId + " \u2192 " + record.toCardDefinitionId);
+            String desc = record.fromCardDefinitionId + " \u2192 " + record.toCardDefinitionId;
+            if (record.notes != null && !record.notes.isEmpty()) desc += "\n" + record.notes;
+            holder.binding.tvHistoryDescription.setText(desc);
+            holder.itemView.setOnLongClickListener(v -> {
+                showEditHistoryDialog(record);
+                return true;
+            });
         }
 
         @Override

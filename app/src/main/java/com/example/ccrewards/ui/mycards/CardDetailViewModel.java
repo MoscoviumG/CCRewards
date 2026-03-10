@@ -277,4 +277,12 @@ public class CardDetailViewModel extends ViewModel {
     public void updateCard(UserCard card) {
         cardRepository.updateUserCard(card);
     }
+
+    public void deleteProductChangeRecord(ProductChangeRecord record) {
+        cardRepository.deleteProductChangeRecord(record);
+    }
+
+    public void updateProductChangeRecord(ProductChangeRecord record) {
+        cardRepository.updateProductChangeRecord(record);
+    }
 }

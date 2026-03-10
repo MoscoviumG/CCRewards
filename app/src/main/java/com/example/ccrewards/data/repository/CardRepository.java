@@ -153,6 +153,14 @@ public class CardRepository {
         return productChangeRecordDao.getHistoryForCard(userCardId);
     }
 
+    public void deleteProductChangeRecord(ProductChangeRecord record) {
+        executor.execute(() -> productChangeRecordDao.delete(record));
+    }
+
+    public void updateProductChangeRecord(ProductChangeRecord record) {
+        executor.execute(() -> productChangeRecordDao.insert(record));
+    }
+
     // ── Choice Categories ─────────────────────────────────────────────────────
 
     public LiveData<List<UserCardChoiceCategory>> getChoicesForCard(long userCardId) {
