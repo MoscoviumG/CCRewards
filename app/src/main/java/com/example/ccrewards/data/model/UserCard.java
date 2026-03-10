@@ -22,6 +22,9 @@ public class UserCard {
     /** User-overridden card strip color (ARGB). Null = use definition's cardColorPrimary. */
     public Long customColorPrimary;
 
+    /** True if the card is temporarily deactivated (excluded from Best Card, shown greyed in My Cards). */
+    public boolean isDormant;
+
     public UserCard(String cardDefinitionId, String nickname, int creditLimit,
                     LocalDate openDate, LocalDate closeDate, int sortOrder) {
         this.cardDefinitionId = cardDefinitionId;

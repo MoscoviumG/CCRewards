@@ -65,8 +65,16 @@ public class CardRepository {
         return userCardDao.getActiveCardDefinitionIdsSync();
     }
 
+    public List<String> getNonDormantCardDefinitionIdsSync() {
+        return userCardDao.getNonDormantCardDefinitionIdsSync();
+    }
+
     public List<com.example.ccrewards.data.model.UserCard> getAllActiveUserCardsSync() {
         return userCardDao.getAllActiveUserCardsSync();
+    }
+
+    public List<com.example.ccrewards.data.model.UserCard> getNonDormantActiveUserCardsSync() {
+        return userCardDao.getNonDormantActiveUserCardsSync();
     }
 
     public LiveData<List<CardDefinition>> searchCardDefinitions(String query) {
@@ -103,6 +111,14 @@ public class CardRepository {
 
     public LiveData<List<UserCardWithDetails>> getActiveUserCards() {
         return userCardDao.getActiveCardsWithDetails();
+    }
+
+    public LiveData<List<UserCardWithDetails>> getNonDormantActiveUserCards() {
+        return userCardDao.getNonDormantActiveCardsWithDetails();
+    }
+
+    public void setDormant(long userCardId, boolean isDormant) {
+        executor.execute(() -> userCardDao.setDormant(userCardId, isDormant ? 1 : 0));
     }
 
     public LiveData<List<UserCardWithDetails>> getAllUserCards() {

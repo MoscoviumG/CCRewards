@@ -43,7 +43,7 @@ import java.util.concurrent.Executors;
         RotationalBonus.class,
         RotationalBonusCategory.class,
     },
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 @TypeConverters(Converters.class)
@@ -164,6 +164,13 @@ public abstract class AppDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE `card_benefits` ADD COLUMN `customResetMonth` INTEGER");
             database.execSQL("ALTER TABLE `card_benefits` ADD COLUMN `customResetDay` INTEGER");
+        }
+    };
+
+    public static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `user_cards` ADD COLUMN `isDormant` INTEGER NOT NULL DEFAULT 0");
         }
     };
 

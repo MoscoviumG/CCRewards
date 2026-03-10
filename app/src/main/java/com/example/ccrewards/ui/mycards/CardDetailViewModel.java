@@ -278,6 +278,10 @@ public class CardDetailViewModel extends ViewModel {
         cardRepository.updateUserCard(card);
     }
 
+    public void setDormant(long userCardId, boolean isDormant) {
+        cardRepository.setDormant(userCardId, isDormant);
+    }
+
     public void deleteProductChangeRecord(ProductChangeRecord record) {
         cardRepository.deleteProductChangeRecord(record);
     }

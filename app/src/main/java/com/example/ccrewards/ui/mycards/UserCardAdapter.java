@@ -76,6 +76,10 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
             binding.chipBusinessBadge.setVisibility(
                     item.definition.isBusinessCard ? View.VISIBLE : View.GONE);
 
+            // Dormant badge
+            binding.chipDormantBadge.setVisibility(
+                    item.userCard.isDormant ? View.VISIBLE : View.GONE);
+
             // Nickname is now included inline in tvCardName via UserCard.label()
             binding.tvNickname.setVisibility(View.GONE);
 
@@ -110,7 +114,8 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
                             && Objects.equals(oldItem.userCard.nickname, newItem.userCard.nickname)
                             && Objects.equals(oldItem.userCard.openDate, newItem.userCard.openDate)
                             && Objects.equals(oldItem.userCard.customColorPrimary,
-                                              newItem.userCard.customColorPrimary);
+                                              newItem.userCard.customColorPrimary)
+                            && oldItem.userCard.isDormant == newItem.userCard.isDormant;
                 }
             };
 }

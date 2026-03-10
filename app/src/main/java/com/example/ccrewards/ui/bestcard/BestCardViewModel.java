@@ -116,7 +116,7 @@ public class BestCardViewModel extends ViewModel {
         trigger.addSource(rateRepository.getAllValuations(), v -> recompute());
         trigger.addSource(customCategoryRepository.getAllCustomCategoriesLive(), v -> recompute());
         trigger.addSource(wbRepository.getActiveLive(), v -> recompute());
-        trigger.addSource(cardRepository.getActiveUserCards(), v -> recompute());
+        trigger.addSource(cardRepository.getNonDormantActiveUserCards(), v -> recompute());
         trigger.addSource(rotationalBonusRepository.getActiveLive(), v -> recompute());
         trigger.observeForever(v -> {});
     }
@@ -174,10 +174,10 @@ public class BestCardViewModel extends ViewModel {
             List<RewardRate> allRates = rateRepository.getAllRatesSync();
             List<PointValuation> valuations = rateRepository.getAllValuationsSync();
             List<CardDefinition> allCards = cardRepository.getAllCardDefinitionsSync();
-            List<String> ownedIds = cardRepository.getActiveCardDefinitionIdsSync();
+            List<String> ownedIds = cardRepository.getNonDormantCardDefinitionIdsSync();
             List<CustomCategory> customCategories = customCategoryRepository.getAllCustomCategoriesSync();
             List<CustomCategoryRate> allCustomRates = customCategoryRepository.getAllRatesSync();
-            List<UserCard> activeUserCards = cardRepository.getAllActiveUserCardsSync();
+            List<UserCard> activeUserCards = cardRepository.getNonDormantActiveUserCardsSync();
 
             if (allRates == null || valuations == null || allCards == null) return;
 

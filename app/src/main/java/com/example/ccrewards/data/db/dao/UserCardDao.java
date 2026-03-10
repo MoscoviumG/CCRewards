@@ -35,8 +35,21 @@ public interface UserCardDao {
     @Query("SELECT DISTINCT cardDefinitionId FROM user_cards WHERE closeDate IS NULL")
     List<String> getActiveCardDefinitionIdsSync();
 
+    @Query("SELECT DISTINCT cardDefinitionId FROM user_cards WHERE closeDate IS NULL AND isDormant = 0")
+    List<String> getNonDormantCardDefinitionIdsSync();
+
     @Query("SELECT * FROM user_cards WHERE closeDate IS NULL ORDER BY sortOrder, openDate DESC")
     List<UserCard> getAllActiveUserCardsSync();
+
+    @Transaction
+    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL AND isDormant = 0 ORDER BY sortOrder, openDate DESC")
+    LiveData<List<UserCardWithDetails>> getNonDormantActiveCardsWithDetails();
+
+    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL AND isDormant = 0 ORDER BY sortOrder, openDate DESC")
+    List<UserCard> getNonDormantActiveUserCardsSync();
+
+    @Query("UPDATE user_cards SET isDormant = :isDormant WHERE id = :id")
+    void setDormant(long id, int isDormant);
 
     @Query("SELECT MAX(sortOrder) FROM user_cards")
     Integer getMaxSortOrder();
