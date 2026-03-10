@@ -145,29 +145,29 @@ public class BenefitDetailFragment extends Fragment {
                     binding.layoutSliderSection.setVisibility(View.VISIBLE);
                     binding.layoutToggleSection.setVisibility(View.GONE);
 
-                    float maxDollars = benefit.amountCents / 100f;
+                    float maxDollars = (float) Math.ceil(benefit.amountCents / 100.0);
+                    int maxCents = (int) (maxDollars * 100);
                     binding.sliderBdUsage.setValueTo(maxDollars);
                     binding.sliderBdUsage.setStepSize(1f);
                     float usedDollars = Math.min(usedCents / 100f, maxDollars);
                     binding.sliderBdUsage.setValue(usedDollars);
-                    updateUsedLabel(usedCents, benefit.amountCents);
+                    updateUsedLabel(usedCents, maxCents);
 
                     binding.sliderBdUsage.addOnChangeListener((slider, value, fromUser) -> {
                         if (!fromUser || sliderChanging) return;
                         int newUsedCents = Math.round(value * 100);
-                        updateUsedLabel(newUsedCents, benefit.amountCents);
+                        updateUsedLabel(newUsedCents, maxCents);
                         benefitRepository.setUsedAmount(
-                                userCardId, benefitId, periodKey, newUsedCents, benefit.amountCents);
+                                userCardId, benefitId, periodKey, newUsedCents, maxCents);
                     });
 
                     binding.btnBdMarkFull.setOnClickListener(v -> {
                         sliderChanging = true;
                         binding.sliderBdUsage.setValue(maxDollars);
                         sliderChanging = false;
-                        updateUsedLabel(benefit.amountCents, benefit.amountCents);
+                        updateUsedLabel(maxCents, maxCents);
                         benefitRepository.setUsedAmount(
-                                userCardId, benefitId, periodKey,
-                                benefit.amountCents, benefit.amountCents);
+                                userCardId, benefitId, periodKey, maxCents, maxCents);
                     });
 
                 } else {

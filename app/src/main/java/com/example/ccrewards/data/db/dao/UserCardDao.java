@@ -65,4 +65,7 @@ public interface UserCardDao {
 
     @Query("UPDATE user_cards SET cardDefinitionId = :newCardDefinitionId WHERE id = :userCardId")
     void updateCardDefinition(long userCardId, String newCardDefinitionId);
+
+    @Query("SELECT * FROM user_cards WHERE cardDefinitionId = :cardDefinitionId AND closeDate IS NULL")
+    List<UserCard> getByCardDefinitionSync(String cardDefinitionId);
 }

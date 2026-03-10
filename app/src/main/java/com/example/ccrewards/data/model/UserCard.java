@@ -13,7 +13,7 @@ public class UserCard {
 
     public String cardDefinitionId;
     public String nickname;         // null if not set
-    public String lastFour;         // last 4 digits of physical card, null if not set
+    public String lastFour;         // last digits of physical card (typically 4, 5 for Amex), null if not set
     public int creditLimit;
     public LocalDate openDate;
     public LocalDate closeDate;     // null = still active

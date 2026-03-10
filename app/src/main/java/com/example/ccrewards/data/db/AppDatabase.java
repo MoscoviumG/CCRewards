@@ -13,14 +13,17 @@ import com.example.ccrewards.data.db.converters.Converters;
 import com.example.ccrewards.data.db.dao.*;
 import com.example.ccrewards.data.model.*;
 import com.example.ccrewards.data.seed.DefaultPointValuations;
+import com.example.ccrewards.data.seed.QuarterlyScheduleSeedData;
 import com.example.ccrewards.data.seed.SeedData;
 import com.example.ccrewards.data.seed.TransferPartnersSeedData;
 
 import androidx.room.migration.Migration;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +45,10 @@ import java.util.concurrent.Executors;
         WelcomeBonus.class,
         RotationalBonus.class,
         RotationalBonusCategory.class,
+        QuarterlyBonusScheduleRow.class,
+        AutoBonusCreated.class,
     },
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 @TypeConverters(Converters.class)
@@ -63,6 +68,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract WelcomeBonusDao welcomeBonusDao();
     public abstract RotationalBonusDao rotationalBonusDao();
     public abstract RotationalBonusCategoryDao rotationalBonusCategoryDao();
+    public abstract QuarterlyBonusScheduleDao quarterlyBonusScheduleDao();
+    public abstract AutoBonusCreatedDao autoBonusCreatedDao();
 
     // ── Schema migration ───────────────────────────────────────────────────────
 
@@ -174,6 +181,26 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `quarterly_bonus_schedule` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`cardDefinitionId` TEXT, " +
+                    "`year` INTEGER NOT NULL, " +
+                    "`quarter` INTEGER NOT NULL, " +
+                    "`categoryName` TEXT, " +
+                    "`rate` REAL NOT NULL DEFAULT 0, " +
+                    "`rateType` TEXT, " +
+                    "`spendLimitCents` INTEGER NOT NULL DEFAULT 150000)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `auto_bonus_created` (" +
+                    "`userCardId` INTEGER NOT NULL, " +
+                    "`year` INTEGER NOT NULL, " +
+                    "`quarter` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`userCardId`, `year`, `quarter`))");
+        }
+    };
+
     // ── Versioned seed management ──────────────────────────────────────────────
 
     /**
@@ -218,11 +245,16 @@ public abstract class AppDatabase extends RoomDatabase {
                         database.cardBenefitDao().insertAll(SeedData.getCardBenefits());
                         database.pointValuationDao().insertAll(DefaultPointValuations.getValuations());
                         database.transferPartnerDao().insertAll(TransferPartnersSeedData.getPartners());
+                        database.quarterlyBonusScheduleDao().upsertAll(QuarterlyScheduleSeedData.getSchedule());
                         prefs.edit().putInt(KEY_SEED_VERSION, SEED_VERSION).apply();
                     } else if (appliedVersion < SEED_VERSION) {
                         // Existing install with stale seed: refresh catalog, preserve user data.
                         refreshSeedData(database, prefs);
                     }
+
+                    // Auto-create quarterly bonuses for matching user cards (runs every open,
+                    // deduplication via auto_bonus_created prevents re-creation).
+                    autoCreateQuarterlyBonuses(database);
                 });
             }
         };
@@ -309,6 +341,73 @@ public abstract class AppDatabase extends RoomDatabase {
         database.transferPartnerDao().deleteAll();
         database.transferPartnerDao().insertAll(TransferPartnersSeedData.getPartners());
 
+        // 6. Quarterly bonus schedule: upsert so new year/quarter rows are added
+        //    without disturbing existing rows (auto_bonus_created is never touched here).
+        database.quarterlyBonusScheduleDao().upsertAll(QuarterlyScheduleSeedData.getSchedule());
+
         prefs.edit().putInt(KEY_SEED_VERSION, SEED_VERSION).apply();
+    }
+
+    /**
+     * Auto-creates a {@link RotationalBonus} for the current quarter for any user card whose
+     * definition appears in {@code quarterly_bonus_schedule}.  Deduplication is handled by
+     * {@code auto_bonus_created}: if a row already exists for (userCardId, year, quarter) — even
+     * if the bonus was subsequently deleted by the user — no new bonus is created.
+     */
+    private static void autoCreateQuarterlyBonuses(AppDatabase database) {
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
+        int currentQuarter = (today.getMonthValue() - 1) / 3 + 1;
+
+        List<QuarterlyBonusScheduleRow> scheduleRows =
+                database.quarterlyBonusScheduleDao().getForYearAndQuarter(currentYear, currentQuarter);
+        if (scheduleRows.isEmpty()) return;
+
+        // Group schedule rows by cardDefinitionId.
+        Map<String, List<QuarterlyBonusScheduleRow>> byCard = new LinkedHashMap<>();
+        for (QuarterlyBonusScheduleRow r : scheduleRows) {
+            byCard.computeIfAbsent(r.cardDefinitionId, k -> new ArrayList<>()).add(r);
+        }
+
+        // Last day of the current quarter (e.g. Q1 → March 31).
+        int lastMonthOfQuarter = currentQuarter * 3;
+        LocalDate quarterEnd = LocalDate.of(currentYear, lastMonthOfQuarter, 1)
+                .withDayOfMonth(
+                        LocalDate.of(currentYear, lastMonthOfQuarter, 1).lengthOfMonth());
+
+        for (Map.Entry<String, List<QuarterlyBonusScheduleRow>> entry : byCard.entrySet()) {
+            List<UserCard> userCards =
+                    database.userCardDao().getByCardDefinitionSync(entry.getKey());
+            for (UserCard uc : userCards) {
+                boolean alreadyCreated =
+                        database.autoBonusCreatedDao().exists(uc.id, currentYear, currentQuarter);
+                if (alreadyCreated) continue;
+
+                // Create the parent bonus record.
+                RotationalBonus bonus = new RotationalBonus();
+                bonus.userCardId = uc.id;
+                bonus.label = "Q" + currentQuarter + " " + currentYear;
+                bonus.spendLimitCents = entry.getValue().get(0).spendLimitCents;
+                bonus.usedCents = 0;
+                bonus.endDate = quarterEnd;
+                bonus.isFullyUsed = false;
+                long bonusId = database.rotationalBonusDao().insert(bonus);
+
+                // Create one category row per schedule entry.
+                for (QuarterlyBonusScheduleRow cat : entry.getValue()) {
+                    RotationalBonusCategory catRow = new RotationalBonusCategory();
+                    catRow.rotationalBonusId = bonusId;
+                    catRow.categoryName = cat.categoryName;
+                    catRow.rate = cat.rate;
+                    catRow.rateType = RateType.valueOf(cat.rateType);
+                    catRow.currencyName = null;
+                    database.rotationalBonusCategoryDao().insert(catRow);
+                }
+
+                // Mark as created so we never duplicate it.
+                database.autoBonusCreatedDao().insert(
+                        new AutoBonusCreated(uc.id, currentYear, currentQuarter));
+            }
+        }
     }
 }

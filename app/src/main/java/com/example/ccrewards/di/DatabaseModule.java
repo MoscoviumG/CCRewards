@@ -26,7 +26,7 @@ public class DatabaseModule {
         // Use a holder array so we can reference the DB instance in the callback.
         AppDatabase[] holder = new AppDatabase[1];
         holder[0] = Room.databaseBuilder(context, AppDatabase.class, "ccrewards.db")
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10, AppDatabase.MIGRATION_10_11, AppDatabase.MIGRATION_11_12)
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10, AppDatabase.MIGRATION_10_11, AppDatabase.MIGRATION_11_12, AppDatabase.MIGRATION_12_13)
                 .addCallback(AppDatabase.buildOpenCallback(context, holder))
                 .build();
         return holder[0];
@@ -106,5 +106,15 @@ public class DatabaseModule {
     @Provides
     public static com.example.ccrewards.data.db.dao.RotationalBonusCategoryDao provideRotationalBonusCategoryDao(AppDatabase db) {
         return db.rotationalBonusCategoryDao();
+    }
+
+    @Provides
+    public static QuarterlyBonusScheduleDao provideQuarterlyBonusScheduleDao(AppDatabase db) {
+        return db.quarterlyBonusScheduleDao();
+    }
+
+    @Provides
+    public static AutoBonusCreatedDao provideAutoBonusCreatedDao(AppDatabase db) {
+        return db.autoBonusCreatedDao();
     }
 }

@@ -241,14 +241,14 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="12dp"
-                android:hint="Last 4 digits (optional)">
+                android:hint="Last digits (optional)">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_last_four"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:maxLength="4"
+                    android:maxLength="9"
                     android:maxLines="1" />
 
             </com.google.android.material.textfield.TextInputLayout>
