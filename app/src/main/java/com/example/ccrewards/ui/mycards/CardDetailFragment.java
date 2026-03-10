@@ -711,10 +711,7 @@ public class CardDetailFragment extends Fragment {
             String desc = record.fromCardDefinitionId + " \u2192 " + record.toCardDefinitionId;
             if (record.notes != null && !record.notes.isEmpty()) desc += "\n" + record.notes;
             holder.binding.tvHistoryDescription.setText(desc);
-            holder.itemView.setOnLongClickListener(v -> {
-                showEditHistoryDialog(record);
-                return true;
-            });
+            holder.itemView.setOnClickListener(v -> showEditHistoryDialog(record));
         }
 
         @Override
