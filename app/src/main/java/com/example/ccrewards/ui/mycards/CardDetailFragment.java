@@ -93,13 +93,10 @@ public class CardDetailFragment extends Fragment {
         binding.toolbar.setNavigationOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp());
 
-        // Menu items
+        // Edit menu item
         binding.toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_edit_card) {
                 showEditDialog();
-                return true;
-            } else if (item.getItemId() == R.id.action_toggle_dormant) {
-                toggleDormant();
                 return true;
             }
             return false;
@@ -176,6 +173,7 @@ public class CardDetailFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_cardDetail_to_addEditBenefit, args);
         });
 
+        binding.btnToggleDormant.setOnClickListener(v -> toggleDormant());
         binding.btnDeleteCard.setOnClickListener(v -> confirmDelete());
 
         binding.btnChangeColor.setOnClickListener(v -> showColorPickerDialog());
@@ -255,11 +253,8 @@ public class CardDetailFragment extends Fragment {
 
         binding.tvDetailOpenDate.setText(DateUtil.toDisplayString(item.userCard.openDate));
 
-        // Update dormant menu item title
-        MenuItem dormantItem = binding.toolbar.getMenu().findItem(R.id.action_toggle_dormant);
-        if (dormantItem != null) {
-            dormantItem.setTitle(item.userCard.isDormant ? "Reactivate Card" : "Mark as Dormant");
-        }
+        // Update dormant button label
+        binding.btnToggleDormant.setText(item.userCard.isDormant ? "Reactivate Card" : "Mark as Dormant");
 
         // Nickname is now included inline in the card label above
         binding.tvDetailNickname.setVisibility(View.GONE);

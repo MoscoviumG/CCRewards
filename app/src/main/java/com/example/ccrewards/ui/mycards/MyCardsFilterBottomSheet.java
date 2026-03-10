@@ -39,6 +39,7 @@ public class MyCardsFilterBottomSheet extends BottomSheetDialogFragment {
         args.putStringArrayList("networks", new java.util.ArrayList<>(state.networks));
         args.putString("anniversaryMonth", state.anniversaryMonth.name());
         args.putString("cardAge", state.cardAge.name());
+        args.putString("dormantFilter", state.dormantFilter.name());
         sheet.setArguments(args);
         return sheet;
     }
@@ -69,6 +70,8 @@ public class MyCardsFilterBottomSheet extends BottomSheetDialogFragment {
                     args.getString("anniversaryMonth", "ANY"));
             currentState.cardAge = CardFilterState.CardAgeFilter.valueOf(
                     args.getString("cardAge", "ANY"));
+            currentState.dormantFilter = CardFilterState.DormantFilter.valueOf(
+                    args.getString("dormantFilter", "ACTIVE_ONLY"));
         }
 
         // Populate chips from state
@@ -89,6 +92,7 @@ public class MyCardsFilterBottomSheet extends BottomSheetDialogFragment {
             result.putStringArrayList("networks", new java.util.ArrayList<>(currentState.networks));
             result.putString("anniversaryMonth", currentState.anniversaryMonth.name());
             result.putString("cardAge", currentState.cardAge.name());
+            result.putString("dormantFilter", currentState.dormantFilter.name());
             getParentFragmentManager().setFragmentResult(RESULT_KEY, result);
             dismiss();
         });
@@ -134,6 +138,13 @@ public class MyCardsFilterBottomSheet extends BottomSheetDialogFragment {
             case MORE_THAN_THREE: binding.chipAge3plus.setChecked(true); break;
             default: binding.chipAgeAny.setChecked(true); break;
         }
+
+        // Dormant
+        switch (currentState.dormantFilter) {
+            case ALL: binding.chipDormantAll.setChecked(true); break;
+            case DORMANT_ONLY: binding.chipDormantOnly.setChecked(true); break;
+            default: binding.chipDormantActiveOnly.setChecked(true); break;
+        }
     }
 
     private void readStateFromUi() {
@@ -175,6 +186,12 @@ public class MyCardsFilterBottomSheet extends BottomSheetDialogFragment {
         else if (ageId == R.id.chip_age_1to3) currentState.cardAge = CardFilterState.CardAgeFilter.ONE_TO_THREE;
         else if (ageId == R.id.chip_age_3plus) currentState.cardAge = CardFilterState.CardAgeFilter.MORE_THAN_THREE;
         else currentState.cardAge = CardFilterState.CardAgeFilter.ANY;
+
+        // Dormant
+        int dormantId = binding.chipGroupDormant.getCheckedChipId();
+        if (dormantId == R.id.chip_dormant_all) currentState.dormantFilter = CardFilterState.DormantFilter.ALL;
+        else if (dormantId == R.id.chip_dormant_only) currentState.dormantFilter = CardFilterState.DormantFilter.DORMANT_ONLY;
+        else currentState.dormantFilter = CardFilterState.DormantFilter.ACTIVE_ONLY;
     }
 
     @Override

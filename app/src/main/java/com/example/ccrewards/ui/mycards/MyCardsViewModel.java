@@ -82,64 +82,65 @@ public class MyCardsViewModel extends ViewModel {
             return;
         }
 
-        List<UserCardWithDetails> result;
-        if (currentFilter.isDefault()) {
-            result = new ArrayList<>(cards);
-        } else {
-            LocalDate today = LocalDate.now();
-            LocalDate nextMonth = today.plusMonths(1);
+        LocalDate today = LocalDate.now();
+        LocalDate nextMonth = today.plusMonths(1);
 
-            result = new ArrayList<>();
-            for (UserCardWithDetails item : cards) {
-                if (item.definition == null) continue;
+        List<UserCardWithDetails> result = new ArrayList<>();
+        for (UserCardWithDetails item : cards) {
+            if (item.definition == null) continue;
 
-                // Card type
-                boolean isBiz = item.definition.isBusinessCard;
-                if (currentFilter.cardType == CardFilterState.CardType.PERSONAL && isBiz) continue;
-                if (currentFilter.cardType == CardFilterState.CardType.BUSINESS && !isBiz) continue;
+            // Dormant filter (always applied — default is ACTIVE_ONLY)
+            if (currentFilter.dormantFilter == CardFilterState.DormantFilter.ACTIVE_ONLY
+                    && item.userCard.isDormant) continue;
+            if (currentFilter.dormantFilter == CardFilterState.DormantFilter.DORMANT_ONLY
+                    && !item.userCard.isDormant) continue;
 
-                // Issuer
-                if (!currentFilter.issuers.isEmpty()) {
-                    if (!currentFilter.issuers.contains(item.definition.issuer)) continue;
-                }
+            // Card type
+            boolean isBiz = item.definition.isBusinessCard;
+            if (currentFilter.cardType == CardFilterState.CardType.PERSONAL && isBiz) continue;
+            if (currentFilter.cardType == CardFilterState.CardType.BUSINESS && !isBiz) continue;
 
-                // Network
-                if (!currentFilter.networks.isEmpty()) {
-                    if (!currentFilter.networks.contains(item.definition.network)) continue;
-                }
-
-                // Anniversary month
-                if (currentFilter.anniversaryMonth != CardFilterState.AnniversaryFilter.ANY) {
-                    LocalDate openDate = item.userCard.openDate;
-                    if (openDate == null) continue;
-                    int annivMonth = openDate.getMonthValue();
-                    if (currentFilter.anniversaryMonth == CardFilterState.AnniversaryFilter.THIS_MONTH) {
-                        if (annivMonth != today.getMonthValue()) continue;
-                    } else if (currentFilter.anniversaryMonth == CardFilterState.AnniversaryFilter.NEXT_MONTH) {
-                        if (annivMonth != nextMonth.getMonthValue()) continue;
-                    }
-                }
-
-                // Card age
-                if (currentFilter.cardAge != CardFilterState.CardAgeFilter.ANY) {
-                    LocalDate openDate = item.userCard.openDate;
-                    if (openDate == null) continue;
-                    long yearsOld = openDate.until(today, ChronoUnit.YEARS);
-                    switch (currentFilter.cardAge) {
-                        case LESS_THAN_1:
-                            if (yearsOld >= 1) continue;
-                            break;
-                        case ONE_TO_THREE:
-                            if (yearsOld < 1 || yearsOld >= 3) continue;
-                            break;
-                        case MORE_THAN_THREE:
-                            if (yearsOld < 3) continue;
-                            break;
-                    }
-                }
-
-                result.add(item);
+            // Issuer
+            if (!currentFilter.issuers.isEmpty()) {
+                if (!currentFilter.issuers.contains(item.definition.issuer)) continue;
             }
+
+            // Network
+            if (!currentFilter.networks.isEmpty()) {
+                if (!currentFilter.networks.contains(item.definition.network)) continue;
+            }
+
+            // Anniversary month
+            if (currentFilter.anniversaryMonth != CardFilterState.AnniversaryFilter.ANY) {
+                LocalDate openDate = item.userCard.openDate;
+                if (openDate == null) continue;
+                int annivMonth = openDate.getMonthValue();
+                if (currentFilter.anniversaryMonth == CardFilterState.AnniversaryFilter.THIS_MONTH) {
+                    if (annivMonth != today.getMonthValue()) continue;
+                } else if (currentFilter.anniversaryMonth == CardFilterState.AnniversaryFilter.NEXT_MONTH) {
+                    if (annivMonth != nextMonth.getMonthValue()) continue;
+                }
+            }
+
+            // Card age
+            if (currentFilter.cardAge != CardFilterState.CardAgeFilter.ANY) {
+                LocalDate openDate = item.userCard.openDate;
+                if (openDate == null) continue;
+                long yearsOld = openDate.until(today, ChronoUnit.YEARS);
+                switch (currentFilter.cardAge) {
+                    case LESS_THAN_1:
+                        if (yearsOld >= 1) continue;
+                        break;
+                    case ONE_TO_THREE:
+                        if (yearsOld < 1 || yearsOld >= 3) continue;
+                        break;
+                    case MORE_THAN_THREE:
+                        if (yearsOld < 3) continue;
+                        break;
+                }
+            }
+
+            result.add(item);
         }
 
         // Apply sort

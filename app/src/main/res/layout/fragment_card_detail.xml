@@ -448,16 +448,31 @@
                 android:layout_marginTop="8dp"
                 android:text="Product Change" />
 
-            <!-- Delete card -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_delete_card"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
+            <!-- Card actions row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="24dp"
-                android:text="Delete Card"
-                android:textColor="@color/design_default_color_error" />
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_toggle_dormant"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Mark as Dormant" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_delete_card"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Delete Card"
+                    android:textColor="@color/design_default_color_error" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
