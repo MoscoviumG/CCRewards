@@ -17,10 +17,7 @@ import java.util.List;
 @Dao
 public interface UserCardDao {
 
-    @Transaction
-    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL ORDER BY sortOrder, openDate DESC")
-    LiveData<List<UserCardWithDetails>> getActiveCardsWithDetails();
-
+    /** All cards (open + closed) — used by My Cards list (ViewModel applies filter). */
     @Transaction
     @Query("SELECT * FROM user_cards ORDER BY sortOrder, openDate DESC")
     LiveData<List<UserCardWithDetails>> getAllCardsWithDetails();
@@ -33,23 +30,18 @@ public interface UserCardDao {
     UserCard getCardByIdSync(long id);
 
     @Query("SELECT DISTINCT cardDefinitionId FROM user_cards WHERE closeDate IS NULL")
-    List<String> getActiveCardDefinitionIdsSync();
+    List<String> getOpenCardDefinitionIdsSync();
 
-    @Query("SELECT DISTINCT cardDefinitionId FROM user_cards WHERE closeDate IS NULL AND isDormant = 0")
-    List<String> getNonDormantCardDefinitionIdsSync();
+    /** Open cards only — used by Best Card and Credits. */
+    @Transaction
+    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL ORDER BY sortOrder, openDate DESC")
+    LiveData<List<UserCardWithDetails>> getOpenCardsWithDetails();
 
     @Query("SELECT * FROM user_cards WHERE closeDate IS NULL ORDER BY sortOrder, openDate DESC")
-    List<UserCard> getAllActiveUserCardsSync();
+    List<UserCard> getOpenUserCardsSync();
 
-    @Transaction
-    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL AND isDormant = 0 ORDER BY sortOrder, openDate DESC")
-    LiveData<List<UserCardWithDetails>> getNonDormantActiveCardsWithDetails();
-
-    @Query("SELECT * FROM user_cards WHERE closeDate IS NULL AND isDormant = 0 ORDER BY sortOrder, openDate DESC")
-    List<UserCard> getNonDormantActiveUserCardsSync();
-
-    @Query("UPDATE user_cards SET isDormant = :isDormant WHERE id = :id")
-    void setDormant(long id, int isDormant);
+    @Query("UPDATE user_cards SET closeDate = :closeDate WHERE id = :id")
+    void setCloseDate(long id, Long closeDate);
 
     @Query("SELECT MAX(sortOrder) FROM user_cards")
     Integer getMaxSortOrder();

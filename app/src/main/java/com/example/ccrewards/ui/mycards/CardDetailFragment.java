@@ -1,5 +1,7 @@
 package com.example.ccrewards.ui.mycards;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.GridLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
@@ -20,12 +24,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.ccrewards.R;
 import com.example.ccrewards.data.model.CardBenefit;
+import com.example.ccrewards.data.model.FreeNightAward;
 import com.example.ccrewards.data.model.ProductChangeRecord;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
 import com.example.ccrewards.databinding.FragmentCardDetailBinding;
 import com.example.ccrewards.databinding.ItemBenefitDetailBinding;
+import com.example.ccrewards.databinding.ItemFreeNightAwardBinding;
 import com.example.ccrewards.databinding.ItemHistoryRecordBinding;
 import com.example.ccrewards.databinding.ItemRewardRateRowBinding;
 import com.example.ccrewards.databinding.ItemRotationalBonusBannerBinding;
@@ -66,11 +72,32 @@ public class CardDetailFragment extends Fragment {
     private long userCardId;
     private String currentCurrencyName = "";
 
+    private final ActivityResultLauncher<Intent> wbLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null)
+                    return;
+                Intent data = result.getData();
+                WelcomeBonus wb = new WelcomeBonus();
+                wb.userCardId = userCardId;
+                wb.bonusPoints = data.getIntExtra(SetWelcomeBonusActivity.EXTRA_BONUS, 0);
+                wb.bonusCurrencyName = currentCurrencyName;
+                wb.spendRequirementCents = data.getIntExtra(SetWelcomeBonusActivity.EXTRA_SPEND, 0);
+                long epoch = data.getLongExtra(SetWelcomeBonusActivity.EXTRA_DEADLINE, -1L);
+                wb.deadline = epoch == -1L ? null : java.time.LocalDate.ofEpochDay(epoch);
+                wb.showInBestCard = data.getBooleanExtra(SetWelcomeBonusActivity.EXTRA_SHOW_BC, true);
+                wb.cashbackCents = data.getIntExtra(SetWelcomeBonusActivity.EXTRA_CASHBACK, 0);
+                String fnTypeKey = data.getStringExtra(SetWelcomeBonusActivity.EXTRA_FN_TYPE);
+                wb.fnTypeKey = (fnTypeKey != null && !fnTypeKey.isEmpty()) ? fnTypeKey : null;
+                wb.fnCount = data.getIntExtra(SetWelcomeBonusActivity.EXTRA_FN_COUNT, 1);
+                viewModel.upsertWelcomeBonus(wb);
+            });
+
     // Simple adapters using ViewBinding
     private SimpleRateAdapter rateAdapter;
     private SimpleBenefitAdapter benefitAdapter;
     private SimpleHistoryAdapter historyAdapter;
     private SimpleRotationalBonusAdapter rbAdapter;
+    private SimpleFreeNightAdapter fnAdapter;
 
     @Nullable
     @Override
@@ -123,6 +150,11 @@ public class CardDetailFragment extends Fragment {
         binding.recyclerQuarterlyBonuses.setAdapter(rbAdapter);
         binding.recyclerQuarterlyBonuses.setNestedScrollingEnabled(false);
 
+        fnAdapter = new SimpleFreeNightAdapter();
+        binding.recyclerFreeNights.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerFreeNights.setAdapter(fnAdapter);
+        binding.recyclerFreeNights.setNestedScrollingEnabled(false);
+
         // Observe card details
         viewModel.getCardDetails().observe(getViewLifecycleOwner(), this::bindCardDetails);
 
@@ -133,6 +165,10 @@ public class CardDetailFragment extends Fragment {
         // Observe quarterly bonuses
         viewModel.getRotationalBonuses().observe(getViewLifecycleOwner(), items ->
                 rbAdapter.setData(items != null ? items : new ArrayList<>()));
+
+        // Observe free night awards
+        viewModel.getFreeNights().observe(getViewLifecycleOwner(), items ->
+                fnAdapter.setData(items != null ? items : new ArrayList<>()));
 
         // Observe credit usage
         viewModel.getCreditUsageThisYear().observe(getViewLifecycleOwner(), cents -> {
@@ -173,7 +209,7 @@ public class CardDetailFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_cardDetail_to_addEditBenefit, args);
         });
 
-        binding.btnToggleDormant.setOnClickListener(v -> toggleDormant());
+        binding.btnCloseCard.setOnClickListener(v -> handleCloseCardButton());
         binding.btnDeleteCard.setOnClickListener(v -> confirmDelete());
 
         binding.btnChangeColor.setOnClickListener(v -> showColorPickerDialog());
@@ -186,38 +222,28 @@ public class CardDetailFragment extends Fragment {
                     .navigate(R.id.action_cardDetail_to_addRotationalBonus, args);
         });
 
+        binding.btnAddFreeNight.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putLong("userCardId", userCardId);
+            Navigation.findNavController(v)
+                    .navigate(R.id.action_cardDetail_to_addFreeNight, args);
+        });
+
         // ── Welcome Bonus ────────────────────────────────────────────────────
 
         viewModel.getWelcomeBonus().observe(getViewLifecycleOwner(), this::bindWelcomeBonus);
 
-        // Listen for result from the bottom sheet
-        getChildFragmentManager().setFragmentResultListener(
-                WelcomeBonusBottomSheet.RESULT_KEY, getViewLifecycleOwner(), (key, result) -> {
-                    WelcomeBonus wb = new WelcomeBonus();
-                    wb.userCardId = userCardId;
-                    wb.bonusPoints = result.getInt("bonus_points");
-                    wb.bonusCurrencyName = currentCurrencyName;
-                    wb.spendRequirementCents = result.getInt("spend_req_cents");
-                    long epoch = result.getLong("deadline_epoch", -1L);
-                    wb.deadline = epoch == -1L ? null : LocalDate.ofEpochDay(epoch);
-                    wb.showInBestCard = result.getBoolean("show_in_best_card", true);
-                    wb.achieved = false;
-                    viewModel.upsertWelcomeBonus(wb);
-                });
-
-        binding.btnAddWelcomeBonus.setOnClickListener(v ->
-                WelcomeBonusBottomSheet.newInstance(currentCurrencyName)
-                        .show(getChildFragmentManager(), WelcomeBonusBottomSheet.TAG));
+        binding.btnAddWelcomeBonus.setOnClickListener(v -> launchWbActivity(null));
 
         binding.btnWbEdit.setOnClickListener(v -> {
             WelcomeBonus current = viewModel.getWelcomeBonus().getValue();
-            if (current != null)
-                WelcomeBonusBottomSheet.newInstance(current)
-                        .show(getChildFragmentManager(), WelcomeBonusBottomSheet.TAG);
+            launchWbActivity(current);
         });
 
-        binding.btnWbMarkAchieved.setOnClickListener(v ->
-                viewModel.markWelcomeBonusAchieved(userCardId));
+        binding.btnWbMarkAchieved.setOnClickListener(v -> {
+            WelcomeBonus wb = viewModel.getWelcomeBonus().getValue();
+            if (wb != null) viewModel.markWelcomeBonusAchieved(wb);
+        });
 
         binding.btnWbRemove.setOnClickListener(v -> {
             WelcomeBonus wb = viewModel.getWelcomeBonus().getValue();
@@ -253,8 +279,8 @@ public class CardDetailFragment extends Fragment {
 
         binding.tvDetailOpenDate.setText(DateUtil.toDisplayString(item.userCard.openDate));
 
-        // Update dormant button label
-        binding.btnToggleDormant.setText(item.userCard.isDormant ? "Reactivate Card" : "Mark as Dormant");
+        boolean isClosed = item.userCard.closeDate != null;
+        binding.btnCloseCard.setText(isClosed ? "Reopen Card" : "Close Card");
 
         // Nickname is now included inline in the card label above
         binding.tvDetailNickname.setVisibility(View.GONE);
@@ -289,13 +315,25 @@ public class CardDetailFragment extends Fragment {
         binding.cardWelcomeBonus.setVisibility(View.VISIBLE);
         binding.btnAddWelcomeBonus.setVisibility(View.GONE);
 
-        boolean cashBack = WelcomeBonusBottomSheet.isCashBack(wb.bonusCurrencyName);
-        if (cashBack) {
-            binding.tvWbBonus.setText(CurrencyUtil.centsToString(wb.bonusPoints) + " Cash Back");
-        } else {
-            binding.tvWbBonus.setText(NumberFormat.getInstance(Locale.US).format(wb.bonusPoints)
-                    + " " + shortCurrency(wb.bonusCurrencyName));
+        boolean cashBack = SetWelcomeBonusActivity.isCashBack(wb.bonusCurrencyName);
+        StringBuilder bonusText = new StringBuilder();
+        if (wb.bonusPoints > 0) {
+            if (cashBack) {
+                bonusText.append(CurrencyUtil.centsToString(wb.bonusPoints)).append(" Cash Back");
+            } else {
+                bonusText.append(NumberFormat.getInstance(Locale.US).format(wb.bonusPoints))
+                        .append(" ").append(shortCurrency(wb.bonusCurrencyName));
+            }
         }
+        if (wb.cashbackCents > 0) {
+            if (bonusText.length() > 0) bonusText.append(" + ");
+            bonusText.append(CurrencyUtil.centsToString(wb.cashbackCents)).append(" Cash");
+        }
+        if (wb.fnTypeKey != null && !wb.fnTypeKey.isEmpty()) {
+            if (bonusText.length() > 0) bonusText.append(" + ");
+            bonusText.append(wb.fnCount).append("× FN");
+        }
+        binding.tvWbBonus.setText(bonusText);
 
         binding.tvWbSpend.setText("Spend " + CurrencyUtil.centsToString(wb.spendRequirementCents));
         binding.tvWbDeadline.setText(wb.deadline != null
@@ -303,6 +341,22 @@ public class CardDetailFragment extends Fragment {
 
         binding.btnWbMarkAchieved.setVisibility(wb.achieved ? View.GONE : View.VISIBLE);
         binding.tvWbAchievedLabel.setVisibility(wb.achieved ? View.VISIBLE : View.GONE);
+    }
+
+    private void launchWbActivity(@Nullable WelcomeBonus existing) {
+        Intent intent = new Intent(requireContext(), SetWelcomeBonusActivity.class);
+        intent.putExtra(SetWelcomeBonusActivity.EXTRA_CURRENCY, currentCurrencyName);
+        if (existing != null) {
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_BONUS, existing.bonusPoints);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_SPEND, existing.spendRequirementCents);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_DEADLINE,
+                    existing.deadline != null ? existing.deadline.toEpochDay() : -1L);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_SHOW_BC, existing.showInBestCard);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_CASHBACK, existing.cashbackCents);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_FN_TYPE, existing.fnTypeKey);
+            intent.putExtra(SetWelcomeBonusActivity.EXTRA_FN_COUNT, existing.fnCount);
+        }
+        wbLauncher.launch(intent);
     }
 
     private static String shortCurrency(String name) {
@@ -442,11 +496,22 @@ public class CardDetailFragment extends Fragment {
                 .show();
     }
 
-    private void toggleDormant() {
+    private void handleCloseCardButton() {
         UserCardWithDetails current = viewModel.getCardDetails().getValue();
         if (current == null) return;
-        boolean newDormant = !current.userCard.isDormant;
-        viewModel.setDormant(userCardId, newDormant);
+        if (current.userCard.closeDate != null) {
+            // Card is closed — reopen it
+            viewModel.setCloseDate(userCardId, null);
+        } else {
+            // Card is open — prompt for close date
+            showCloseDatePicker(LocalDate.now(), date -> viewModel.setCloseDate(userCardId, date));
+        }
+    }
+
+    private void showCloseDatePicker(LocalDate initial, java.util.function.Consumer<LocalDate> onPicked) {
+        int y = initial.getYear(), m = initial.getMonthValue() - 1, d = initial.getDayOfMonth();
+        new DatePickerDialog(requireContext(), (picker, year, month, day) ->
+                onPicked.accept(LocalDate.of(year, month + 1, day)), y, m, d).show();
     }
 
     private void confirmDelete() {
@@ -470,6 +535,71 @@ public class CardDetailFragment extends Fragment {
     }
 
     // ── Simple inner adapters ────────────────────────────────────────────────
+
+    private class SimpleFreeNightAdapter
+            extends androidx.recyclerview.widget.RecyclerView.Adapter<SimpleFreeNightAdapter.VH> {
+
+        private List<CardDetailViewModel.FreeNightInfo> items = new ArrayList<>();
+
+        void setData(List<CardDetailViewModel.FreeNightInfo> data) {
+            items = data != null ? data : new ArrayList<>();
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemFreeNightAwardBinding b = ItemFreeNightAwardBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false);
+            return new VH(b);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            CardDetailViewModel.FreeNightInfo info = items.get(position);
+            FreeNightAward award = info.award;
+
+            holder.binding.tvFnTitle.setText(info.typeLabel);
+            holder.binding.tvFnExpiry.setText(award.expirationDate != null
+                    ? "Expires " + DateUtil.toDisplayString(award.expirationDate)
+                    : award.isFromWelcomeBonus ? "From Welcome Bonus" : "No expiration");
+
+            boolean isUsed = award.usedCount >= award.totalCount;
+            holder.binding.tvFnUsage.setText(isUsed ? "Used" : "Not used");
+            holder.binding.btnFnUse.setText(isUsed ? "Unmark" : "Mark Used");
+            holder.binding.btnFnUse.setVisibility(View.VISIBLE);
+            holder.binding.btnFnUse.setOnClickListener(v ->
+                    viewModel.markFreeNightUsed(award.id, isUsed ? 0 : award.totalCount));
+
+            holder.binding.getRoot().setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putLong("userCardId", userCardId);
+                args.putLong("awardId", award.id);
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.action_cardDetail_to_addFreeNight, args);
+            });
+
+            holder.binding.btnFnDelete.setOnClickListener(v ->
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Remove Free Night")
+                            .setMessage("Remove this free night certificate?")
+                            .setPositiveButton("Remove", (d, w) ->
+                                    viewModel.deleteFreeNight(award.id))
+                            .setNegativeButton("Cancel", null)
+                            .show());
+        }
+
+        @Override
+        public int getItemCount() { return items.size(); }
+
+        class VH extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+            final ItemFreeNightAwardBinding binding;
+            VH(ItemFreeNightAwardBinding b) {
+                super(b.getRoot());
+                binding = b;
+            }
+        }
+    }
 
     private class SimpleRotationalBonusAdapter
             extends androidx.recyclerview.widget.RecyclerView.Adapter<SimpleRotationalBonusAdapter.VH> {
@@ -719,8 +849,13 @@ public class CardDetailFragment extends Fragment {
         public void onBindViewHolder(@NonNull VH holder, int position) {
             ProductChangeRecord record = items.get(position);
             holder.binding.tvHistoryDate.setText(DateUtil.toDisplayString(record.changeDate));
-            String desc = record.fromCardDefinitionId + " \u2192 " + record.toCardDefinitionId;
-            if (record.notes != null && !record.notes.isEmpty()) desc += "\n" + record.notes;
+            String desc;
+            if (record.fromCardDefinitionId == null && record.toCardDefinitionId == null) {
+                desc = record.notes != null ? record.notes : "";
+            } else {
+                desc = record.fromCardDefinitionId + " \u2192 " + record.toCardDefinitionId;
+                if (record.notes != null && !record.notes.isEmpty()) desc += "\n" + record.notes;
+            }
             holder.binding.tvHistoryDescription.setText(desc);
             holder.itemView.setOnClickListener(v -> showEditHistoryDialog(record));
         }

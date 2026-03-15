@@ -11,6 +11,7 @@ import com.example.ccrewards.data.model.RewardRate;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.FreeNightRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class AddCardDetailViewModel extends ViewModel {
 
     private final CardRepository cardRepository;
     private final WelcomeBonusRepository wbRepository;
+    private final FreeNightRepository freeNightRepository;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     private String cardDefinitionId;
@@ -43,9 +45,11 @@ public class AddCardDetailViewModel extends ViewModel {
 
     @Inject
     public AddCardDetailViewModel(CardRepository cardRepository,
-                                  WelcomeBonusRepository wbRepository) {
+                                  WelcomeBonusRepository wbRepository,
+                                  FreeNightRepository freeNightRepository) {
         this.cardRepository = cardRepository;
         this.wbRepository = wbRepository;
+        this.freeNightRepository = freeNightRepository;
     }
 
     public void loadCard(String id) {
@@ -86,6 +90,7 @@ public class AddCardDetailViewModel extends ViewModel {
                 pendingWelcomeBonus.userCardId = newId;
                 wbRepository.upsert(pendingWelcomeBonus);
             }
+            freeNightRepository.ensureAnnualFreeNightsForCard(newId, cardDefinitionId, openDate);
             if (onComplete != null) onComplete.run();
         });
     }

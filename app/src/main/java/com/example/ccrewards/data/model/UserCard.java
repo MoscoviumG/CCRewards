@@ -16,14 +16,11 @@ public class UserCard {
     public String lastFour;         // last digits of physical card (typically 4, 5 for Amex), null if not set
     public int creditLimit;
     public LocalDate openDate;
-    public LocalDate closeDate;     // null = still active
+    public LocalDate closeDate;     // null = open/active; non-null = closed on that date
     public int sortOrder;
 
     /** User-overridden card strip color (ARGB). Null = use definition's cardColorPrimary. */
     public Long customColorPrimary;
-
-    /** True if the card is temporarily deactivated (excluded from Best Card, shown greyed in My Cards). */
-    public boolean isDormant;
 
     public UserCard(String cardDefinitionId, String nickname, int creditLimit,
                     LocalDate openDate, LocalDate closeDate, int sortOrder) {

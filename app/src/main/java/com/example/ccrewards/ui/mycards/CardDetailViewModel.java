@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.ccrewards.data.model.BenefitUsageWithAmount;
+import com.example.ccrewards.data.model.FreeNightAward;
 import com.example.ccrewards.data.model.ProductChangeRecord;
 import com.example.ccrewards.data.model.RewardCategory;
 import com.example.ccrewards.data.model.RewardRate;
@@ -14,8 +15,11 @@ import com.example.ccrewards.data.model.RotationalBonusCategory;
 import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
+import com.example.ccrewards.data.model.FreeNightAward;
+import com.example.ccrewards.data.model.FreeNightValuation;
 import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.FreeNightRepository;
 import com.example.ccrewards.data.repository.RotationalBonusRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 import com.example.ccrewards.util.PeriodKeyUtil;
@@ -47,10 +51,24 @@ public class CardDetailViewModel extends ViewModel {
         }
     }
 
+    /** Combined award + resolved valuation label for display. */
+    public static class FreeNightInfo {
+        public final FreeNightAward award;
+        public final String typeLabel; // e.g. "Marriott Free Night (35k)"
+        public final int valueCents;   // user's valuation for this type
+
+        FreeNightInfo(FreeNightAward award, String typeLabel, int valueCents) {
+            this.award = award;
+            this.typeLabel = typeLabel;
+            this.valueCents = valueCents;
+        }
+    }
+
     private final CardRepository cardRepository;
     private final WelcomeBonusRepository wbRepository;
     private final BenefitRepository benefitRepository;
     private final RotationalBonusRepository rotRepository;
+    private final FreeNightRepository freeNightRepository;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<Long> userCardId = new MutableLiveData<>();
@@ -61,21 +79,25 @@ public class CardDetailViewModel extends ViewModel {
     private final MediatorLiveData<WelcomeBonus> welcomeBonus = new MediatorLiveData<>();
     private final MediatorLiveData<Integer> creditUsageThisYear = new MediatorLiveData<>();
     private final MediatorLiveData<List<RotationalBonusInfo>> rotBonuses = new MediatorLiveData<>();
+    private final MediatorLiveData<List<FreeNightInfo>> freeNights = new MediatorLiveData<>();
 
     private LiveData<UserCardWithDetails> detailsSource;
     private LiveData<List<ProductChangeRecord>> historySource;
     private LiveData<WelcomeBonus> wbSource;
     private LiveData<List<BenefitUsageWithAmount>> usageSource;
     private LiveData<List<RotationalBonus>> rbSource;
+    private LiveData<List<FreeNightAward>> fnSource;
 
     @Inject
     public CardDetailViewModel(CardRepository cardRepository, WelcomeBonusRepository wbRepository,
                                BenefitRepository benefitRepository,
-                               RotationalBonusRepository rotRepository) {
+                               RotationalBonusRepository rotRepository,
+                               FreeNightRepository freeNightRepository) {
         this.cardRepository = cardRepository;
         this.wbRepository = wbRepository;
         this.benefitRepository = benefitRepository;
         this.rotRepository = rotRepository;
+        this.freeNightRepository = freeNightRepository;
     }
 
     public void loadCard(long id) {
@@ -127,6 +149,46 @@ public class CardDetailViewModel extends ViewModel {
                     }
                     rotBonuses.postValue(result);
                 }));
+
+        // Free night awards for this card
+        if (fnSource != null) freeNights.removeSource(fnSource);
+        fnSource = freeNightRepository.getAwardsForCard(id);
+        freeNights.addSource(fnSource, awardList ->
+                executor.execute(() -> {
+                    // Migrate any legacy multi-count awards to individual records
+                    freeNightRepository.splitMultiCountAwardsSync(id);
+
+                    List<FreeNightInfo> result = new ArrayList<>();
+                    if (awardList != null) {
+                        // Count WB awards per typeKey so we can number them
+                        Map<String, Integer> wbCountByType = new HashMap<>();
+                        for (FreeNightAward award : awardList) {
+                            if (award.isFromWelcomeBonus) {
+                                wbCountByType.merge(award.typeKey, 1, Integer::sum);
+                            }
+                        }
+                        Map<String, Integer> wbIndexByType = new HashMap<>();
+                        for (FreeNightAward award : awardList) {
+                            FreeNightValuation val =
+                                    freeNightRepository.getValuationSync(award.typeKey);
+                            // Prefer award.label (set for recurring/annual), else valuation label
+                            String baseLabel = award.label != null ? award.label
+                                    : (val != null ? val.label : award.typeKey);
+                            String displayLabel;
+                            if (award.isFromWelcomeBonus
+                                    && wbCountByType.getOrDefault(award.typeKey, 1) > 1) {
+                                int idx = wbIndexByType.getOrDefault(award.typeKey, 0) + 1;
+                                wbIndexByType.put(award.typeKey, idx);
+                                displayLabel = baseLabel + " · FN " + idx;
+                            } else {
+                                displayLabel = baseLabel;
+                            }
+                            int valueCents = val != null ? val.valueCents : 0;
+                            result.add(new FreeNightInfo(award, displayLabel, valueCents));
+                        }
+                    }
+                    freeNights.postValue(result);
+                }));
     }
 
     public LiveData<UserCardWithDetails> getCardDetails() {
@@ -147,6 +209,25 @@ public class CardDetailViewModel extends ViewModel {
 
     public LiveData<List<RotationalBonusInfo>> getRotationalBonuses() {
         return rotBonuses;
+    }
+
+    public LiveData<List<FreeNightInfo>> getFreeNights() {
+        return freeNights;
+    }
+
+    public void markFreeNightUsed(long awardId, int newUsedCount) {
+        freeNightRepository.markUsed(awardId, newUsedCount);
+    }
+
+    public void deleteFreeNight(long awardId) {
+        freeNightRepository.deleteAward(awardId);
+    }
+
+    public void addFreeNightFromWelcomeBonus(long cardId, String typeKey, int count) {
+        if (typeKey == null || typeKey.isEmpty()) return;
+        FreeNightAward award = new FreeNightAward(
+                cardId, typeKey, null, null, count, true);
+        freeNightRepository.insertAward(award, null);
     }
 
     public void deleteRotationalBonus(long bonusId) {
@@ -186,8 +267,16 @@ public class CardDetailViewModel extends ViewModel {
         wbRepository.delete(wb);
     }
 
-    public void markWelcomeBonusAchieved(long userCardId) {
-        wbRepository.markAchieved(userCardId);
+    public void markWelcomeBonusAchieved(WelcomeBonus wb) {
+        wbRepository.markAchieved(wb.userCardId);
+        if (wb.fnTypeKey != null && !wb.fnTypeKey.isEmpty()) {
+            int count = Math.max(1, wb.fnCount);
+            for (int i = 0; i < count; i++) {
+                FreeNightAward award = new FreeNightAward(
+                        wb.userCardId, wb.fnTypeKey, null, null, 1, true);
+                freeNightRepository.insertAward(award, null);
+            }
+        }
     }
 
     /**
@@ -278,8 +367,12 @@ public class CardDetailViewModel extends ViewModel {
         cardRepository.updateUserCard(card);
     }
 
-    public void setDormant(long userCardId, boolean isDormant) {
-        cardRepository.setDormant(userCardId, isDormant);
+    public void setCloseDate(long userCardId, LocalDate closeDate) {
+        cardRepository.setCloseDate(userCardId, closeDate);
+        String note = closeDate != null ? "Account closed" : "Account reopened";
+        LocalDate eventDate = closeDate != null ? closeDate : LocalDate.now();
+        cardRepository.insertProductChangeRecord(
+                new ProductChangeRecord(userCardId, null, null, eventDate, note));
     }
 
     public void deleteProductChangeRecord(ProductChangeRecord record) {

@@ -418,6 +418,34 @@
                 android:layout_marginTop="4dp"
                 android:text="+ Set Welcome Bonus" />
 
+            <!-- Free Night Certificates section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="4dp"
+                android:text="Free Night Certificates"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorPrimary" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_free_nights"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_free_night"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:text="+ Add Free Night" />
+
             <!-- Account History section -->
             <TextView
                 android:layout_width="match_parent"
@@ -456,12 +484,12 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_toggle_dormant"
+                    android:id="@+id/btn_close_card"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Mark as Dormant" />
+                    android:text="Close Card" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_delete_card"

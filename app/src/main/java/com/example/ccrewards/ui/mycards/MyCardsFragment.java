@@ -97,8 +97,8 @@ public class MyCardsFragment extends Fragment {
                     result.getString("anniversaryMonth", "ANY"));
             state.cardAge = CardFilterState.CardAgeFilter.valueOf(
                     result.getString("cardAge", "ANY"));
-            state.dormantFilter = CardFilterState.DormantFilter.valueOf(
-                    result.getString("dormantFilter", "ACTIVE_ONLY"));
+            state.closedFilter = CardFilterState.ClosedFilter.valueOf(
+                    result.getString("closedFilter", "OPEN_ONLY"));
         }
         return state;
     }

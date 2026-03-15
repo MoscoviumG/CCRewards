@@ -6,6 +6,7 @@ import com.example.ccrewards.data.db.dao.*;
 import com.example.ccrewards.data.model.*;
 import com.example.ccrewards.data.model.relations.UserCardWithDetails;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -62,19 +63,15 @@ public class CardRepository {
     }
 
     public List<String> getActiveCardDefinitionIdsSync() {
-        return userCardDao.getActiveCardDefinitionIdsSync();
+        return userCardDao.getOpenCardDefinitionIdsSync();
     }
 
-    public List<String> getNonDormantCardDefinitionIdsSync() {
-        return userCardDao.getNonDormantCardDefinitionIdsSync();
+    public List<String> getOpenCardDefinitionIdsSync() {
+        return userCardDao.getOpenCardDefinitionIdsSync();
     }
 
-    public List<com.example.ccrewards.data.model.UserCard> getAllActiveUserCardsSync() {
-        return userCardDao.getAllActiveUserCardsSync();
-    }
-
-    public List<com.example.ccrewards.data.model.UserCard> getNonDormantActiveUserCardsSync() {
-        return userCardDao.getNonDormantActiveUserCardsSync();
+    public List<com.example.ccrewards.data.model.UserCard> getOpenUserCardsSync() {
+        return userCardDao.getOpenUserCardsSync();
     }
 
     public LiveData<List<CardDefinition>> searchCardDefinitions(String query) {
@@ -109,20 +106,17 @@ public class CardRepository {
 
     // ── User Cards ────────────────────────────────────────────────────────────
 
-    public LiveData<List<UserCardWithDetails>> getActiveUserCards() {
-        return userCardDao.getActiveCardsWithDetails();
-    }
-
-    public LiveData<List<UserCardWithDetails>> getNonDormantActiveUserCards() {
-        return userCardDao.getNonDormantActiveCardsWithDetails();
-    }
-
-    public void setDormant(long userCardId, boolean isDormant) {
-        executor.execute(() -> userCardDao.setDormant(userCardId, isDormant ? 1 : 0));
-    }
-
     public LiveData<List<UserCardWithDetails>> getAllUserCards() {
         return userCardDao.getAllCardsWithDetails();
+    }
+
+    public LiveData<List<UserCardWithDetails>> getOpenUserCards() {
+        return userCardDao.getOpenCardsWithDetails();
+    }
+
+    public void setCloseDate(long userCardId, LocalDate closeDate) {
+        Long epochDay = closeDate != null ? closeDate.toEpochDay() : null;
+        executor.execute(() -> userCardDao.setCloseDate(userCardId, epochDay));
     }
 
     public LiveData<UserCardWithDetails> getUserCardWithDetails(long id) {
@@ -167,6 +161,10 @@ public class CardRepository {
 
     public LiveData<List<ProductChangeRecord>> getProductChangeHistory(long userCardId) {
         return productChangeRecordDao.getHistoryForCard(userCardId);
+    }
+
+    public void insertProductChangeRecord(ProductChangeRecord record) {
+        executor.execute(() -> productChangeRecordDao.insert(record));
     }
 
     public void deleteProductChangeRecord(ProductChangeRecord record) {

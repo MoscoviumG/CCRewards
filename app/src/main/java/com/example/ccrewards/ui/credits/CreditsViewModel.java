@@ -1,5 +1,8 @@
 package com.example.ccrewards.ui.credits;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -22,6 +25,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
 public class CreditsViewModel extends ViewModel {
@@ -32,33 +36,43 @@ public class CreditsViewModel extends ViewModel {
         public final int daysUntilReset;
         public final boolean isAnniversary;
         public final int usedCents;
+        public final boolean isStarred;
 
-        public ListItem(BenefitWithUsage bwu, int daysUntilReset, boolean isAnniversary) {
+        public ListItem(BenefitWithUsage bwu, int daysUntilReset, boolean isAnniversary,
+                        boolean isStarred) {
             this.benefitWithUsage = bwu;
             this.daysUntilReset = daysUntilReset;
             this.isAnniversary = isAnniversary;
             this.usedCents = bwu.usage != null ? bwu.usage.usedCents : 0;
+            this.isStarred = isStarred;
         }
     }
 
+    private static final String PREFS_NAME = "credits_prefs";
+    private static final String KEY_HIDE_USED = "hide_used";
+
     private final CardRepository cardRepository;
     private final BenefitRepository benefitRepository;
+    private final SharedPreferences prefs;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<List<ListItem>> displayItems = new MutableLiveData<>();
     private final MutableLiveData<Long> refreshTrigger = new MutableLiveData<>(0L);
-    private final MutableLiveData<Boolean> hideUsed = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> hideUsed;
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
 
     private final MediatorLiveData<Void> trigger = new MediatorLiveData<>();
     private LiveData<List<UserCardWithDetails>> sourceCards;
 
     @Inject
-    public CreditsViewModel(CardRepository cardRepository, BenefitRepository benefitRepository) {
+    public CreditsViewModel(@ApplicationContext Context context,
+                            CardRepository cardRepository, BenefitRepository benefitRepository) {
         this.cardRepository = cardRepository;
         this.benefitRepository = benefitRepository;
+        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.hideUsed = new MutableLiveData<>(prefs.getBoolean(KEY_HIDE_USED, false));
 
-        sourceCards = cardRepository.getActiveUserCards();
+        sourceCards = cardRepository.getOpenUserCards();
         trigger.addSource(sourceCards, v -> recompute(sourceCards.getValue()));
         trigger.addSource(refreshTrigger, v -> recompute(sourceCards.getValue()));
         trigger.addSource(hideUsed, v -> recompute(sourceCards.getValue()));
@@ -70,10 +84,20 @@ public class CreditsViewModel extends ViewModel {
 
     public void refresh() { refreshTrigger.setValue(System.currentTimeMillis()); }
 
-    public void setHideUsed(boolean hide) { hideUsed.setValue(hide); }
+    public boolean getInitialHideUsed() { return Boolean.TRUE.equals(hideUsed.getValue()); }
+
+    public void setHideUsed(boolean hide) {
+        hideUsed.setValue(hide);
+        prefs.edit().putBoolean(KEY_HIDE_USED, hide).apply();
+    }
 
     public void setSearchQuery(String query) {
         searchQuery.setValue(query != null ? query : "");
+    }
+
+    public void toggleStar(long userCardId, long benefitId) {
+        benefitRepository.toggleStar(userCardId, benefitId,
+                () -> refreshTrigger.postValue(System.currentTimeMillis()));
     }
 
     private void recompute(List<UserCardWithDetails> cards) {
@@ -95,7 +119,15 @@ public class CreditsViewModel extends ViewModel {
                             && item.userCard.openDate != null;
                     String periodKey;
                     int daysUntilReset;
-                    if (isCustom) {
+                    if (benefit.isOneTime) {
+                        periodKey = "one-time";
+                        // Use due date (customResetMonth/Day) for sorting if set
+                        boolean hasDueDate = benefit.customResetMonth != null && benefit.customResetDay != null;
+                        daysUntilReset = hasDueDate
+                                ? PeriodKeyUtil.daysUntilCustomReset(
+                                        com.example.ccrewards.data.model.ResetPeriod.ANNUALLY, benefit.customResetMonth, benefit.customResetDay)
+                                : Integer.MAX_VALUE;
+                    } else if (isCustom) {
                         periodKey = PeriodKeyUtil.getCurrentCustomPeriodKey(
                                 benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
                         daysUntilReset = PeriodKeyUtil.daysUntilCustomReset(
@@ -123,12 +155,19 @@ public class CreditsViewModel extends ViewModel {
                         if (!cardName.contains(query) && !benefitName.contains(query)) continue;
                     }
 
-                    result.add(new ListItem(bwu, daysUntilReset, isAnniv));
+                    boolean starred = benefitRepository.isStarred(item.userCard.id, benefit.id);
+                    result.add(new ListItem(bwu, daysUntilReset, isAnniv, starred));
                 }
             }
 
-            // Sort by days until reset ascending (soonest to expire first)
-            result.sort((a, b) -> Integer.compare(a.daysUntilReset, b.daysUntilReset));
+            // 1) Starred first, 2) unused before used, 3) days until reset ascending
+            result.sort((a, b) -> {
+                if (a.isStarred != b.isStarred) return a.isStarred ? -1 : 1;
+                boolean aUsed = a.benefitWithUsage.isUsed();
+                boolean bUsed = b.benefitWithUsage.isUsed();
+                if (aUsed != bUsed) return aUsed ? 1 : -1;
+                return Integer.compare(a.daysUntilReset, b.daysUntilReset);
+            });
 
             displayItems.postValue(result);
         });

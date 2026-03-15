@@ -52,6 +52,7 @@ public class BenefitDetailFragment extends Fragment {
     private UserCard loadedUserCard;
     private String currentPeriodKey;
     private boolean sliderChanging = false;
+    private boolean isStarred = false;
 
     @Nullable
     @Override
@@ -72,6 +73,10 @@ public class BenefitDetailFragment extends Fragment {
                 Navigation.findNavController(view).navigateUp());
 
         binding.toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == com.example.ccrewards.R.id.action_star_benefit) {
+                toggleStar();
+                return true;
+            }
             if (item.getItemId() == com.example.ccrewards.R.id.action_edit_benefit) {
                 navigateToEdit();
                 return true;
@@ -103,7 +108,15 @@ public class BenefitDetailFragment extends Fragment {
                     && userCard != null && userCard.openDate != null;
             String periodKey;
             int daysUntilReset;
-            if (isCustom) {
+            if (benefit.isOneTime) {
+                periodKey = "one-time";
+                boolean hasDueDate = benefit.customResetMonth != null && benefit.customResetDay != null;
+                daysUntilReset = hasDueDate
+                        ? PeriodKeyUtil.daysUntilCustomReset(
+                                com.example.ccrewards.data.model.ResetPeriod.ANNUALLY,
+                                benefit.customResetMonth, benefit.customResetDay)
+                        : Integer.MAX_VALUE;
+            } else if (isCustom) {
                 periodKey = PeriodKeyUtil.getCurrentCustomPeriodKey(
                         benefit.resetPeriod, benefit.customResetMonth, benefit.customResetDay);
                 daysUntilReset = PeriodKeyUtil.daysUntilCustomReset(
@@ -118,25 +131,43 @@ public class BenefitDetailFragment extends Fragment {
                 daysUntilReset = PeriodKeyUtil.daysUntilReset(benefit.resetPeriod);
             }
             BenefitUsage currentUsage = benefitRepository.getUsageSync(userCardId, benefitId, periodKey);
+            boolean starred = benefitRepository.isStarred(userCardId, benefitId);
+
+            com.example.ccrewards.data.model.CardDefinition def =
+                    (userCard != null) ? cardRepository.getCardDefinitionSync(userCard.cardDefinitionId) : null;
+            String defDisplayName = (def != null) ? def.displayName
+                    : (userCard != null ? userCard.cardDefinitionId : "");
 
             loadedBenefit = benefit;
             loadedUserCard = userCard;
             currentPeriodKey = periodKey;
             loadedCardDefinitionId = userCard != null ? userCard.cardDefinitionId : "";
+            isStarred = starred;
 
             requireActivity().runOnUiThread(() -> {
                 if (!isAdded() || binding == null) return;
 
+                updateStarIcon();
                 binding.toolbar.setTitle(benefit.name);
                 binding.tvBdName.setText(benefit.name);
-                binding.tvBdCardName.setText(userCard != null ? userCard.cardDefinitionId : "");
+                binding.tvBdCardName.setText(UserCard.label(
+                        defDisplayName,
+                        userCard != null ? userCard.lastFour : null,
+                        userCard != null ? userCard.nickname : null));
                 binding.tvBdDescription.setText(benefit.description != null ? benefit.description : "");
                 binding.tvBdAmount.setText(
                         benefit.amountCents > 0
                                 ? CurrencyUtil.centsToString(benefit.amountCents)
                                 : "Non-monetary");
-                binding.chipBdPeriod.setText(formatPeriod(benefit.resetPeriod));
-                binding.chipBdDays.setText(daysUntilReset + " days left");
+                if (benefit.isOneTime) {
+                    binding.chipBdPeriod.setText("One-time");
+                    binding.chipBdDays.setText(daysUntilReset != Integer.MAX_VALUE
+                            ? daysUntilReset + " days left"
+                            : "No expiry");
+                } else {
+                    binding.chipBdPeriod.setText(formatPeriod(benefit.resetPeriod));
+                    binding.chipBdDays.setText(daysUntilReset + " days left");
+                }
 
                 int usedCents = currentUsage != null ? currentUsage.usedCents : 0;
 
@@ -187,6 +218,24 @@ public class BenefitDetailFragment extends Fragment {
         if (binding == null) return;
         binding.tvBdUsedAmount.setText(
                 "$" + (usedCents / 100) + " / $" + (totalCents / 100));
+    }
+
+    private void toggleStar() {
+        benefitRepository.toggleStar(userCardId, benefitId, () -> {
+            isStarred = !isStarred;
+            if (isAdded()) requireActivity().runOnUiThread(this::updateStarIcon);
+        });
+    }
+
+    private void updateStarIcon() {
+        if (binding == null) return;
+        android.view.MenuItem starItem = binding.toolbar.getMenu()
+                .findItem(com.example.ccrewards.R.id.action_star_benefit);
+        if (starItem != null) {
+            starItem.setIcon(isStarred
+                    ? com.example.ccrewards.R.drawable.ic_star
+                    : com.example.ccrewards.R.drawable.ic_star_outline);
+        }
     }
 
     private void navigateToEdit() {

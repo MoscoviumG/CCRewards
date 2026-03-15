@@ -2,6 +2,8 @@ package com.example.ccrewards.data.db.converters;
 
 import androidx.room.TypeConverter;
 
+import com.example.ccrewards.data.model.FreeNightLimitType;
+import com.example.ccrewards.data.model.HotelGroup;
 import com.example.ccrewards.data.model.RateType;
 import com.example.ccrewards.data.model.ResetPeriod;
 import com.example.ccrewards.data.model.ResetType;
@@ -70,5 +72,25 @@ public class Converters {
     @TypeConverter
     public static ResetType toResetType(String name) {
         return name == null ? null : ResetType.valueOf(name);
+    }
+
+    @TypeConverter
+    public static String fromHotelGroup(HotelGroup group) {
+        return group == null ? null : group.name();
+    }
+
+    @TypeConverter
+    public static HotelGroup toHotelGroup(String name) {
+        return name == null ? null : HotelGroup.valueOf(name);
+    }
+
+    @TypeConverter
+    public static String fromFreeNightLimitType(FreeNightLimitType type) {
+        return type == null ? null : type.name();
+    }
+
+    @TypeConverter
+    public static FreeNightLimitType toFreeNightLimitType(String name) {
+        return name == null ? null : FreeNightLimitType.valueOf(name);
     }
 }

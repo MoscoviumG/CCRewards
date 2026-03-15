@@ -69,13 +69,13 @@
             app:layout_constraintTop_toTopOf="@id/tv_issuer"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Dormant badge (shown only for dormant cards) -->
+        <!-- Closed badge (shown only for closed cards) -->
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_dormant_badge"
+            android:id="@+id/chip_closed_badge"
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dormant"
+            android:text="Closed"
             android:visibility="gone"
             android:textAppearance="?attr/textAppearanceLabelSmall"
             app:chipBackgroundColor="?attr/colorSurfaceVariant"

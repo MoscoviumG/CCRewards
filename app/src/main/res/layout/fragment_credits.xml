@@ -20,31 +20,27 @@
             app:title="Credits"
             app:titleTextColor="@color/white" />
 
-        <!-- Search bar -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_credits_search"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_credits"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="2dp"
-            android:hint="Search benefits"
-            app:startIconDrawable="@android:drawable/ic_menu_search">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_credits_search"
-                android:layout_width="match_parent"
+            android:background="?attr/colorPrimary"
+            app:tabTextColor="#B3FFFFFF"
+            app:tabSelectedTextColor="@android:color/white"
+            app:tabIndicatorColor="@android:color/white">
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:maxLines="1" />
+                android:text="Benefits" />
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Free Nights" />
+        </com.google.android.material.tabs.TabLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Hide used toggle -->
+        <!-- Free Nights controls (hide used toggle), hidden when on Benefits tab -->
         <LinearLayout
+            android:id="@+id/layout_fn_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -52,7 +48,8 @@
             android:paddingEnd="12dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="0dp"
@@ -63,15 +60,71 @@
                 android:textColor="?attr/colorOnSurface" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_hide_used"
+                android:id="@+id/switch_fn_hide_used"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
 
+        <!-- Benefits-only controls (search + hide used) -->
+        <LinearLayout
+            android:id="@+id/layout_benefits_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_credits_search"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="2dp"
+                android:hint="Search benefits"
+                app:startIconDrawable="@android:drawable/ic_menu_search">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_credits_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Hide used"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_hide_used"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Empty state -->
+    <!-- Benefits empty state -->
     <LinearLayout
         android:id="@+id/credits_empty_state"
         android:layout_width="match_parent"
@@ -106,6 +159,44 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingBottom="80dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- Free Nights empty state -->
+    <LinearLayout
+        android:id="@+id/fn_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No free nights"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Free night certificates from your cards will appear here"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_free_nights"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

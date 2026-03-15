@@ -129,10 +129,17 @@
                     android:text="Annually"
                     android:checked="true" />
 
+                <RadioButton
+                    android:id="@+id/rb_one_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="One-time" />
+
             </RadioGroup>
 
-            <!-- Reset type label -->
+            <!-- Reset type section — hidden when One-time is selected -->
             <TextView
+                android:id="@+id/tv_reset_type_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -141,7 +148,6 @@
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorOnSurface" />
 
-            <!-- Reset type radio buttons -->
             <RadioGroup
                 android:id="@+id/rg_reset_type"
                 android:layout_width="match_parent"
@@ -169,7 +175,7 @@
 
             </RadioGroup>
 
-            <!-- Custom date picker — shown only when Custom is selected -->
+            <!-- Date picker row — shown when Custom reset type OR One-time is selected -->
             <LinearLayout
                 android:id="@+id/layout_custom_date"
                 android:layout_width="match_parent"
@@ -180,6 +186,7 @@
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/tv_custom_date_prefix"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel;
 import com.example.ccrewards.data.model.CardDefinition;
 import com.example.ccrewards.data.model.CustomCategory;
 import com.example.ccrewards.data.model.CustomCategoryRate;
+import com.example.ccrewards.data.model.FreeNightAward;
+import com.example.ccrewards.data.model.FreeNightValuation;
 import com.example.ccrewards.data.model.PointValuation;
 import com.example.ccrewards.data.model.RateType;
 import com.example.ccrewards.data.model.RewardCategory;
@@ -19,6 +21,7 @@ import com.example.ccrewards.data.model.RotationalBonus;
 import com.example.ccrewards.data.model.RotationalBonusCategory;
 import com.example.ccrewards.data.repository.CardRepository;
 import com.example.ccrewards.data.repository.CustomCategoryRepository;
+import com.example.ccrewards.data.repository.FreeNightRepository;
 import com.example.ccrewards.data.repository.RewardRateRepository;
 import com.example.ccrewards.data.repository.RotationalBonusRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
@@ -45,14 +48,16 @@ public class BestCardViewModel extends ViewModel {
         public final WelcomeBonus bonus;
         public final String cardName;
         public final long cardColorPrimary;
-        public final double effectiveReturnPct; // bonus return + base GENERAL return, as percentage
+        public final double effectiveReturnPct; // points + cashback + free nights + base GENERAL
+        public final String freeNightSummary;   // e.g. "1× Marriott – 35k", null if none
 
         public ActiveWelcomeBonus(WelcomeBonus bonus, String cardName, long cardColorPrimary,
-                                   double effectiveReturnPct) {
+                                   double effectiveReturnPct, String freeNightSummary) {
             this.bonus = bonus;
             this.cardName = cardName;
             this.cardColorPrimary = cardColorPrimary;
             this.effectiveReturnPct = effectiveReturnPct;
+            this.freeNightSummary = freeNightSummary;
         }
     }
 
@@ -88,6 +93,7 @@ public class BestCardViewModel extends ViewModel {
     private final CustomCategoryRepository customCategoryRepository;
     private final WelcomeBonusRepository wbRepository;
     private final RotationalBonusRepository rotationalBonusRepository;
+    private final FreeNightRepository freeNightRepository;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<Map<RewardCategory, List<BestCardForCategory>>> ranked =
@@ -105,18 +111,20 @@ public class BestCardViewModel extends ViewModel {
     public BestCardViewModel(CardRepository cardRepository, RewardRateRepository rateRepository,
                               CustomCategoryRepository customCategoryRepository,
                               WelcomeBonusRepository wbRepository,
-                              RotationalBonusRepository rotationalBonusRepository) {
+                              RotationalBonusRepository rotationalBonusRepository,
+                              FreeNightRepository freeNightRepository) {
         this.cardRepository = cardRepository;
         this.rateRepository = rateRepository;
         this.customCategoryRepository = customCategoryRepository;
         this.wbRepository = wbRepository;
         this.rotationalBonusRepository = rotationalBonusRepository;
+        this.freeNightRepository = freeNightRepository;
 
         trigger.addSource(rateRepository.getAllRates(), v -> recompute());
         trigger.addSource(rateRepository.getAllValuations(), v -> recompute());
         trigger.addSource(customCategoryRepository.getAllCustomCategoriesLive(), v -> recompute());
         trigger.addSource(wbRepository.getActiveLive(), v -> recompute());
-        trigger.addSource(cardRepository.getNonDormantActiveUserCards(), v -> recompute());
+        trigger.addSource(cardRepository.getOpenUserCards(), v -> recompute());
         trigger.addSource(rotationalBonusRepository.getActiveLive(), v -> recompute());
         trigger.observeForever(v -> {});
     }
@@ -155,8 +163,14 @@ public class BestCardViewModel extends ViewModel {
         rotationalBonusRepository.insert(bonus, cats, onComplete);
     }
 
-    public void markBonusAchieved(long userCardId) {
-        executor.execute(() -> wbRepository.markAchieved(userCardId));
+    public void markBonusAchieved(WelcomeBonus wb) {
+        executor.execute(() -> {
+            wbRepository.markAchieved(wb.userCardId);
+            if (wb.fnTypeKey != null && !wb.fnTypeKey.isEmpty()) {
+                freeNightRepository.insertAwardSync(new FreeNightAward(
+                        wb.userCardId, wb.fnTypeKey, null, null, wb.fnCount, true));
+            }
+        });
     }
 
     public void updateWelcomeBonusSpend(long userCardId, int spendUsedCents) {
@@ -174,10 +188,10 @@ public class BestCardViewModel extends ViewModel {
             List<RewardRate> allRates = rateRepository.getAllRatesSync();
             List<PointValuation> valuations = rateRepository.getAllValuationsSync();
             List<CardDefinition> allCards = cardRepository.getAllCardDefinitionsSync();
-            List<String> ownedIds = cardRepository.getNonDormantCardDefinitionIdsSync();
+            List<String> ownedIds = cardRepository.getOpenCardDefinitionIdsSync();
             List<CustomCategory> customCategories = customCategoryRepository.getAllCustomCategoriesSync();
             List<CustomCategoryRate> allCustomRates = customCategoryRepository.getAllRatesSync();
-            List<UserCard> activeUserCards = cardRepository.getNonDormantActiveUserCardsSync();
+            List<UserCard> activeUserCards = cardRepository.getOpenUserCardsSync();
 
             if (allRates == null || valuations == null || allCards == null) return;
 
@@ -426,6 +440,13 @@ public class BestCardViewModel extends ViewModel {
             Map<Long, UserCard> userCardMap = new HashMap<>();
             for (UserCard uc : activeUserCards) userCardMap.put(uc.id, uc);
 
+            // Pre-load all FN valuations into a map for fast lookup
+            List<FreeNightValuation> allValuations = freeNightRepository.getAllValuationsSync();
+            Map<String, FreeNightValuation> valuationMap = new HashMap<>();
+            if (allValuations != null) {
+                for (FreeNightValuation v : allValuations) valuationMap.put(v.typeKey, v);
+            }
+
             LocalDate today = LocalDate.now();
             List<ActiveWelcomeBonus> wbResult = new ArrayList<>();
             for (WelcomeBonus wb : wbs) {
@@ -435,19 +456,42 @@ public class BestCardViewModel extends ViewModel {
                 CardDefinition cd = cardMap.get(uc.cardDefinitionId);
                 if (cd == null) continue;
 
-                double cpp = cppMap.getOrDefault(wb.bonusCurrencyName, 1.0);
-                double bonusRatePerDollar = wb.bonusPoints / (wb.spendRequirementCents / 100.0);
-                double bonusCashPct = bonusRatePerDollar * cpp / 100.0 * 100.0;
+                double spendDollars = wb.spendRequirementCents / 100.0;
 
-                // Add base GENERAL rate for context
+                // Points component
+                double cpp = cppMap.getOrDefault(wb.bonusCurrencyName, 1.0);
+                double pointsEffPct = wb.bonusPoints > 0
+                        ? (wb.bonusPoints / spendDollars) * cpp / 100.0 * 100.0
+                        : 0;
+
+                // Cashback component
+                double cashEffPct = wb.cashbackCents > 0
+                        ? (wb.cashbackCents / 100.0) / spendDollars * 100.0
+                        : 0;
+
+                // Free night component — read from wb.fnTypeKey (stored until Mark Done)
+                double fnEffPct = 0;
+                String freeNightSummary = null;
+                if (wb.fnTypeKey != null && !wb.fnTypeKey.isEmpty()) {
+                    FreeNightValuation val = valuationMap.get(wb.fnTypeKey);
+                    if (val != null) {
+                        fnEffPct = (val.valueCents / 100.0) / spendDollars * 100.0 * wb.fnCount;
+                    }
+                    freeNightSummary = wb.fnCount + "× FN";
+                }
+
+                // Base GENERAL rate for context
                 RewardRate generalRate = generalRateMap.get(cd.id);
                 double basePct = generalRate != null
-                        ? generalRate.rate * cppMap.getOrDefault(cd.rewardCurrencyName, 1.0) / 100.0 * 100.0
+                        ? generalRate.rate * cppMap.getOrDefault(cd.rewardCurrencyName, 1.0)
+                                / 100.0 * 100.0
                         : 0;
 
                 wbResult.add(new ActiveWelcomeBonus(wb,
                         UserCard.label(cd.displayName, uc.lastFour, uc.nickname),
-                        cd.cardColorPrimary, bonusCashPct + basePct));
+                        cd.cardColorPrimary,
+                        pointsEffPct + cashEffPct + fnEffPct + basePct,
+                        freeNightSummary));
             }
             activeBonuses.postValue(wbResult);
 

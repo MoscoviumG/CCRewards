@@ -4,8 +4,12 @@ import android.content.Context;
 
 import androidx.room.Room;
 
+import com.example.ccrewards.data.ExportImportManager;
 import com.example.ccrewards.data.db.AppDatabase;
 import com.example.ccrewards.data.db.dao.*;
+import com.example.ccrewards.data.db.dao.StarredBenefitDao;
+import com.example.ccrewards.data.repository.BenefitRepository;
+import com.example.ccrewards.data.repository.FreeNightRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 
 import javax.inject.Singleton;
@@ -26,7 +30,7 @@ public class DatabaseModule {
         // Use a holder array so we can reference the DB instance in the callback.
         AppDatabase[] holder = new AppDatabase[1];
         holder[0] = Room.databaseBuilder(context, AppDatabase.class, "ccrewards.db")
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10, AppDatabase.MIGRATION_10_11, AppDatabase.MIGRATION_11_12, AppDatabase.MIGRATION_12_13)
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10, AppDatabase.MIGRATION_10_11, AppDatabase.MIGRATION_11_12, AppDatabase.MIGRATION_12_13, AppDatabase.MIGRATION_13_14, AppDatabase.MIGRATION_14_15, AppDatabase.MIGRATION_15_16, AppDatabase.MIGRATION_16_17, AppDatabase.MIGRATION_17_18, AppDatabase.MIGRATION_18_19, AppDatabase.MIGRATION_19_20)
                 .addCallback(AppDatabase.buildOpenCallback(context, holder))
                 .build();
         return holder[0];
@@ -116,5 +120,45 @@ public class DatabaseModule {
     @Provides
     public static AutoBonusCreatedDao provideAutoBonusCreatedDao(AppDatabase db) {
         return db.autoBonusCreatedDao();
+    }
+
+    @Provides
+    public static com.example.ccrewards.data.db.dao.FreeNightAwardDao provideFreeNightAwardDao(AppDatabase db) {
+        return db.freeNightAwardDao();
+    }
+
+    @Provides
+    public static com.example.ccrewards.data.db.dao.FreeNightValuationDao provideFreeNightValuationDao(AppDatabase db) {
+        return db.freeNightValuationDao();
+    }
+
+    @Provides
+    public static StarredBenefitDao provideStarredBenefitDao(AppDatabase db) {
+        return db.starredBenefitDao();
+    }
+
+    @Provides
+    @Singleton
+    public static BenefitRepository provideBenefitRepository(
+            com.example.ccrewards.data.db.dao.CardBenefitDao cardBenefitDao,
+            com.example.ccrewards.data.db.dao.BenefitUsageDao benefitUsageDao,
+            com.example.ccrewards.data.db.dao.TransferPartnerDao transferPartnerDao,
+            StarredBenefitDao starredBenefitDao) {
+        return new BenefitRepository(cardBenefitDao, benefitUsageDao, transferPartnerDao, starredBenefitDao);
+    }
+
+    @Provides
+    @Singleton
+    public static FreeNightRepository provideFreeNightRepository(
+            com.example.ccrewards.data.db.dao.FreeNightAwardDao awardDao,
+            com.example.ccrewards.data.db.dao.FreeNightValuationDao valuationDao) {
+        return new FreeNightRepository(awardDao, valuationDao);
+    }
+
+    @Provides
+    @Singleton
+    public static ExportImportManager provideExportImportManager(
+            AppDatabase db, @ApplicationContext Context context) {
+        return new ExportImportManager(db, context);
     }
 }

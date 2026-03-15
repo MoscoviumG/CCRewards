@@ -49,7 +49,7 @@ public class MyCardsViewModel extends ViewModel {
         } catch (IllegalArgumentException e) {
             currentSortOrder = SortOrder.DEFAULT;
         }
-        sourceCards = cardRepository.getActiveUserCards();
+        sourceCards = cardRepository.getAllUserCards();
         filteredCards.addSource(sourceCards, this::applyFilter);
     }
 
@@ -89,11 +89,10 @@ public class MyCardsViewModel extends ViewModel {
         for (UserCardWithDetails item : cards) {
             if (item.definition == null) continue;
 
-            // Dormant filter (always applied — default is ACTIVE_ONLY)
-            if (currentFilter.dormantFilter == CardFilterState.DormantFilter.ACTIVE_ONLY
-                    && item.userCard.isDormant) continue;
-            if (currentFilter.dormantFilter == CardFilterState.DormantFilter.DORMANT_ONLY
-                    && !item.userCard.isDormant) continue;
+            // Closed filter (always applied — default is OPEN_ONLY)
+            boolean isClosed = item.userCard.closeDate != null;
+            if (currentFilter.closedFilter == CardFilterState.ClosedFilter.OPEN_ONLY && isClosed) continue;
+            if (currentFilter.closedFilter == CardFilterState.ClosedFilter.CLOSED_ONLY && !isClosed) continue;
 
             // Card type
             boolean isBiz = item.definition.isBusinessCard;

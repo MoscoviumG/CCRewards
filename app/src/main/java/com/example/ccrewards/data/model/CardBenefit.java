@@ -25,6 +25,10 @@ public class CardBenefit {
     /** Day of month (1–31) of the custom reset date. Null unless resetType == CUSTOM. */
     public Integer customResetDay;
 
+    /** True if this benefit never resets (one-time credit). */
+    @androidx.room.ColumnInfo(defaultValue = "0")
+    public boolean isOneTime;
+
     /** Room constructor — used for deserialization. */
     public CardBenefit(String cardDefinitionId, String name, String description,
                        int amountCents, ResetPeriod resetPeriod, boolean isCustom, @NonNull ResetType resetType) {

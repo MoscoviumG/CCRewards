@@ -49,6 +49,7 @@ A US credit card portfolio optimizer for Android. CCRewards helps you track ever
 | **Manage Best Card Categories** | Choose which categories appear in the Best Card grid, reorder them via drag-and-drop, and add custom categories |
 | **Launch Screen** | Choose which tab the app opens to on launch |
 | **Dark / Light / System Theme** | Choose app theme in Settings |
+| **Data Export / Import** | Back up all card data to a JSON file; restore it on a new device (Experimental) |
 
 ---
 
@@ -422,6 +423,18 @@ Turn this OFF to flip the display — raw earn rate becomes primary and the effe
 **Reminder time** — the time of day to send the daily check (default 9:00 AM). The app schedules a WorkManager periodic task aligned to this exact hour and minute.
 
 When a benefit notification fires, it lists the benefit name, its value, and how many days remain. When a welcome bonus notification fires, it shows the remaining spend needed and days left. Tapping either notification opens the app.
+
+---
+
+#### Data Export / Import (Experimental)
+
+Found at the bottom of Settings under the **EXPERIMENTAL** heading.
+
+**Export Data** — Saves all your cards and data to a JSON file using the system file picker. The file contains every table that holds user data: owned cards, benefit usage history, product change records, welcome bonuses, quarterly bonuses, custom categories, free night awards, custom card definitions, customized reward rates, and point/free-night valuations. Seed data (built-in card definitions, standard rates, transfer partners) is not exported since it already exists on any device with the app installed.
+
+**Import Data** — Opens the system file picker to select a previously exported JSON file. A confirmation dialog warns that this will **replace all existing data** and cannot be undone. On confirmation, the import runs in a single transaction: all user data is deleted, then the backup is restored. The app restarts automatically when the import completes.
+
+> **Limitation:** Benefit usage records reference built-in benefit IDs by their database autoincrement value. If the app was updated between export and import and the seed benefit list changed, some usage records may not match their correct benefits. This is noted in the UI subtitle. For best results, export and import on the same app version.
 
 ---
 

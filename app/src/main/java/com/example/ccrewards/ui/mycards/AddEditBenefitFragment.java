@@ -66,16 +66,20 @@ public class AddEditBenefitFragment extends Fragment {
 
         viewModel.loadBenefit(benefitId);
 
-        // Show/hide custom date row when reset type changes
-        binding.rgResetType.setOnCheckedChangeListener((group, checkedId) -> {
-            boolean showCustom = checkedId == binding.rbCustom.getId();
-            binding.layoutCustomDate.setVisibility(showCustom ? View.VISIBLE : View.GONE);
-        });
+        // Period selection drives show/hide of reset type section and date picker
+        binding.rgResetPeriod.setOnCheckedChangeListener((group, checkedId) ->
+                updateResetSectionVisibility());
+
+        // Reset type selection drives show/hide of custom date row
+        binding.rgResetType.setOnCheckedChangeListener((group, checkedId) ->
+                updateResetSectionVisibility());
 
         binding.btnPickCustomDate.setOnClickListener(v -> {
-            int initMonth = customMonth != null ? customMonth - 1 : java.time.LocalDate.now().getMonthValue() - 1;
-            int initDay   = customDay   != null ? customDay       : java.time.LocalDate.now().getDayOfMonth();
-            // Use year 2000 (fixed, we only care about month+day)
+            java.time.LocalDate today = java.time.LocalDate.now();
+            boolean isOneTime = binding.rgResetPeriod.getCheckedRadioButtonId() == binding.rbOneTime.getId();
+            int initYear  = isOneTime ? today.getYear() : 2000;
+            int initMonth = customMonth != null ? customMonth - 1 : today.getMonthValue() - 1;
+            int initDay   = customDay   != null ? customDay       : today.getDayOfMonth();
             DatePickerDialog dpd = new DatePickerDialog(requireContext(),
                     (picker, year, month0, dayOfMonth) -> {
                         customMonth = month0 + 1;
@@ -84,7 +88,7 @@ public class AddEditBenefitFragment extends Fragment {
                                 java.time.Month.of(customMonth).getDisplayName(
                                         java.time.format.TextStyle.SHORT,
                                         java.util.Locale.getDefault()) + " " + customDay);
-                    }, 2000, initMonth, initDay);
+                    }, initYear, initMonth, initDay);
             // Hide year spinner — we only want month+day
             try {
                 java.lang.reflect.Field f = dpd.getDatePicker().getClass().getDeclaredField("mYearSpinner");
@@ -100,35 +104,49 @@ public class AddEditBenefitFragment extends Fragment {
             if (benefit != null) {
                 binding.etBenefitName.setText(benefit.name);
                 binding.etBenefitDescription.setText(benefit.description);
-                // Convert cents to dollars for display
                 binding.etBenefitAmount.setText(String.valueOf(benefit.amountCents / 100));
-                // Set reset period radio
-                switch (benefit.resetPeriod) {
-                    case MONTHLY: binding.rgResetPeriod.check(binding.rbMonthly.getId()); break;
-                    case QUARTERLY: binding.rgResetPeriod.check(binding.rbQuarterly.getId()); break;
-                    case SEMI_ANNUALLY: binding.rgResetPeriod.check(binding.rbSemiAnnually.getId()); break;
-                    default: binding.rgResetPeriod.check(binding.rbAnnually.getId()); break;
+
+                if (benefit.isOneTime) {
+                    binding.rgResetPeriod.check(binding.rbOneTime.getId());
+                    // Restore due date if set
+                    if (benefit.customResetMonth != null && benefit.customResetDay != null) {
+                        customMonth = benefit.customResetMonth;
+                        customDay   = benefit.customResetDay;
+                        binding.tvCustomDateLabel.setText(
+                                java.time.Month.of(customMonth).getDisplayName(
+                                        java.time.format.TextStyle.SHORT,
+                                        java.util.Locale.getDefault()) + " " + customDay);
+                    }
+                } else {
+                    // Set reset period radio
+                    switch (benefit.resetPeriod) {
+                        case MONTHLY:       binding.rgResetPeriod.check(binding.rbMonthly.getId()); break;
+                        case QUARTERLY:     binding.rgResetPeriod.check(binding.rbQuarterly.getId()); break;
+                        case SEMI_ANNUALLY: binding.rgResetPeriod.check(binding.rbSemiAnnually.getId()); break;
+                        default:            binding.rgResetPeriod.check(binding.rbAnnually.getId()); break;
+                    }
+                    // Set reset type radio
+                    switch (benefit.resetType) {
+                        case ANNIVERSARY:
+                            binding.rgResetType.check(binding.rbAnniversary.getId());
+                            break;
+                        case CUSTOM:
+                            binding.rgResetType.check(binding.rbCustom.getId());
+                            if (benefit.customResetMonth != null && benefit.customResetDay != null) {
+                                customMonth = benefit.customResetMonth;
+                                customDay   = benefit.customResetDay;
+                                binding.tvCustomDateLabel.setText(
+                                        java.time.Month.of(customMonth).getDisplayName(
+                                                java.time.format.TextStyle.SHORT,
+                                                java.util.Locale.getDefault()) + " " + customDay);
+                            }
+                            break;
+                        default:
+                            binding.rgResetType.check(binding.rbCalendar.getId());
+                            break;
+                    }
                 }
-                // Set reset type radio
-                switch (benefit.resetType) {
-                    case ANNIVERSARY:
-                        binding.rgResetType.check(binding.rbAnniversary.getId());
-                        break;
-                    case CUSTOM:
-                        binding.rgResetType.check(binding.rbCustom.getId());
-                        if (benefit.customResetMonth != null && benefit.customResetDay != null) {
-                            customMonth = benefit.customResetMonth;
-                            customDay   = benefit.customResetDay;
-                            binding.tvCustomDateLabel.setText(
-                                    java.time.Month.of(customMonth).getDisplayName(
-                                            java.time.format.TextStyle.SHORT,
-                                            java.util.Locale.getDefault()) + " " + customDay);
-                        }
-                        break;
-                    default:
-                        binding.rgResetType.check(binding.rbCalendar.getId());
-                        break;
-                }
+                updateResetSectionVisibility();
             }
         });
 
@@ -153,21 +171,58 @@ public class AddEditBenefitFragment extends Fragment {
                 amountCents = 0;
             }
 
-            ResetPeriod period = getSelectedPeriod();
-            ResetType resetType = getSelectedResetType();
+            boolean isOneTime = binding.rgResetPeriod.getCheckedRadioButtonId() == binding.rbOneTime.getId();
 
-            if (resetType == ResetType.CUSTOM && (customMonth == null || customDay == null)) {
-                Snackbar.make(v, "Please pick a start date for Custom reset type", Snackbar.LENGTH_SHORT).show();
-                return;
+            if (isOneTime) {
+                // For one-time benefits, store ANNUALLY as the period fallback.
+                // The due date (if set) is stored in customResetMonth/Day; resetType = CUSTOM when set.
+                boolean hasDueDate = customMonth != null && customDay != null;
+                ResetType resetType = hasDueDate ? ResetType.CUSTOM : ResetType.CALENDAR;
+                viewModel.saveBenefit(cardDefinitionId, name, description, amountCents,
+                        ResetPeriod.ANNUALLY, resetType,
+                        hasDueDate ? customMonth : null, hasDueDate ? customDay : null,
+                        true, benefitId,
+                        () -> requireActivity().runOnUiThread(() ->
+                                Navigation.findNavController(requireView()).navigateUp()));
+            } else {
+                ResetPeriod period = getSelectedPeriod();
+                ResetType resetType = getSelectedResetType();
+
+                if (resetType == ResetType.CUSTOM && (customMonth == null || customDay == null)) {
+                    Snackbar.make(v, "Please pick a start date for Custom reset type", Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+                Integer saveMonth = resetType == ResetType.CUSTOM ? customMonth : null;
+                Integer saveDay   = resetType == ResetType.CUSTOM ? customDay   : null;
+
+                viewModel.saveBenefit(cardDefinitionId, name, description, amountCents, period,
+                        resetType, saveMonth, saveDay, false, benefitId,
+                        () -> requireActivity().runOnUiThread(() ->
+                                Navigation.findNavController(requireView()).navigateUp()));
             }
-            Integer saveMonth = resetType == ResetType.CUSTOM ? customMonth : null;
-            Integer saveDay   = resetType == ResetType.CUSTOM ? customDay   : null;
-
-            viewModel.saveBenefit(cardDefinitionId, name, description, amountCents, period,
-                    resetType, saveMonth, saveDay, benefitId,
-                    () -> requireActivity().runOnUiThread(() ->
-                            Navigation.findNavController(requireView()).navigateUp()));
         });
+    }
+
+    /** Syncs visibility of the reset type section and date picker based on current selections. */
+    private void updateResetSectionVisibility() {
+        boolean isOneTime = binding.rgResetPeriod.getCheckedRadioButtonId() == binding.rbOneTime.getId();
+
+        // Show/hide reset type radio group and its label
+        int resetTypeVisibility = isOneTime ? View.GONE : View.VISIBLE;
+        binding.tvResetTypeLabel.setVisibility(resetTypeVisibility);
+        binding.rgResetType.setVisibility(resetTypeVisibility);
+
+        // Show date picker:
+        // - One-time mode: always show it (optional due date), labeled "Due date (optional):"
+        // - Recurring mode: only when Custom reset type is selected, labeled "Period starts on:"
+        if (isOneTime) {
+            binding.layoutCustomDate.setVisibility(View.VISIBLE);
+            binding.tvCustomDatePrefix.setText("Due date (optional):");
+        } else {
+            boolean showCustom = binding.rgResetType.getCheckedRadioButtonId() == binding.rbCustom.getId();
+            binding.layoutCustomDate.setVisibility(showCustom ? View.VISIBLE : View.GONE);
+            binding.tvCustomDatePrefix.setText("Period starts on:");
+        }
     }
 
     private void confirmDeleteBenefit(View navView) {
@@ -184,8 +239,8 @@ public class AddEditBenefitFragment extends Fragment {
 
     private ResetPeriod getSelectedPeriod() {
         int checkedId = binding.rgResetPeriod.getCheckedRadioButtonId();
-        if (checkedId == binding.rbMonthly.getId()) return ResetPeriod.MONTHLY;
-        if (checkedId == binding.rbQuarterly.getId()) return ResetPeriod.QUARTERLY;
+        if (checkedId == binding.rbMonthly.getId())      return ResetPeriod.MONTHLY;
+        if (checkedId == binding.rbQuarterly.getId())    return ResetPeriod.QUARTERLY;
         if (checkedId == binding.rbSemiAnnually.getId()) return ResetPeriod.SEMI_ANNUALLY;
         return ResetPeriod.ANNUALLY;
     }

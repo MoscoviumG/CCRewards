@@ -13,6 +13,7 @@ import com.example.ccrewards.data.db.converters.Converters;
 import com.example.ccrewards.data.db.dao.*;
 import com.example.ccrewards.data.model.*;
 import com.example.ccrewards.data.seed.DefaultPointValuations;
+import com.example.ccrewards.data.seed.FreeNightValuationSeedData;
 import com.example.ccrewards.data.seed.QuarterlyScheduleSeedData;
 import com.example.ccrewards.data.seed.SeedData;
 import com.example.ccrewards.data.seed.TransferPartnersSeedData;
@@ -47,8 +48,11 @@ import java.util.concurrent.Executors;
         RotationalBonusCategory.class,
         QuarterlyBonusScheduleRow.class,
         AutoBonusCreated.class,
+        FreeNightAward.class,
+        FreeNightValuation.class,
+        StarredBenefit.class,
     },
-    version = 13,
+    version = 20,
     exportSchema = false
 )
 @TypeConverters(Converters.class)
@@ -70,6 +74,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract RotationalBonusCategoryDao rotationalBonusCategoryDao();
     public abstract QuarterlyBonusScheduleDao quarterlyBonusScheduleDao();
     public abstract AutoBonusCreatedDao autoBonusCreatedDao();
+    public abstract com.example.ccrewards.data.db.dao.FreeNightAwardDao freeNightAwardDao();
+    public abstract com.example.ccrewards.data.db.dao.FreeNightValuationDao freeNightValuationDao();
+    public abstract StarredBenefitDao starredBenefitDao();
 
     // ── Schema migration ───────────────────────────────────────────────────────
 
@@ -201,6 +208,121 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_13_14 = new Migration(13, 14) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `free_night_awards` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`userCardId` INTEGER NOT NULL, " +
+                    "`label` TEXT, " +
+                    "`typeKey` TEXT NOT NULL, " +
+                    "`expirationDate` INTEGER, " +
+                    "`totalCount` INTEGER NOT NULL DEFAULT 1, " +
+                    "`usedCount` INTEGER NOT NULL DEFAULT 0, " +
+                    "`isFromWelcomeBonus` INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `free_night_valuations` (" +
+                    "`typeKey` TEXT PRIMARY KEY NOT NULL, " +
+                    "`label` TEXT NOT NULL, " +
+                    "`hotelGroup` TEXT, " +
+                    "`limitType` TEXT, " +
+                    "`pointsCap` INTEGER, " +
+                    "`hyattCategory` INTEGER, " +
+                    "`valueCents` INTEGER NOT NULL DEFAULT 0, " +
+                    "`defaultValueCents` INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("ALTER TABLE `welcome_bonuses` ADD COLUMN `cashbackCents` INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
+    public static final Migration MIGRATION_14_15 = new Migration(14, 15) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `welcome_bonuses` ADD COLUMN `fnTypeKey` TEXT DEFAULT NULL");
+            database.execSQL("ALTER TABLE `welcome_bonuses` ADD COLUMN `fnCount` INTEGER NOT NULL DEFAULT 1");
+        }
+    };
+
+    /** Fixes fnTypeKey column to have DEFAULT NULL so Room 2.7.0 schema validation passes. */
+    public static final Migration MIGRATION_15_16 = new Migration(15, 16) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE `welcome_bonuses_new` (" +
+                    "`userCardId` INTEGER NOT NULL, " +
+                    "`bonusPoints` INTEGER NOT NULL, " +
+                    "`bonusCurrencyName` TEXT NOT NULL, " +
+                    "`spendRequirementCents` INTEGER NOT NULL, " +
+                    "`spendUsedCents` INTEGER NOT NULL DEFAULT 0, " +
+                    "`deadline` INTEGER, " +
+                    "`showInBestCard` INTEGER NOT NULL DEFAULT 1, " +
+                    "`achieved` INTEGER NOT NULL DEFAULT 0, " +
+                    "`cashbackCents` INTEGER NOT NULL DEFAULT 0, " +
+                    "`fnTypeKey` TEXT DEFAULT NULL, " +
+                    "`fnCount` INTEGER NOT NULL DEFAULT 1, " +
+                    "PRIMARY KEY(`userCardId`))");
+            database.execSQL("INSERT INTO `welcome_bonuses_new` " +
+                    "(`userCardId`, `bonusPoints`, `bonusCurrencyName`, `spendRequirementCents`, " +
+                    "`spendUsedCents`, `deadline`, `showInBestCard`, `achieved`, `cashbackCents`, " +
+                    "`fnTypeKey`, `fnCount`) " +
+                    "SELECT `userCardId`, `bonusPoints`, `bonusCurrencyName`, `spendRequirementCents`, " +
+                    "`spendUsedCents`, `deadline`, `showInBestCard`, `achieved`, `cashbackCents`, " +
+                    "`fnTypeKey`, `fnCount` FROM `welcome_bonuses`");
+            database.execSQL("DROP TABLE `welcome_bonuses`");
+            database.execSQL("ALTER TABLE `welcome_bonuses_new` RENAME TO `welcome_bonuses`");
+        }
+    };
+
+    public static final Migration MIGRATION_16_17 = new Migration(16, 17) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `starred_benefits` (" +
+                    "`userCardId` INTEGER NOT NULL, " +
+                    "`benefitId` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`userCardId`, `benefitId`))");
+        }
+    };
+
+    public static final Migration MIGRATION_17_18 = new Migration(17, 18) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `free_night_awards` ADD COLUMN `isRecurring` INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE `free_night_awards` ADD COLUMN `renewalMonth` INTEGER");
+            database.execSQL("ALTER TABLE `free_night_awards` ADD COLUMN `renewalDay` INTEGER");
+        }
+    };
+
+    public static final Migration MIGRATION_18_19 = new Migration(18, 19) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `card_benefits` ADD COLUMN `isOneTime` INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
+    public static final Migration MIGRATION_19_20 = new Migration(19, 20) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // Migrate any isDormant=1 cards to closeDate = today (epoch day)
+            database.execSQL(
+                "UPDATE user_cards SET closeDate = (strftime('%s','now') / 86400) " +
+                "WHERE isDormant = 1 AND closeDate IS NULL");
+            // Recreate table without isDormant column
+            database.execSQL("CREATE TABLE IF NOT EXISTS `user_cards_new` (" +
+                "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`cardDefinitionId` TEXT, " +
+                "`nickname` TEXT, " +
+                "`lastFour` TEXT, " +
+                "`creditLimit` INTEGER NOT NULL, " +
+                "`openDate` INTEGER, " +
+                "`closeDate` INTEGER, " +
+                "`sortOrder` INTEGER NOT NULL, " +
+                "`customColorPrimary` INTEGER)");
+            database.execSQL(
+                "INSERT INTO user_cards_new " +
+                "SELECT id, cardDefinitionId, nickname, lastFour, creditLimit, " +
+                "openDate, closeDate, sortOrder, customColorPrimary FROM user_cards");
+            database.execSQL("DROP TABLE user_cards");
+            database.execSQL("ALTER TABLE user_cards_new RENAME TO user_cards");
+        }
+    };
+
     // ── Versioned seed management ──────────────────────────────────────────────
 
     /**
@@ -208,7 +330,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * Existing installs will automatically refresh their catalog on next launch while
      * preserving all user data (owned cards, usage history, custom rates, ¢/pt edits).
      */
-    public static final int SEED_VERSION = 22;
+    public static final int SEED_VERSION = 24;
 
     private static final String PREF_NAME = "ccrewards_seed_prefs";
     private static final String KEY_SEED_VERSION = "seed_version";
@@ -245,7 +367,7 @@ public abstract class AppDatabase extends RoomDatabase {
                         database.cardBenefitDao().insertAll(SeedData.getCardBenefits());
                         database.pointValuationDao().insertAll(DefaultPointValuations.getValuations());
                         database.transferPartnerDao().insertAll(TransferPartnersSeedData.getPartners());
-                        database.quarterlyBonusScheduleDao().upsertAll(QuarterlyScheduleSeedData.getSchedule());
+                        database.freeNightValuationDao().insertAll(FreeNightValuationSeedData.getValuations());
                         prefs.edit().putInt(KEY_SEED_VERSION, SEED_VERSION).apply();
                     } else if (appliedVersion < SEED_VERSION) {
                         // Existing install with stale seed: refresh catalog, preserve user data.
@@ -254,7 +376,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
                     // Auto-create quarterly bonuses for matching user cards (runs every open,
                     // deduplication via auto_bonus_created prevents re-creation).
-                    autoCreateQuarterlyBonuses(database);
                 });
             }
         };
@@ -341,73 +462,16 @@ public abstract class AppDatabase extends RoomDatabase {
         database.transferPartnerDao().deleteAll();
         database.transferPartnerDao().insertAll(TransferPartnersSeedData.getPartners());
 
-        // 6. Quarterly bonus schedule: upsert so new year/quarter rows are added
-        //    without disturbing existing rows (auto_bonus_created is never touched here).
-        database.quarterlyBonusScheduleDao().upsertAll(QuarterlyScheduleSeedData.getSchedule());
+        // 6. Free night valuations: INSERT IGNORE preserves user edits to valueCents;
+        //    update defaultValueCents so "Reset to Default" restores the new baseline.
+        List<com.example.ccrewards.data.model.FreeNightValuation> fnValuations =
+                FreeNightValuationSeedData.getValuations();
+        database.freeNightValuationDao().insertAll(fnValuations);
+        for (com.example.ccrewards.data.model.FreeNightValuation v : fnValuations) {
+            database.freeNightValuationDao().updateDefault(v.typeKey, v.defaultValueCents);
+        }
 
         prefs.edit().putInt(KEY_SEED_VERSION, SEED_VERSION).apply();
     }
 
-    /**
-     * Auto-creates a {@link RotationalBonus} for the current quarter for any user card whose
-     * definition appears in {@code quarterly_bonus_schedule}.  Deduplication is handled by
-     * {@code auto_bonus_created}: if a row already exists for (userCardId, year, quarter) — even
-     * if the bonus was subsequently deleted by the user — no new bonus is created.
-     */
-    private static void autoCreateQuarterlyBonuses(AppDatabase database) {
-        LocalDate today = LocalDate.now();
-        int currentYear = today.getYear();
-        int currentQuarter = (today.getMonthValue() - 1) / 3 + 1;
-
-        List<QuarterlyBonusScheduleRow> scheduleRows =
-                database.quarterlyBonusScheduleDao().getForYearAndQuarter(currentYear, currentQuarter);
-        if (scheduleRows.isEmpty()) return;
-
-        // Group schedule rows by cardDefinitionId.
-        Map<String, List<QuarterlyBonusScheduleRow>> byCard = new LinkedHashMap<>();
-        for (QuarterlyBonusScheduleRow r : scheduleRows) {
-            byCard.computeIfAbsent(r.cardDefinitionId, k -> new ArrayList<>()).add(r);
-        }
-
-        // Last day of the current quarter (e.g. Q1 → March 31).
-        int lastMonthOfQuarter = currentQuarter * 3;
-        LocalDate quarterEnd = LocalDate.of(currentYear, lastMonthOfQuarter, 1)
-                .withDayOfMonth(
-                        LocalDate.of(currentYear, lastMonthOfQuarter, 1).lengthOfMonth());
-
-        for (Map.Entry<String, List<QuarterlyBonusScheduleRow>> entry : byCard.entrySet()) {
-            List<UserCard> userCards =
-                    database.userCardDao().getByCardDefinitionSync(entry.getKey());
-            for (UserCard uc : userCards) {
-                boolean alreadyCreated =
-                        database.autoBonusCreatedDao().exists(uc.id, currentYear, currentQuarter);
-                if (alreadyCreated) continue;
-
-                // Create the parent bonus record.
-                RotationalBonus bonus = new RotationalBonus();
-                bonus.userCardId = uc.id;
-                bonus.label = "Q" + currentQuarter + " " + currentYear;
-                bonus.spendLimitCents = entry.getValue().get(0).spendLimitCents;
-                bonus.usedCents = 0;
-                bonus.endDate = quarterEnd;
-                bonus.isFullyUsed = false;
-                long bonusId = database.rotationalBonusDao().insert(bonus);
-
-                // Create one category row per schedule entry.
-                for (QuarterlyBonusScheduleRow cat : entry.getValue()) {
-                    RotationalBonusCategory catRow = new RotationalBonusCategory();
-                    catRow.rotationalBonusId = bonusId;
-                    catRow.categoryName = cat.categoryName;
-                    catRow.rate = cat.rate;
-                    catRow.rateType = RateType.valueOf(cat.rateType);
-                    catRow.currencyName = null;
-                    database.rotationalBonusCategoryDao().insert(catRow);
-                }
-
-                // Mark as created so we never duplicate it.
-                database.autoBonusCreatedDao().insert(
-                        new AutoBonusCreated(uc.id, currentYear, currentQuarter));
-            }
-        }
-    }
 }

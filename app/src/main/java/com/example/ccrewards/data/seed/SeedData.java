@@ -406,7 +406,7 @@ public class SeedData {
         list.add(new RewardRate("ihg_premier", RewardCategory.TRAVEL_IHG, RateType.MILES, 10.0));
         list.add(new RewardRate("ihg_premier", RewardCategory.DINING,    RateType.MILES,  5.0));
         list.add(new RewardRate("ihg_premier", RewardCategory.GAS,       RateType.MILES,  5.0));
-        list.add(new RewardRate("ihg_premier", RewardCategory.GROCERIES, RateType.MILES,  5.0));
+        list.add(new RewardRate("ihg_premier", RewardCategory.TRAVEL, RateType.MILES,  5.0));
         list.add(new RewardRate("ihg_premier", RewardCategory.GENERAL,   RateType.MILES,  3.0));
 
         // IHG One Rewards Traveler (3x dining/gas/select streaming, 2x general)

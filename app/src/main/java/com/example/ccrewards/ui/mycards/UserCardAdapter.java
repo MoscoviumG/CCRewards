@@ -76,9 +76,11 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
             binding.chipBusinessBadge.setVisibility(
                     item.definition.isBusinessCard ? View.VISIBLE : View.GONE);
 
-            // Dormant badge
-            binding.chipDormantBadge.setVisibility(
-                    item.userCard.isDormant ? View.VISIBLE : View.GONE);
+            // Closed badge
+            boolean isClosed = item.userCard.closeDate != null;
+            binding.chipClosedBadge.setVisibility(isClosed ? View.VISIBLE : View.GONE);
+            // Gray out closed cards
+            itemView.setAlpha(isClosed ? 0.5f : 1.0f);
 
             // Nickname is now included inline in tvCardName via UserCard.label()
             binding.tvNickname.setVisibility(View.GONE);
@@ -115,7 +117,7 @@ public class UserCardAdapter extends ListAdapter<UserCardWithDetails, UserCardAd
                             && Objects.equals(oldItem.userCard.openDate, newItem.userCard.openDate)
                             && Objects.equals(oldItem.userCard.customColorPrimary,
                                               newItem.userCard.customColorPrimary)
-                            && oldItem.userCard.isDormant == newItem.userCard.isDormant;
+                            && Objects.equals(oldItem.userCard.closeDate, newItem.userCard.closeDate);
                 }
             };
 }

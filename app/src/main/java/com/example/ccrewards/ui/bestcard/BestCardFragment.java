@@ -380,12 +380,26 @@ public class BestCardFragment extends Fragment {
 
             holder.binding.tvWbCardName.setText(item.cardName);
 
-            // Bonus value + spend req + effective rate
-            String bonusStr = isCashBackStatic(wb.bonusCurrencyName)
-                    ? CurrencyUtil.centsToString(wb.bonusPoints) + " Cash Back"
-                    : NumberFormat.getInstance(Locale.US).format(wb.bonusPoints)
-                            + " " + shortCurrencyName(wb.bonusCurrencyName);
-            String detailsLine = bonusStr + " · Spend "
+            // Bonus components: points/cashback + optional cash + optional free nights
+            StringBuilder bonusBuilder = new StringBuilder();
+            if (wb.bonusPoints > 0) {
+                if (isCashBackStatic(wb.bonusCurrencyName)) {
+                    bonusBuilder.append(CurrencyUtil.centsToString(wb.bonusPoints))
+                            .append(" Cash Back");
+                } else {
+                    bonusBuilder.append(NumberFormat.getInstance(Locale.US).format(wb.bonusPoints))
+                            .append(" ").append(shortCurrencyName(wb.bonusCurrencyName));
+                }
+            }
+            if (wb.cashbackCents > 0) {
+                if (bonusBuilder.length() > 0) bonusBuilder.append(" + ");
+                bonusBuilder.append(CurrencyUtil.centsToString(wb.cashbackCents)).append(" Cash");
+            }
+            if (item.freeNightSummary != null) {
+                if (bonusBuilder.length() > 0) bonusBuilder.append(" + ");
+                bonusBuilder.append(item.freeNightSummary);
+            }
+            String detailsLine = bonusBuilder + " · Spend "
                     + CurrencyUtil.centsToString(wb.spendRequirementCents);
             if (showEffective) {
                 detailsLine += String.format(Locale.US, " · %.2f%% eff.", item.effectiveReturnPct);
@@ -425,7 +439,7 @@ public class BestCardFragment extends Fragment {
             });
 
             holder.binding.btnWbMarkAchieved.setOnClickListener(v -> {
-                viewModel.markBonusAchieved(wb.userCardId);
+                viewModel.markBonusAchieved(wb);
                 Snackbar.make(binding.getRoot(), "Welcome bonus marked as achieved",
                         Snackbar.LENGTH_SHORT).show();
             });

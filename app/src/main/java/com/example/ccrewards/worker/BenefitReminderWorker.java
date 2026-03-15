@@ -21,6 +21,7 @@ import com.example.ccrewards.data.model.UserCard;
 import com.example.ccrewards.data.model.WelcomeBonus;
 import com.example.ccrewards.data.repository.BenefitRepository;
 import com.example.ccrewards.data.repository.CardRepository;
+import com.example.ccrewards.data.repository.FreeNightRepository;
 import com.example.ccrewards.data.repository.WelcomeBonusRepository;
 import com.example.ccrewards.ui.settings.SettingsFragment;
 import com.example.ccrewards.util.CurrencyUtil;
@@ -29,6 +30,7 @@ import com.example.ccrewards.util.PeriodKeyUtil;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.EntryPoint;
@@ -51,6 +53,7 @@ public class BenefitReminderWorker extends Worker {
         CardRepository cardRepository();
         BenefitRepository benefitRepository();
         WelcomeBonusRepository welcomeBonusRepository();
+        FreeNightRepository freeNightRepository();
     }
 
     /** Fires an immediate "reminders are on" notification. Call when the user enables the toggle. */
@@ -87,9 +90,10 @@ public class BenefitReminderWorker extends Worker {
         CardRepository cardRepo = entryPoint.cardRepository();
         BenefitRepository benefitRepo = entryPoint.benefitRepository();
         WelcomeBonusRepository wbRepo = entryPoint.welcomeBonusRepository();
+        FreeNightRepository fnRepo = entryPoint.freeNightRepository();
 
         // Use sync queries since doWork() runs on background thread
-        List<UserCard> activeCards = cardRepo.getAllActiveUserCardsSync();
+        List<UserCard> activeCards = cardRepo.getOpenUserCardsSync();
         List<CardBenefit> allBenefits = benefitRepo.getAllBenefitsSync();
 
         if (activeCards == null || allBenefits == null) return Result.success();
@@ -161,6 +165,29 @@ public class BenefitReminderWorker extends Worker {
                         .setSmallIcon(R.drawable.ic_nav_credits)
                         .setContentTitle("Welcome bonus expiring: " + cardName)
                         .setContentText(body)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setAutoCancel(true);
+                NotificationManagerCompat.from(appContext).notify(notifId++, builder.build());
+            }
+        }
+
+        // Free night expiry notifications
+        List<Long> fnCardIds = new ArrayList<>();
+        for (UserCard c : activeCards) fnCardIds.add(c.id);
+        List<com.example.ccrewards.data.model.FreeNightAward> fnAwards =
+                fnRepo.getAllAwardsForCardsSync(fnCardIds);
+        if (fnAwards != null) {
+            LocalDate today = LocalDate.now();
+            for (com.example.ccrewards.data.model.FreeNightAward fn : fnAwards) {
+                if (fn.usedCount >= fn.totalCount) continue; // already used
+                if (fn.expirationDate == null) continue;
+                long daysUntilExp = ChronoUnit.DAYS.between(today, fn.expirationDate);
+                if (daysUntilExp < 0 || daysUntilExp > threshold) continue;
+                String label = fn.label != null ? fn.label : fn.typeKey;
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_nav_credits)
+                        .setContentTitle("Free night expiring: " + label)
+                        .setContentText("Expires in " + daysUntilExp + " day" + (daysUntilExp == 1 ? "" : "s"))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setAutoCancel(true);
                 NotificationManagerCompat.from(appContext).notify(notifId++, builder.build());

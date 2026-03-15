@@ -100,6 +100,27 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_cardDetail_to_addFreeNight"
+            app:destination="@id/addFreeNightAwardFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addFreeNightAwardFragment"
+        android:name="com.example.ccrewards.ui.mycards.AddFreeNightAwardFragment"
+        android:label="Add Free Night"
+        tools:layout="@layout/fragment_add_free_night_award">
+        <argument
+            android:name="userCardId"
+            app:argType="long" />
+        <argument
+            android:name="awardId"
+            app:argType="long"
+            android:defaultValue="-1L" />
     </fragment>
 
     <fragment
@@ -278,7 +299,20 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_settings_to_freeNightValuations"
+            app:destination="@id/freeNightValuationsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+
+    <fragment
+        android:id="@+id/freeNightValuationsFragment"
+        android:name="com.example.ccrewards.ui.settings.FreeNightValuationsFragment"
+        android:label="Free Night Valuations"
+        tools:layout="@layout/fragment_free_night_valuations" />
 
     <fragment
         android:id="@+id/manageCategoriesFragment"

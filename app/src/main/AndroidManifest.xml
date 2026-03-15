@@ -26,6 +26,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.mycards.SetWelcomeBonusActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CCRewards"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Remove WorkManager's auto-initializer because CCRewardsApp implements
              Configuration.Provider for on-demand initialization. -->
         <provider

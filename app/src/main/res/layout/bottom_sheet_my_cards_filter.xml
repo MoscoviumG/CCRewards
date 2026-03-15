@@ -300,17 +300,17 @@
 
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Dormant Status (My Cards only) -->
+        <!-- Closed Status (My Cards only) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="Dormant Cards"
+            android:text="Closed Cards"
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?attr/colorOnSurface" />
 
         <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_dormant"
+            android:id="@+id/chip_group_closed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -318,26 +318,26 @@
             app:selectionRequired="true">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_dormant_active_only"
+                android:id="@+id/chip_closed_open_only"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Active only"
+                android:text="Open only"
                 android:checked="true" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_dormant_all"
+                android:id="@+id/chip_closed_all"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="All cards" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_dormant_only"
+                android:id="@+id/chip_closed_only"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dormant only" />
+                android:text="Closed only" />
 
         </com.google.android.material.chip.ChipGroup>
 

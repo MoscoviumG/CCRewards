@@ -1,12 +1,17 @@
 package com.example.ccrewards.ui.settings;
 
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,12 +21,16 @@ import androidx.navigation.Navigation;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.ccrewards.R;
+import com.example.ccrewards.data.ExportImportManager;
 import com.example.ccrewards.databinding.FragmentSettingsBinding;
 import com.example.ccrewards.worker.BenefitReminderWorker;
 import com.example.ccrewards.worker.WorkManagerScheduler;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -41,8 +50,24 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_NOTIF_TIME_HOUR = "notification_time_hour";
     public static final String PREF_NOTIF_TIME_MINUTE = "notification_time_minute";
 
+    @Inject ExportImportManager exportImportManager;
+
     private FragmentSettingsBinding binding;
     private SettingsViewModel viewModel;
+
+    private ActivityResultLauncher<String> exportLauncher;
+    private ActivityResultLauncher<String[]> importLauncher;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        exportLauncher = registerForActivityResult(
+                new ActivityResultContracts.CreateDocument("application/json"),
+                uri -> { if (uri != null) doExport(uri); });
+        importLauncher = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> { if (uri != null) showImportConfirmDialog(uri); });
+    }
 
     @Nullable
     @Override
@@ -83,6 +108,10 @@ public class SettingsFragment extends Fragment {
         binding.rowManageCategories.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_settings_to_manageCategories));
 
+        // Free Night Valuations row
+        binding.rowFreeNightValuations.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_settings_to_freeNightValuations));
+
         // Theme picker
         updateDarkModeLabel(prefs);
         binding.rowDarkMode.setOnClickListener(v -> showThemeDialog(prefs));
@@ -117,6 +146,61 @@ public class SettingsFragment extends Fragment {
         // Reminder time
         updateTimeLabel(prefs);
         binding.rowNotificationTime.setOnClickListener(v -> showTimePicker(prefs));
+
+        // Export / Import
+        binding.rowExportData.setOnClickListener(v ->
+                exportLauncher.launch("ccrewards_backup_" + java.time.LocalDate.now() + ".json"));
+        binding.rowImportData.setOnClickListener(v ->
+                importLauncher.launch(new String[]{"application/json", "*/*"}));
+    }
+
+    private void doExport(Uri uri) {
+        exportImportManager.exportToUri(uri, new ExportImportManager.Callback() {
+            @Override public void onSuccess(String msg) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (getView() != null)
+                        Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
+                });
+            }
+            @Override public void onError(String msg) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (getView() != null)
+                        Snackbar.make(getView(), msg, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void showImportConfirmDialog(Uri uri) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Import Data")
+                .setMessage("This will replace ALL your existing data and cannot be undone. Continue?")
+                .setPositiveButton("Import", (dialog, which) -> doImport(uri))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void doImport(Uri uri) {
+        exportImportManager.importFromUri(uri, new ExportImportManager.Callback() {
+            @Override public void onSuccess(String msg) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (getView() == null) return;
+                    Snackbar snackbar = Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT);
+                    snackbar.addCallback(new Snackbar.Callback() {
+                        @Override public void onDismissed(Snackbar transientBottomBar, int event) {
+                            requireActivity().recreate();
+                        }
+                    });
+                    snackbar.show();
+                });
+            }
+            @Override public void onError(String msg) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (getView() != null)
+                        Snackbar.make(getView(), msg, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void updateDaysLabel(SharedPreferences prefs) {

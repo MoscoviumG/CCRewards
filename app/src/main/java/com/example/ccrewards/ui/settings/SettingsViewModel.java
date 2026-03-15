@@ -29,19 +29,25 @@ public class SettingsViewModel extends ViewModel {
 
     @Inject
     public SettingsViewModel(CardRepository cardRepository) {
-        LiveData<List<UserCardWithDetails>> allCards = cardRepository.getActiveUserCards();
+        LiveData<List<UserCardWithDetails>> allCards = cardRepository.getAllUserCards();
         stats.addSource(allCards, cards -> {
             if (cards == null) {
                 stats.setValue(new int[]{0, 0, 0});
                 nextDropOff.setValue(null);
                 return;
             }
-            int count = cards.size();
+            int count = 0;
             int fee = 0;
             LocalDate cutoff = LocalDate.now().minusMonths(24);
             List<LocalDate> inWindow = new ArrayList<>();
             for (UserCardWithDetails item : cards) {
-                if (item.definition != null) fee += item.definition.annualFee;
+                boolean isClosed = item.userCard.closeDate != null;
+                // Total cards and fees: open cards only
+                if (!isClosed) {
+                    count++;
+                    if (item.definition != null) fee += item.definition.annualFee;
+                }
+                // 5/24: all cards opened within the window, regardless of close status
                 LocalDate openDate = item.userCard.openDate;
                 if (openDate != null && !openDate.isBefore(cutoff)) {
                     inWindow.add(openDate);
